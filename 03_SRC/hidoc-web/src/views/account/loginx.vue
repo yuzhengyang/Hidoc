@@ -47,6 +47,9 @@ export default {
             }
         };
     },
+    mounted() {
+        document.title = '登录';
+    },
     methods: {
         back() {
             this.$router.go(-1); //返回上一层

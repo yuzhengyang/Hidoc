@@ -1,15 +1,14 @@
 package com.yuzhyn.hidoc.app.system.interceptor;
 
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.internal.entity.SysUser;
-import com.yuzhyn.hidoc.app.application.internal.model.UserInfo;
+import com.yuzhyn.hidoc.app.application.entity.SysUser;
+import com.yuzhyn.hidoc.app.application.model.UserInfo;
 import com.yuzhyn.hidoc.app.common.constant.UrlAccess;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
-import pers.yuzhyn.azylee.core.datas.strings.StringTool;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -58,7 +57,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String name = headerNames.nextElement();
-            String value = request.getHeader(name);
+                String value = request.getHeader(name);
 //            log.info("header: " + name + " = " + value);
             if (name.equals("access-token")) {
                 UserInfo userInfo = R.Cache.UserInfo.get(value);

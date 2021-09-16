@@ -153,7 +153,7 @@ export default {
             data.append('docId', this.docId);
             data.append('bucketName', '.hidoc');
             return request({
-                url: '/i/f/u',
+                url: '/f/u',
                 method: 'post',
                 data
             }).then(res => {

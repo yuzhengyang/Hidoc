@@ -1,8 +1,8 @@
 package com.yuzhyn.hidoc.app.manager;
 
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.internal.entity.SysMachine;
-import com.yuzhyn.hidoc.app.application.internal.mapper.SysMachineMapper;
+import com.yuzhyn.hidoc.app.application.entity.SysMachine;
+import com.yuzhyn.hidoc.app.application.mapper.SysMachineMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

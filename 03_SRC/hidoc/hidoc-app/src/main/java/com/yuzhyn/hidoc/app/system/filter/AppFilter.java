@@ -2,18 +2,14 @@ package com.yuzhyn.hidoc.app.system.filter;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.internal.entity.SysAccessLog;
-import com.yuzhyn.hidoc.app.application.internal.model.UserInfo;
-import com.yuzhyn.hidoc.app.common.constant.UrlAccess;
+import com.yuzhyn.hidoc.app.application.entity.SysAccessLog;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import com.yuzhyn.hidoc.app.system.wrapper.ResponseWrapper;
 import com.yuzhyn.hidoc.app.utils.ClientIPTool;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import pers.yuzhyn.azylee.core.datas.objects.Obj;
 import pers.yuzhyn.azylee.core.datas.objects.ObjectTool;
-import pers.yuzhyn.azylee.core.datas.strings.StringTool;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +18,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Enumeration;
 
 @Slf4j
 @Component

@@ -136,7 +136,7 @@ export default {
         },
         changePassword() {
             return request({
-                url: '/i/user/changePassword',
+                url: '/user/changePassword',
                 method: 'post',
                 data: { password: this.changePasswordForm.password, password2: this.changePasswordForm.password2 }
             }).then(res => {

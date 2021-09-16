@@ -164,6 +164,7 @@ export default {
 
                     switch (this.$route.params.docId) {
                         case '_intro':
+                            document.title = this.collected.name;
                             break;
                         default:
                             this.$nextTick(() => {
@@ -185,6 +186,7 @@ export default {
             }).then(res => {
                 if (res.code == 0) {
                     this.doc = res.meta.doc;
+                    document.title = this.doc.title;
                     this.contributors = [];
                     if (res.meta.contributors && res.meta.contributors.length > 1) {
                         this.contributors = res.meta.contributors;

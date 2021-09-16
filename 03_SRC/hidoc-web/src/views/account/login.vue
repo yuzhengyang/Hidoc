@@ -46,6 +46,9 @@ export default {
             }
         };
     },
+    mounted() {
+        document.title = '登录';
+    },
     methods: {
         home() {
             this.$router.push({ path: '/', params: {} });

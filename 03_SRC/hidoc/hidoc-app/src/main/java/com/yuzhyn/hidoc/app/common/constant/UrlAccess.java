@@ -14,15 +14,15 @@ public class UrlAccess {
 
     public static List<String> anonymous() {
         List<String> urls = new ArrayList<>();
-        urls.add("/i/user/register");
-        urls.add("/i/user/login");
-        urls.add("/i/user/logout");
+        urls.add("/user/register");
+        urls.add("/user/login");
+        urls.add("/user/logout");
         urls.add("/collected/preview");
         urls.add("/collected/test");
         urls.add("/collected/test2");
         urls.add("/collected/get");
         urls.add("/doc/get");
-        urls.add("/i/f/d");
+        urls.add("/f/d");
         return urls;
     }
 }

@@ -1,10 +1,8 @@
 package com.yuzhyn.hidoc.app.manager;
 
-import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.internal.entity.SysUser;
-import com.yuzhyn.hidoc.app.application.internal.entity.SysUserFileConf;
-import com.yuzhyn.hidoc.app.application.internal.model.UserInfo;
-import pers.yuzhyn.azylee.core.datas.ids.UUIDTool;
+import com.yuzhyn.hidoc.app.application.entity.SysUser;
+import com.yuzhyn.hidoc.app.application.entity.SysUserFileConf;
+import com.yuzhyn.hidoc.app.application.model.UserInfo;
 import pers.yuzhyn.azylee.core.logs.Alog;
 
 /**

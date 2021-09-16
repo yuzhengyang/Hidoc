@@ -1,9 +1,9 @@
 package com.yuzhyn.hidoc.app;
 
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.internal.entity.SysFile;
-import com.yuzhyn.hidoc.app.application.internal.entity.SysFileCursor;
-import com.yuzhyn.hidoc.app.application.internal.model.UserInfo;
+import com.yuzhyn.hidoc.app.application.entity.SysFile;
+import com.yuzhyn.hidoc.app.application.entity.SysFileCursor;
+import com.yuzhyn.hidoc.app.application.model.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
@@ -13,7 +13,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import pers.yuzhyn.azylee.core.systems.commons.SystemPropertyTool;
 import pers.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
-import reactor.util.function.Tuple2;
 
 @Slf4j
 @EnableCaching

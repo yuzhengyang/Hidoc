@@ -38,7 +38,7 @@ export default {
     },
     mounted() {
         request({
-            url: '/i/user/currentUserInfo',
+            url: '/user/currentUserInfo',
             method: 'post'
         }).then(res => {
             if (res.code == 0) {

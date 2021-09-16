@@ -89,6 +89,7 @@ export default {
         };
     },
     mounted() {
+        document.title = '注册';
         for (let i = 1; i <= 96; i++) {
             this.systemAvatarList.push({ type: 'system', name: i + '.jpg' });
         }

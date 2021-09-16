@@ -40,7 +40,7 @@ export default {
     },
     mounted() {
         request({
-            url: '/i/user/currentUserBoard',
+            url: '/user/currentUserBoard',
             method: 'post'
         }).then(res => {
             if (res.code == 0) {

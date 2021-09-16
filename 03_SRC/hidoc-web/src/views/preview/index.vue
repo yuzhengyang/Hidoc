@@ -30,6 +30,7 @@ export default {
         };
     },
     mounted() {
+        document.title = 'Hidoc';
         // debugger;
         let token = this.$store.state.user.token;
         console.log('token: ' + token);
