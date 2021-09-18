@@ -5,7 +5,7 @@
 //import org.springframework.http.HttpHeaders;
 //import org.springframework.web.servlet.config.annotation.CorsRegistry;
 //import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-//import pers.yuzhyn.azylee.core.logs.Alog;
+//import com.yuzhyn.azylee.core.logs.Alog;
 //
 ///**
 // * 跨域配置

@@ -1,16 +1,16 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.SysMachineStatusLog;
-import com.yuzhyn.hidoc.app.application.mapper.SysMachineStatusLogMapper;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysMachineStatusLog;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineStatusLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.Component;
-import pers.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
-import pers.yuzhyn.azylee.core.datas.ids.UUIDTool;
-import pers.yuzhyn.azylee.core.logs.Alog;
-import pers.yuzhyn.azylee.core.threads.sleeps.Sleep;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
+import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
+import com.yuzhyn.azylee.core.logs.Alog;
+import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 
 import java.time.LocalDateTime;
 import java.util.Date;

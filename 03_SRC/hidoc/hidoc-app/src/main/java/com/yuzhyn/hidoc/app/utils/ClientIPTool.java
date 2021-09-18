@@ -1,7 +1,7 @@
 package com.yuzhyn.hidoc.app.utils;
 
-import pers.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
-import pers.yuzhyn.azylee.core.logs.Alog;
+import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
+import com.yuzhyn.azylee.core.logs.Alog;
 
 import javax.servlet.http.HttpServletRequest;
 

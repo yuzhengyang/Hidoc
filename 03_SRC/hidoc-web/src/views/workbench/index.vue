@@ -4,36 +4,48 @@
         <el-main>
             <el-row>
                 <el-col :span="3">
-                    <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                        <el-menu-item index="1" @click="changeMenu(1)">
+                    <el-menu default-active="1000" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+                        <el-menu-item index="1000" @click="changeMenu(1000)">
                             <i class="el-icon-data-analysis"></i>
                             <template #title>信息看板</template>
                         </el-menu-item>
-                        <el-menu-item index="2" @click="changeMenu(2)">
+                        <el-menu-item index="2000" @click="changeMenu(2000)">
                             <i class="el-icon-collection"></i>
                             <template #title>文集文档</template>
                         </el-menu-item>
-                        <el-menu-item index="3" @click="changeMenu(3)">
-                            <i class="el-icon-files"></i>
-                            <template #title>文件管理</template>
+                        <el-menu-item index="2010" @click="changeMenu(2010)">
+                            <i class="el-icon-collection"></i>
+                            <template #title>回收站</template>
                         </el-menu-item>
-                        <el-menu-item index="4" @click="changeMenu(4)">
+                        <el-menu-item index="2020" @click="changeMenu(2020)">
+                            <i class="el-icon-collection"></i>
+                            <template #title>互动评论</template>
+                        </el-menu-item>
+                        <el-menu-item index="3000" @click="changeMenu(3000)">
+                            <i class="el-icon-files"></i>
+                            <template #title>素材库</template>
+                        </el-menu-item>
+                        <el-menu-item index="3010" @click="changeMenu(3010)">
+                            <i class="el-icon-files"></i>
+                            <template #title>我的文件</template>
+                        </el-menu-item>
+                        <el-menu-item index="4000" @click="changeMenu(4000)">
                             <i class="el-icon-user"></i>
                             <template #title>个人信息</template>
                         </el-menu-item>
                     </el-menu>
                 </el-col>
                 <el-col :span="21">
-                    <dash-board v-if="this.currentMenuIndex==1"></dash-board>
-                    <doc-tab-page v-if="this.currentMenuIndex==2"></doc-tab-page>
-                    <file-manager v-if="this.currentMenuIndex==3"></file-manager>
-                    <user-info v-if="this.currentMenuIndex==4"></user-info>
+                    <dash-board v-if="this.currentMenuIndex == 1000"></dash-board>
+                    <doc-tab-page v-if="this.currentMenuIndex == 2000"></doc-tab-page>
+                    <material-library v-if="this.currentMenuIndex == 3000"></material-library>
+                    <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
+                    <user-info v-if="this.currentMenuIndex == 4000"></user-info>
                 </el-col>
             </el-row>
         </el-main>
     </el-container>
     <el-backtop></el-backtop>
-
 </template>
 
 <script>
@@ -43,11 +55,12 @@ import DashBoard from './components/DashBoard';
 import DocTabPage from './components/DocTabPage';
 import FileManager from './components/FileManager';
 import UserInfo from './components/UserInfo';
+import MaterialLibrary from './components/MaterialLibrary.vue';
 export default {
     name: 'Home',
     data() {
         return {
-            currentMenuIndex: 1,
+            currentMenuIndex: 1000,
             rightValue: [],
             currentCollected: {},
             mineList: [],
@@ -62,7 +75,6 @@ export default {
                 description: '',
                 isOpen: false
             },
-            formLabelWidth: '120px',
             memberUser: [],
             otherUser: [],
             allUser: [],
@@ -77,7 +89,7 @@ export default {
         // console.log('name: ' + name);
         // this.loadCollected();
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);

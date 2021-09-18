@@ -2,14 +2,14 @@ package com.yuzhyn.hidoc.app.system.filter;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.SysAccessLog;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import com.yuzhyn.hidoc.app.system.wrapper.ResponseWrapper;
 import com.yuzhyn.hidoc.app.utils.ClientIPTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import pers.yuzhyn.azylee.core.datas.objects.Obj;
-import pers.yuzhyn.azylee.core.datas.objects.ObjectTool;
+import com.yuzhyn.azylee.core.datas.objects.Obj;
+import com.yuzhyn.azylee.core.datas.objects.ObjectTool;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

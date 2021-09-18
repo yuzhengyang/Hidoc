@@ -5,9 +5,9 @@ import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.utils.LinuxFirewallTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import pers.yuzhyn.azylee.core.datas.collections.MapTool;
-import pers.yuzhyn.azylee.core.logs.Alog;
-import pers.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
+import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.logs.Alog;
+import com.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
 
 import java.io.File;
 import java.io.InputStreamReader;

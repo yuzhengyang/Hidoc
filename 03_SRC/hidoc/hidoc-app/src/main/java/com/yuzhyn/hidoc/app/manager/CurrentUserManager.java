@@ -1,9 +1,9 @@
 package com.yuzhyn.hidoc.app.manager;
 
-import com.yuzhyn.hidoc.app.application.entity.SysUser;
-import com.yuzhyn.hidoc.app.application.entity.SysUserFileConf;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
 import com.yuzhyn.hidoc.app.application.model.UserInfo;
-import pers.yuzhyn.azylee.core.logs.Alog;
+import com.yuzhyn.azylee.core.logs.Alog;
 
 /**
  * @author inc

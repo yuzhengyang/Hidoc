@@ -3,25 +3,25 @@ package com.yuzhyn.hidoc.app.application.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.SysFile;
-import com.yuzhyn.hidoc.app.application.entity.SysFileCursor;
-import com.yuzhyn.hidoc.app.application.entity.SysUser;
-import com.yuzhyn.hidoc.app.application.mapper.SysFileBucketMapper;
-import com.yuzhyn.hidoc.app.application.mapper.SysFileCursorMapper;
-import com.yuzhyn.hidoc.app.application.mapper.SysFileMapper;
-import com.yuzhyn.hidoc.app.application.mapper.SysUserFileConfMapper;
-import com.yuzhyn.hidoc.app.application.service.SysFileService;
+import com.yuzhyn.hidoc.app.application.entity.file.File;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
+import com.yuzhyn.hidoc.app.application.service.FileService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pers.yuzhyn.azylee.core.datas.collections.ListTool;
-import pers.yuzhyn.azylee.core.datas.collections.MapTool;
-import pers.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
-import pers.yuzhyn.azylee.core.datas.ids.UUIDTool;
-import pers.yuzhyn.azylee.core.datas.strings.StringTool;
+import com.yuzhyn.azylee.core.datas.collections.ListTool;
+import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
+import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
+import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple3;
 
@@ -38,19 +38,19 @@ import java.util.Map;
 public class FileController {
 
     @Autowired
-    SysFileService sysFileService;
+    FileService fileService;
 
     @Autowired
     SysUserFileConfMapper sysUserFileConfMapper;
 
     @Autowired
-    SysFileBucketMapper sysFileBucketMapper;
+    FileBucketMapper fileBucketMapper;
 
     @Autowired
-    SysFileCursorMapper sysFileCursorMapper;
+    FileCursorMapper fileCursorMapper;
 
     @Autowired
-    SysFileMapper sysFileMapper;
+    FileMapper fileMapper;
 
     //region 查看文件列表
 
@@ -61,7 +61,7 @@ public class FileController {
      */
     @GetMapping({"list", "l"})
     public ResponseData list() {
-        List<SysFile> list = sysFileMapper.selectList(null);
+        List<File> list = fileMapper.selectList(null);
         return ResponseData.okData(list);
     }
 
@@ -75,8 +75,8 @@ public class FileController {
     public ResponseData pageList(@RequestBody Map<String, Object> params) {
         int current = MapTool.getInt(params, "current", 1);
         int size = MapTool.getInt(params, "size", 1);
-        IPage<SysFile> sysFilePage = sysFileMapper.selectPage(new Page<SysFile>(current, size), null);
-        List<SysFile> list = sysFilePage.getRecords();
+        IPage<File> sysFilePage = fileMapper.selectPage(new Page<File>(current, size), null);
+        List<File> list = sysFilePage.getRecords();
         return ResponseData.okData(list);
     }
     //endregion
@@ -98,20 +98,20 @@ public class FileController {
                                @RequestParam("file") MultipartFile[] files) {
         if (ListTool.ok(files)) {
             SysUser curUser = CurrentUserManager.getUser();
-            if (curUser != null && sysFileService.checkSpaceLimit(curUser.getId(), files[0].getSize())) {
-                List<SysFileCursor> sysFileList = new ArrayList<>();
+            if (curUser != null && fileService.checkSpaceLimit(curUser.getId(), files[0].getSize())) {
+                List<FileCursor> sysFileList = new ArrayList<>();
                 if (null == bucketName) bucketName = UUIDTool.get();
                 if (null == expiryTime) expiryTime = LocalDateTimeTool.max();
 
                 for (MultipartFile file : files) {
                     if (StringTool.ok(bucketName) && expiryTime != null) {
-                        SysFile sysFile = sysFileService.preCreateSysFile(file, curUser.getId());
+                        File sysFile = fileService.preCreateSysFile(file, curUser.getId());
                         if (sysFile != null) {
-                            Tuple3<Boolean, Boolean, SysFile> saveToDisk = sysFileService.saveToDisk(file, sysFile);
-                            SysFile existFile = null;
+                            Tuple3<Boolean, Boolean, File> saveToDisk = fileService.saveToDisk(file, sysFile);
+                            File existFile = null;
                             if (saveToDisk.getT2()) existFile = saveToDisk.getT3();
                             if (saveToDisk.getT1()) {
-                                SysFileCursor cursor = sysFileService.saveDb(sysFile, existFile, bucketName, collectedId, expiryTime);
+                                FileCursor cursor = fileService.saveDb(sysFile, existFile, bucketName, collectedId, expiryTime);
                                 if (cursor != null) sysFileList.add(cursor);
                             }
                         }
@@ -142,8 +142,8 @@ public class FileController {
     @GetMapping({"download/{userPrefix}/{bucketName}/{fileName}", "d/{userPrefix}/{bucketName}/{fileName}"})
     @ResponseBody
     public void download(@PathVariable String userPrefix, @PathVariable String bucketName, @PathVariable String fileName, HttpServletRequest request, HttpServletResponse response) {
-        Tuple2<SysFileCursor, SysFile> fileInfo = sysFileService.getDownloadFile(userPrefix, bucketName, fileName);
-        sysFileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
+        Tuple2<FileCursor, File> fileInfo = fileService.getDownloadFile(userPrefix, bucketName, fileName);
+        fileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
     }
 
     /**
@@ -157,8 +157,8 @@ public class FileController {
     @GetMapping({"download/cursor/{cursorId}", "d/c/{cursorId}"})
     @ResponseBody
     public void downloadByCursor(@PathVariable String cursorId, HttpServletRequest request, HttpServletResponse response) {
-        Tuple2<SysFileCursor, SysFile> fileInfo = sysFileService.getDownloadFileByCursor(cursorId);
-        sysFileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
+        Tuple2<FileCursor, File> fileInfo = fileService.getDownloadFileByCursor(cursorId);
+        fileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
     }
 
     /**
@@ -172,20 +172,20 @@ public class FileController {
     @GetMapping({"download/uname/{uname}", "d/u/{uname}"})
     @ResponseBody
     public void downloadByUname(@PathVariable String uname, HttpServletRequest request, HttpServletResponse response) {
-        SysFileCursor cacheCursor = R.Cache.SysFileCursor.get(uname);
-        SysFile cacheFile = R.Cache.SysFile.get(uname);
+        FileCursor cacheCursor = R.Cache.SysFileCursor.get(uname);
+        File cacheFile = R.Cache.SysFile.get(uname);
 
         if (cacheCursor != null && cacheFile != null) {
             // 存在缓存直接走缓存
-            sysFileService.download(cacheCursor, cacheFile, request, response);
+            fileService.download(cacheCursor, cacheFile, request, response);
         } else {
             // 不存在缓存，走查询，然后加入到缓存中
-            Tuple2<SysFileCursor, SysFile> fileInfo = sysFileService.getDownloadFileByUname(uname);
+            Tuple2<FileCursor, File> fileInfo = fileService.getDownloadFileByUname(uname);
             if (fileInfo.getT1() != null && fileInfo.getT2() != null) {
                 R.Cache.SysFileCursor.put(uname, fileInfo.getT1());
                 R.Cache.SysFile.put(uname, fileInfo.getT2());
             }
-            sysFileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
+            fileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
         }
     }
     //endregion

@@ -1,7 +1,7 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
 import org.springframework.scheduling.annotation.Scheduled;
-import pers.yuzhyn.azylee.core.threads.sleeps.Sleep;
+import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 
 import java.util.Date;
 import java.util.Map;

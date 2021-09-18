@@ -1,22 +1,22 @@
 package com.yuzhyn.hidoc.app.manager;
 
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.SysMachine;
-import com.yuzhyn.hidoc.app.application.mapper.SysMachineMapper;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysMachine;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import pers.yuzhyn.azylee.core.datas.collections.MapTool;
-import pers.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
-import pers.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
-import pers.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
-import pers.yuzhyn.azylee.core.datas.ids.SnowFlake;
-import pers.yuzhyn.azylee.core.datas.ids.UUIDTool;
-import pers.yuzhyn.azylee.core.datas.numbers.LongTool;
-import pers.yuzhyn.azylee.core.datas.strings.StringConst;
-import pers.yuzhyn.azylee.core.datas.strings.StringTool;
-import pers.yuzhyn.azylee.core.ios.dirs.DirTool;
-import pers.yuzhyn.azylee.core.ios.txts.PropertyTool;
+import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
+import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
+import com.yuzhyn.azylee.core.datas.ids.SnowFlake;
+import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
+import com.yuzhyn.azylee.core.datas.numbers.LongTool;
+import com.yuzhyn.azylee.core.datas.strings.StringConst;
+import com.yuzhyn.azylee.core.datas.strings.StringTool;
+import com.yuzhyn.azylee.core.ios.dirs.DirTool;
+import com.yuzhyn.azylee.core.ios.txts.PropertyTool;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

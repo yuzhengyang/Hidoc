@@ -68,7 +68,7 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>pers.yuzhyn.azylee</groupId>
+            <groupId>com.yuzhyn.azylee</groupId>
             <artifactId>azylee-core</artifactId>
             <version>${azylee-core.version}</version>
             <scope>compile</scope>

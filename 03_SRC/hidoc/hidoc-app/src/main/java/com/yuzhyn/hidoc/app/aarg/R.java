@@ -1,13 +1,13 @@
 package com.yuzhyn.hidoc.app.aarg;
 
-import com.yuzhyn.hidoc.app.application.entity.SysAccessLog;
-import com.yuzhyn.hidoc.app.application.entity.SysFile;
-import com.yuzhyn.hidoc.app.application.entity.SysFileCursor;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
+import com.yuzhyn.hidoc.app.application.entity.file.File;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.model.UserInfo;
 import org.ehcache.CacheManager;
-import pers.yuzhyn.azylee.core.datas.ids.SnowFlake;
-import pers.yuzhyn.azylee.core.ios.dirs.DirTool;
-import pers.yuzhyn.azylee.core.systems.commons.SystemPropertyTool;
+import com.yuzhyn.azylee.core.datas.ids.SnowFlake;
+import com.yuzhyn.azylee.core.ios.dirs.DirTool;
+import com.yuzhyn.azylee.core.systems.commons.SystemPropertyTool;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -35,8 +35,8 @@ public final class R {
     public static class Cache {
         public static CacheManager CacheManager;
         public static org.ehcache.Cache<String, UserInfo> UserInfo;
-        public static org.ehcache.Cache<String, SysFileCursor> SysFileCursor;
-        public static org.ehcache.Cache<String, SysFile> SysFile;
+        public static org.ehcache.Cache<String, FileCursor> SysFileCursor;
+        public static org.ehcache.Cache<String, File> SysFile;
     }
 
     public static class Queue{

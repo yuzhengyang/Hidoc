@@ -1,7 +1,7 @@
 package com.yuzhyn.hidoc.app.application.model;
 
-import com.yuzhyn.hidoc.app.application.entity.SysUser;
-import com.yuzhyn.hidoc.app.application.entity.SysUserFileConf;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
 import lombok.Data;
 
 import java.io.Serializable;

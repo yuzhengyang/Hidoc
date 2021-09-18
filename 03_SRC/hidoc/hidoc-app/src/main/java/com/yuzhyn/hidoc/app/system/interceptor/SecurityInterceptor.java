@@ -1,7 +1,7 @@
 package com.yuzhyn.hidoc.app.system.interceptor;
 
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.SysUser;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.model.UserInfo;
 import com.yuzhyn.hidoc.app.common.constant.UrlAccess;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;

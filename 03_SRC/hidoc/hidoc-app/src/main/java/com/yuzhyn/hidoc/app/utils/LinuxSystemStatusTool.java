@@ -1,7 +1,7 @@
 package com.yuzhyn.hidoc.app.utils;
 
-import pers.yuzhyn.azylee.core.logs.Alog;
-import pers.yuzhyn.azylee.core.threads.sleeps.Sleep;
+import com.yuzhyn.azylee.core.logs.Alog;
+import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 
 import java.io.BufferedReader;
 import java.io.File;

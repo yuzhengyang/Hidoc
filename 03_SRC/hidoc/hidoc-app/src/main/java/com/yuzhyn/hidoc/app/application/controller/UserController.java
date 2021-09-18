@@ -1,32 +1,30 @@
 package com.yuzhyn.hidoc.app.application.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
+import com.yuzhyn.azylee.core.datas.encrypts.MixdeTool;
+import com.yuzhyn.azylee.core.datas.regexs.RegexPattern;
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.DocCollected;
-import com.yuzhyn.hidoc.app.application.entity.DocLite;
-import com.yuzhyn.hidoc.app.application.mapper.DocCollectedMapper;
-import com.yuzhyn.hidoc.app.application.mapper.DocLiteMapper;
-import com.yuzhyn.hidoc.app.application.mapper.DocMapper;
-import com.yuzhyn.hidoc.app.application.entity.SysFileCursor;
-import com.yuzhyn.hidoc.app.application.entity.SysUser;
-import com.yuzhyn.hidoc.app.application.entity.SysUserFileConf;
-import com.yuzhyn.hidoc.app.application.entity.SysUserLite;
-import com.yuzhyn.hidoc.app.application.mapper.SysFileCursorMapper;
-import com.yuzhyn.hidoc.app.application.mapper.SysUserFileConfMapper;
-import com.yuzhyn.hidoc.app.application.mapper.SysUserLiteMapper;
-import com.yuzhyn.hidoc.app.application.mapper.SysUserMapper;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocCollected;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
+import com.yuzhyn.hidoc.app.application.mapper.doc.DocCollectedMapper;
+import com.yuzhyn.hidoc.app.application.mapper.doc.DocLiteMapper;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserMapper;
 import com.yuzhyn.hidoc.app.application.model.UserInfo;
-import com.yuzhyn.hidoc.app.application.mapper.SysUserMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import pers.yuzhyn.azylee.core.datas.collections.MapTool;
-import pers.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
-import pers.yuzhyn.azylee.core.datas.encrypts.MixdeTool;
-import pers.yuzhyn.azylee.core.datas.ids.UUIDTool;
-import pers.yuzhyn.azylee.core.datas.regexs.RegexPattern;
-import pers.yuzhyn.azylee.core.datas.strings.StringTool;
+import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
+import com.yuzhyn.azylee.core.datas.strings.StringTool;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,7 +51,7 @@ public class UserController {
     DocCollectedMapper docCollectedMapper;
 
     @Autowired
-    SysFileCursorMapper sysFileCursorMapper;
+    FileCursorMapper fileCursorMapper;
 
     @PostMapping("register")
     public ResponseData register(@RequestBody Map<String, Object> params) {
@@ -178,7 +176,7 @@ public class UserController {
         // 文集数量 文档数量 文件数量 阅读数量
         Integer collectedCount = docCollectedMapper.selectCount(new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getCreateUserId, CurrentUserManager.getUser().getId()));
         Integer docCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()));
-        Integer cursorCount = sysFileCursorMapper.selectCount(new LambdaQueryWrapper<SysFileCursor>().eq(SysFileCursor::getUserId, CurrentUserManager.getUser().getId()));
+        Integer cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, CurrentUserManager.getUser().getId()));
         Integer readCount = 0;
 
         ResponseData responseData = ResponseData.ok();

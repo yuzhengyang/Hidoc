@@ -1,7 +1,7 @@
 package com.yuzhyn.hidoc.app.utils;
 
 
-import pers.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
+import com.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
 
 public class SystemStatusTool {
 

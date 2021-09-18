@@ -2,9 +2,9 @@ package com.yuzhyn.hidoc.app.application.model;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import pers.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
-import pers.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
-import pers.yuzhyn.azylee.core.datas.objects.Obj;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
+import com.yuzhyn.azylee.core.datas.objects.Obj;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

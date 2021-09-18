@@ -1,8 +1,8 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.SysAccessLog;
-import com.yuzhyn.hidoc.app.application.mapper.SysAccessLogMapper;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysAccessLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -10,12 +10,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import pers.yuzhyn.azylee.core.datas.collections.MapTool;
-import pers.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
-import pers.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
-import pers.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
-import pers.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
-import pers.yuzhyn.azylee.core.ios.txts.PropertyTool;
+import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
+import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
+import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
+import com.yuzhyn.azylee.core.ios.txts.PropertyTool;
 
 import java.time.LocalDateTime;
 import java.util.Map;

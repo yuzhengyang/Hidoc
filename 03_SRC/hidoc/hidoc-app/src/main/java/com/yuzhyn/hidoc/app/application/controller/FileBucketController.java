@@ -1,23 +1,23 @@
 package com.yuzhyn.hidoc.app.application.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.yuzhyn.azylee.core.datas.regexs.RegexPattern;
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.SysFile;
-import com.yuzhyn.hidoc.app.application.entity.SysFileBucket;
-import com.yuzhyn.hidoc.app.application.entity.SysFileCursor;
-import com.yuzhyn.hidoc.app.application.mapper.SysFileBucketMapper;
-import com.yuzhyn.hidoc.app.application.mapper.SysFileCursorMapper;
-import com.yuzhyn.hidoc.app.application.mapper.SysFileMapper;
+import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import pers.yuzhyn.azylee.core.datas.collections.MapTool;
-import pers.yuzhyn.azylee.core.datas.strings.StringTool;
+import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.datas.strings.StringTool;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -25,10 +25,10 @@ import java.util.Map;
 public class FileBucketController {
 
     @Autowired
-    SysFileBucketMapper sysFileBucketMapper;
+    FileBucketMapper fileBucketMapper;
 
     @Autowired
-    SysFileCursorMapper sysFileCursorMapper;
+    FileCursorMapper fileCursorMapper;
 
     /**
      * 查看文件桶列表
@@ -37,7 +37,8 @@ public class FileBucketController {
      */
     @PostMapping({"list"})
     public ResponseData list(@RequestBody Map<String, Object> params) {
-        List<SysFileBucket> list = sysFileBucketMapper.selectList(null);
+        List<FileBucket> list = fileBucketMapper.selectList(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, CurrentUserManager.getUser().getId()));
+        list = list.stream().filter(x->!x.getName().contains(".")).collect(Collectors.toList());
         return ResponseData.okData(list);
     }
 
@@ -48,13 +49,17 @@ public class FileBucketController {
             String description = MapTool.get(params, "description", "").toString();
             Boolean isOpen = MapTool.getBoolean(params, "isOpen", false);
 
-            SysFileBucket fileBucket = new SysFileBucket();
+            if (name.length() == 0 || !RegexPattern.GENERAL.isMatch(name)) {
+                return ResponseData.error("账号不符合规则，仅支持字母数字下划线组合");
+            }
+
+            FileBucket fileBucket = new FileBucket();
             fileBucket.setId(R.SnowFlake.nexts());
             fileBucket.setUserId(CurrentUserManager.getUser().getId());
             fileBucket.setName(name);
             fileBucket.setIsOpen(isOpen);
 
-            int flag = sysFileBucketMapper.insert(fileBucket);
+            int flag = fileBucketMapper.insert(fileBucket);
             if (flag > 0) {
                 return ResponseData.okData("fileBucket", fileBucket);
             }
@@ -70,11 +75,15 @@ public class FileBucketController {
             String description = MapTool.get(params, "description", "").toString();
             Boolean isOpen = MapTool.getBoolean(params, "isOpen", false);
 
-            SysFileBucket fileBucket = sysFileBucketMapper.selectById(id);
-            if (StringTool.ok(name)) fileBucket.setName(name);
+            if (name.length() == 0 || !RegexPattern.GENERAL.isMatch(name)) {
+                return ResponseData.error("账号不符合规则，仅支持字母数字下划线组合");
+            }
+
+            FileBucket fileBucket = fileBucketMapper.selectById(id);
+            fileBucket.setName(name);
             fileBucket.setIsOpen(isOpen);
 
-            int flag = sysFileBucketMapper.updateById(fileBucket);
+            int flag = fileBucketMapper.updateById(fileBucket);
             if (flag > 0) {
                 return ResponseData.okData("fileBucket", fileBucket);
             }
@@ -87,15 +96,19 @@ public class FileBucketController {
         if (MapTool.ok(params, "id")) {
             String id = MapTool.get(params, "id", "").toString();
 
-            SysFileBucket fileBucket = sysFileBucketMapper.selectById(id);
-            int cursorCount = sysFileCursorMapper.selectCount(new LambdaQueryWrapper<SysFileCursor>().eq(SysFileCursor::getBucketId, id));
+            FileBucket fileBucket = fileBucketMapper.selectById(id);
+            int cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getBucketId, id));
 
             if (fileBucket != null) {
+                if (!fileBucket.getUserId().equals(CurrentUserManager.getUser().getId())) {
+                    return ResponseData.error("删除失败，不能删除其他用户数据");
+                }
+
                 if (cursorCount > 0) {
                     return ResponseData.error("删除失败，文件桶中存在文件");
                 } else {
 
-                    int flag = sysFileBucketMapper.deleteById(id);
+                    int flag = fileBucketMapper.deleteById(id);
                     if (flag > 0) {
                         return ResponseData.okData("fileBucket", fileBucket);
                     }

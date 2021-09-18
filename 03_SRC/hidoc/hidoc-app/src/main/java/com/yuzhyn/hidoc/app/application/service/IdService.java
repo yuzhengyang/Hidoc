@@ -2,7 +2,7 @@ package com.yuzhyn.hidoc.app.application.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pers.yuzhyn.azylee.core.datas.ids.UUIDTool;
+import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 
 import javax.cache.annotation.CacheResult;
 

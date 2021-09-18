@@ -1,6 +1,6 @@
 package com.yuzhyn.hidoc.app.utils;
 
-import pers.yuzhyn.azylee.core.datas.collections.ListTool;
+import com.yuzhyn.azylee.core.datas.collections.ListTool;
 
 import java.util.List;
 

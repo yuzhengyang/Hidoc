@@ -1,8 +1,8 @@
 package com.yuzhyn.hidoc.app;
 
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.SysFile;
-import com.yuzhyn.hidoc.app.application.entity.SysFileCursor;
+import com.yuzhyn.hidoc.app.application.entity.file.File;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.model.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -11,8 +11,8 @@ import org.ehcache.config.builders.ResourcePoolsBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
-import pers.yuzhyn.azylee.core.systems.commons.SystemPropertyTool;
-import pers.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
+import com.yuzhyn.azylee.core.systems.commons.SystemPropertyTool;
+import com.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
 
 @Slf4j
 @EnableCaching
@@ -25,9 +25,9 @@ public class HidocAppApplication {
         R.Cache.UserInfo = R.Cache.CacheManager.createCache("UserInfo",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, UserInfo.class, ResourcePoolsBuilder.heap(1024)));
         R.Cache.SysFile = R.Cache.CacheManager.createCache("SysFile",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, SysFile.class, ResourcePoolsBuilder.heap(1024)));
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, File.class, ResourcePoolsBuilder.heap(1024)));
         R.Cache.SysFileCursor = R.Cache.CacheManager.createCache("SysFileCursor",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, SysFileCursor.class, ResourcePoolsBuilder.heap(1024)));
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, FileCursor.class, ResourcePoolsBuilder.heap(1024)));
 
 
         log.info("~");

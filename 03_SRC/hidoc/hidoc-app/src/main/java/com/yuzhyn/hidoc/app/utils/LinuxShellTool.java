@@ -1,7 +1,7 @@
 package com.yuzhyn.hidoc.app.utils;
 
-import pers.yuzhyn.azylee.core.logs.Alog;
-import pers.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
+import com.yuzhyn.azylee.core.logs.Alog;
+import com.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
 
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;

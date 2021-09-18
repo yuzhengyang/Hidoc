@@ -1,6 +1,6 @@
 package com.yuzhyn.hidoc.app;
 
-import pers.yuzhyn.azylee.core.datas.ids.SnowFlake;
+import com.yuzhyn.azylee.core.datas.ids.SnowFlake;
 
 public class SnowFlakeTest {
     public static void main(String[] args) {

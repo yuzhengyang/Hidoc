@@ -10,22 +10,18 @@
                 </el-button-group>
                 <span style="width:50px"></span>
                 <el-button-group>
-                    <el-button round v-if="createDocVisible" type="success" @click="createDoc">上传文件</el-button>
+                    <el-button round v-if="createDocVisible" type="success" @click="openUploadDialog">上传文件</el-button>
                 </el-button-group>
-
-
-
             </el-row>
             <el-row>
                 <el-col :span="5">
                     <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{item.name}} </el-menu-item>
+                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{ item.name }}</el-menu-item>
                     </el-menu>
                 </el-col>
                 <el-col :span="19">
                     <el-table :data="tableData" style="width: 100%">
-                        <el-table-column prop="title" label="标题">
-                        </el-table-column>
+                        <el-table-column prop="title" label="标题"></el-table-column>
                         <el-table-column label="最近更新" width="100">
                             <template #default="scope">
                                 <el-popover effect="light" trigger="hover" placement="top">
@@ -63,14 +59,13 @@
     <el-backtop></el-backtop>
 
     <!-- Form -->
-    <el-dialog :title="this.dialogFormMode=='create'?'创建文件夹':'编辑文件夹'" v-model="dialogFormVisible">
+    <el-dialog :title="this.dialogFormMode == 'create' ? '创建文件夹' : '编辑文件夹'" v-model="dialogFormVisible">
         <el-form :model="collectedForm">
             <el-form-item label="名称" :label-width="formLabelWidth">
                 <el-input v-model="collectedForm.name" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="公开" :label-width="formLabelWidth">
-                <el-switch v-model="collectedForm.isOpen" active-color="#13ce66" inactive-color="#ff4949">
-                </el-switch>
+                <el-switch v-model="collectedForm.isOpen" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
             </el-form-item>
         </el-form>
         <template #footer>
@@ -81,6 +76,19 @@
         </template>
     </el-dialog>
 
+    <el-dialog :title="上传文件" v-model="dialogUploadVisible">
+        <el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/" :on-preview="handlePreview" :on-remove="handleRemove" :before-remove="beforeRemove" multiple :limit="3" :on-exceed="handleExceed" :file-list="fileList">
+            <el-button size="small" type="primary">点击上传</el-button>
+            <template #tip>
+                <div class="el-upload__tip">只能上传 jpg/png 文件，且不超过 500kb</div>
+            </template>
+        </el-upload>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button type="primary" @click="dialogUploadVisible = false">完 成</el-button>
+            </span>
+        </template>
+    </el-dialog>
 </template>
 
 <script>
@@ -91,12 +99,13 @@ export default {
         return {
             rightValue: [],
             currentCollected: {},
-            bucketList:[],
+            bucketList: [],
             mineList: [],
             coopList: [],
             tableData: [],
             dialogFormMode: 'create',
             dialogFormVisible: false,
+            dialogUploadVisible: false,
             dialogMemberVisible: false,
             createDocVisible: false,
             collectedForm: {
@@ -108,7 +117,17 @@ export default {
             memberUser: [],
             otherUser: [],
             allUser: [],
-            memberId: []
+            memberId: [],
+            fileList: [
+                {
+                    name: 'food.jpeg',
+                    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+                },
+                {
+                    name: 'food2.jpeg',
+                    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+                }
+            ]
         };
     },
     mounted() {
@@ -130,8 +149,8 @@ export default {
                 data: { token: this.$store.state.user.token }
             }).then(res => {
                 if (res.code == 0) {
-                    this.bucketList = res.data; 
-                    console.log(this.bucketList); 
+                    this.bucketList = res.data;
+                    console.log(this.bucketList);
                 }
             });
         },
@@ -162,7 +181,7 @@ export default {
             });
         },
         openCreateCollected() {
-            console.log('创建文集');
+            console.log('创建文件夹');
             this.dialogFormMode = 'create';
             this.collectedForm.name = '';
             this.collectedForm.description = '';
@@ -170,85 +189,70 @@ export default {
             this.dialogFormVisible = true;
         },
         openEditCollected() {
-            console.log('编辑文集');
+            console.log('编辑文件夹');
             this.dialogFormMode = 'edit';
             this.collectedForm.name = this.currentCollected.name;
             this.collectedForm.description = this.currentCollected.description;
             this.collectedForm.isOpen = this.currentCollected.isOpen;
             this.dialogFormVisible = true;
         },
-        // 打开协作成员弹框，并可编辑成员
-        openMemberList() {
-            this.dialogMemberVisible = true;
-            return request({
-                url: '/collected/getMember',
-                method: 'post',
-                data: { id: this.currentCollected.id }
-            }).then(res => {
-                if (res.code == 0) {
-                    this.memberId = res.meta.memberId;
-                    this.memberUser = res.meta.memberUser;
-                    this.otherUser = res.meta.otherUser;
-                    this.allUser = res.meta.allUser;
-                }
-                // this.$nextTick(_ => {
-                // });
-            });
+        // 打开上传文件窗口
+        openUploadDialog() {
+            this.dialogUploadVisible = true;
         },
-        saveMember() {
-            return request({
-                url: '/collected/saveMember',
-                method: 'post',
-                data: {
-                    id: this.currentCollected.id,
-                    memberId: this.memberId
-                }
-            }).then(res => {
-                if (res.code == 0) {
-                    this.dialogMemberVisible = false;
-                }
-            });
+        handleRemove(file, fileList) {
+            console.log(file, fileList);
+        },
+        handlePreview(file) {
+            console.log(file);
+        },
+        handleExceed(files, fileList) {
+            this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+        },
+        beforeRemove(file, fileList) {
+            return this.$confirm(`确定移除 ${file.name}？`);
         },
         saveCollected() {
             if (this.dialogFormMode == 'create') {
                 return request({
-                    url: '/collected/create',
+                    url: '/bucket/create',
                     method: 'post',
                     data: {
                         name: this.collectedForm.name,
-                        description: this.collectedForm.description,
+                        description: '',
                         token: this.$store.state.user.token,
                         isOpen: this.collectedForm.isOpen
                     }
                 }).then(res => {
                     if (res.code == 0) {
                         this.dialogFormVisible = false;
-                        this.loadCollected();
+                        this.loadBucket();
                     }
                 });
             }
             if (this.dialogFormMode == 'edit') {
                 return request({
-                    url: '/collected/edit',
+                    url: '/bucket/edit',
                     method: 'post',
                     data: {
                         id: this.currentCollected.id,
                         name: this.collectedForm.name,
-                        description: this.collectedForm.description,
+                        description: '',
                         token: this.$store.state.user.token,
                         isOpen: this.collectedForm.isOpen
                     }
                 }).then(res => {
                     if (res.code == 0) {
                         this.dialogFormVisible = false;
-                        this.loadCollected();
+                        this.currentCollected = res.meta.fileBucket;
+                        this.loadBucket();
                     }
                 });
             }
         },
         deleteCollected() {
             return request({
-                url: '/collected/delete',
+                url: '/bucket/delete',
                 method: 'post',
                 data: {
                     id: this.currentCollected.id,
@@ -261,20 +265,9 @@ export default {
                 if (res.code == 0) {
                     this.currentCollected = {};
                     this.createDocVisible = false;
-                    this.loadCollected();
+                    this.loadBucket();
                 }
             });
-        },
-        createDoc() {
-            console.log('创建文档');
-
-            // this.$router.push({ name: 'workbench_editor', params: { status: 'create', collectedId: this.currentCollected.id } });
-
-            let routeData = this.$router.resolve({
-                name: 'workbench_editor',
-                params: { collectedId: this.currentCollected.id, docId: '_create' }
-            });
-            window.open(routeData.path, '_blank');
         },
         // 查看
         previewDoc(row) {
@@ -298,33 +291,6 @@ export default {
                 params: { collectedId: this.currentCollected.id, docId: row.id }
             });
             window.open(routeData.path, '_blank');
-        },
-        // 解锁
-        docUnlock(row) {
-            console.log('解锁:' + row.id);
-            return request({
-                url: '/doc/unlock',
-                method: 'post',
-                data: {
-                    id: row.id.toString()
-                }
-            }).then(res => {
-                if (res.code == 0) {
-                    ElMessage({
-                        message: res.msg || '操作成功',
-                        type: 'success',
-                        duration: 5 * 1000
-                    });
-
-                    this.selectCollected(this.currentCollected);
-                } else {
-                    ElMessage({
-                        message: res.msg || 'Error',
-                        type: 'error',
-                        duration: 5 * 1000
-                    });
-                }
-            });
         },
         // 删除
         docDelete(row) {
@@ -350,28 +316,6 @@ export default {
                         type: 'error',
                         duration: 5 * 1000
                     });
-                }
-            });
-        },
-        setOrder(row, vector) {
-            console.log('排序:' + row.id);
-            return request({
-                url: '/collected/setOrder',
-                method: 'post',
-                data: {
-                    collectedId: this.currentCollected.id,
-                    docId: row.id,
-                    vector: vector
-                }
-            }).then(res => {
-                if (res.code == 0) {
-                    ElMessage({
-                        message: res.msg || '操作成功',
-                        type: 'success',
-                        duration: 5 * 1000
-                    });
-
-                    this.selectCollected(this.currentCollected);
                 }
             });
         }
