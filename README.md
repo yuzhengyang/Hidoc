@@ -55,7 +55,7 @@ PostgreSQL
 
 [演示地址](http://101.132.159.3:8080/)
 
-
+账号密码：duanyu / duanyu
 
 ## 赞助
 

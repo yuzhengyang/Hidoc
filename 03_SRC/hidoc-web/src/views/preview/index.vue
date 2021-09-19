@@ -35,7 +35,7 @@ export default {
         let token = this.$store.state.user.token;
         console.log('token: ' + token);
 
-        return request({
+        request({
             url: '/collected/preview',
             method: 'post',
             data: {}
