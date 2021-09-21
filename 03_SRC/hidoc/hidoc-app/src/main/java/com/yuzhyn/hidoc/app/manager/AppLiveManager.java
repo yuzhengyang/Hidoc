@@ -101,6 +101,7 @@ public class AppLiveManager {
         log.info("** 创建文件夹 **");
         DirTool.create(R.Paths.SysFile);
         DirTool.create(R.Paths.SysFileTemp);
+        DirTool.create(R.Paths.Temp);
     }
 
     /**

@@ -48,6 +48,7 @@ public final class R {
         public static final String AppData = DirTool.combine(App, "hidoc_data");
         public static final String Properties = DirTool.combine(AppData, "properties");
         public static final String SysFile = DirTool.combine(AppData, "sysfile");
+        public static final String Temp = DirTool.combine(AppData, "temp");
         public static final String SysFileTemp = DirTool.combine(SysFile, "temp");
     }
 

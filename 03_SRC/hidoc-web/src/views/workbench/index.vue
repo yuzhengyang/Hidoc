@@ -14,15 +14,15 @@
                             <template #title>文集文档</template>
                         </el-menu-item>
                         <el-menu-item index="2010" @click="changeMenu(2010)">
-                            <i class="el-icon-collection"></i>
+                            <i class="el-icon-delete"></i>
                             <template #title>回收站</template>
                         </el-menu-item>
                         <el-menu-item index="2020" @click="changeMenu(2020)">
-                            <i class="el-icon-collection"></i>
+                            <i class="el-icon-chat-line-square"></i>
                             <template #title>互动评论</template>
                         </el-menu-item>
                         <el-menu-item index="3000" @click="changeMenu(3000)">
-                            <i class="el-icon-files"></i>
+                            <i class="el-icon-picture-outline"></i>
                             <template #title>素材库</template>
                         </el-menu-item>
                         <el-menu-item index="3010" @click="changeMenu(3010)">
@@ -55,7 +55,8 @@ import DashBoard from './components/DashBoard';
 import DocTabPage from './components/DocTabPage';
 import FileManager from './components/FileManager';
 import UserInfo from './components/UserInfo';
-import MaterialLibrary from './components/MaterialLibrary.vue';
+import MaterialLibrary from './components/MaterialLibrary';
+// import { Delete } from '@element-plus/icons';
 export default {
     name: 'Home',
     data() {
