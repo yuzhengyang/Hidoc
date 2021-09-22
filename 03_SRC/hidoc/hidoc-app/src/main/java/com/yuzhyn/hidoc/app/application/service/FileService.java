@@ -1,11 +1,14 @@
 package com.yuzhyn.hidoc.app.application.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
+import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.entity.file.FileDownloadLog;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
@@ -34,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -56,6 +60,13 @@ public class FileService {
     FileDownloadLogMapper fileDownloadLogMapper;
 
 
+    /**
+     * 检查用户文件空间是否够用
+     *
+     * @param userId
+     * @param fileSize
+     * @return
+     */
     public boolean checkSpaceLimit(String userId, long fileSize) {
         SysUserFileConf conf = sysUserFileConfMapper.selectById(userId);
         if (null != conf && conf.getUsedSpace() < conf.getSpaceLimit() &&
@@ -68,12 +79,44 @@ public class FileService {
     //region 文件上传功能函数
 
     /**
+     * 上传文件
+     *
+     * @param collectedId
+     * @param expiryTime
+     * @param bucketName
+     * @param files
+     * @param curUser
+     * @return
+     */
+    public List<FileCursor> uploadFiles(String collectedId, LocalDateTime expiryTime, String bucketName, MultipartFile[] files, SysUser curUser) {
+        List<FileCursor> sysFileList = new ArrayList<>();
+        if (null == bucketName) bucketName = UUIDTool.get();
+        if (null == expiryTime) expiryTime = LocalDateTimeTool.max();
+
+        for (MultipartFile file : files) {
+            if (StringTool.ok(bucketName) && expiryTime != null) {
+                File sysFile = preCreateSysFile(file, curUser.getId());
+                if (sysFile != null) {
+                    Tuple3<Boolean, Boolean, File> saveToDisk = saveToDisk(file, sysFile);
+                    File existFile = null;
+                    if (saveToDisk.getT2()) existFile = saveToDisk.getT3();
+                    if (saveToDisk.getT1()) {
+                        FileCursor cursor = saveDb(sysFile, existFile, bucketName, collectedId, expiryTime);
+                        if (cursor != null) sysFileList.add(cursor);
+                    }
+                }
+            }
+        }
+        return sysFileList;
+    }
+
+    /**
      * 预创建文件实体
      *
      * @param file
      * @return
      */
-    public File preCreateSysFile(MultipartFile file, String userId) {
+    private File preCreateSysFile(MultipartFile file, String userId) {
         if (!file.isEmpty() && userId != null) {
             if (this.checkSpaceLimit(userId, file.getSize())) {
                 String fileId = R.SnowFlake.nexts();
@@ -104,7 +147,7 @@ public class FileService {
      * @param sysFile
      * @return 操作状态（继续执行标志）、是否已有文件、已有文件信息
      */
-    public Tuple3<Boolean, Boolean, File> saveToDisk(MultipartFile file, File sysFile) {
+    private Tuple3<Boolean, Boolean, File> saveToDisk(MultipartFile file, File sysFile) {
         try {
             // 存储文件到临时文件夹
             java.io.File dest = new java.io.File(DirTool.combine(R.Paths.SysFileTemp, sysFile.getId().toString()));
@@ -148,7 +191,7 @@ public class FileService {
      * @param expiryTime
      * @return
      */
-    public FileCursor saveDb(File sysFile, File existFile, String bucketName, String collectedId, LocalDateTime expiryTime) {
+    private FileCursor saveDb(File sysFile, File existFile, String bucketName, String collectedId, LocalDateTime expiryTime) {
         // 判断是新增文件还是已经存在文件，如果是新增文件，则保存记录到数据库
         boolean fileSaveFlag = (null != existFile);
         if (null == existFile) {
@@ -202,6 +245,15 @@ public class FileService {
     //endregion
 
     //region 下载文件功能函数
+
+    /**
+     * 根据桶名称和文件名称获取 文件指针信息和文件信息
+     *
+     * @param userPrefix
+     * @param bucketName
+     * @param fileName
+     * @return
+     */
     public Tuple2<FileCursor, File> getDownloadFile(String userPrefix, String bucketName, String fileName) {
         if (StringTool.ok(userPrefix, bucketName, fileName)) {
             SysUserFileConf conf = sysUserFileConfMapper.selectOne(new LambdaQueryWrapper<SysUserFileConf>()
@@ -229,6 +281,12 @@ public class FileService {
         return null;
     }
 
+    /**
+     * 根据文件指针ID获取 文件指针信息和文件信息
+     *
+     * @param cursorId
+     * @return
+     */
     public Tuple2<FileCursor, File> getDownloadFileByCursor(String cursorId) {
         if (null != cursorId) {
             FileCursor cursor = fileCursorMapper.selectOne(new LambdaQueryWrapper<FileCursor>()
@@ -241,6 +299,12 @@ public class FileService {
         return null;
     }
 
+    /**
+     * 根据全局唯一名称获取 文件指针信息和文件信息
+     *
+     * @param uname
+     * @return
+     */
     public Tuple2<FileCursor, File> getDownloadFileByUname(String uname) {
         if (null != uname) {
 //            try{
@@ -257,6 +321,13 @@ public class FileService {
         return null;
     }
 
+    /**
+     * 保存文件下载日志信息
+     *
+     * @param cursor
+     * @param file
+     * @param ip
+     */
     public void saveDownloadLog(FileCursor cursor, File file, String ip) {
         if (cursor != null && file != null) {
             try {
@@ -272,6 +343,14 @@ public class FileService {
         }
     }
 
+    /**
+     * 根据 文件指针信息和文件信息 下载文件
+     *
+     * @param sysFileCursor
+     * @param sysFile
+     * @param request
+     * @param response
+     */
     public void download(FileCursor sysFileCursor, File sysFile, HttpServletRequest request, HttpServletResponse response) {
         if (sysFileCursor != null && sysFile != null) {
             try {

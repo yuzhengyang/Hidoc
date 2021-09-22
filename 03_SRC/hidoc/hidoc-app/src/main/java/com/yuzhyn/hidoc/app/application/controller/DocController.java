@@ -293,8 +293,6 @@ public class DocController {
                     .eq(DocLite::getIsDelete, false)
                     .orderByAsc(DocLite::getSerialNumber, DocLite::getCreateTime));
             for (DocLite doc : list) {
-                doc.setRelativeUpdateTime(RelativeDateFormat.format(doc.getUpdateTime()));
-
                 SysUserLite ownerUser = sysUserLiteMapper.selectById(doc.getOwnerUserId());
                 if (ownerUser != null) doc.setOwnerUser(ownerUser);
 

@@ -3,6 +3,7 @@ package com.yuzhyn.hidoc.app.application.entity.doc;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.yuzhyn.azylee.core.datas.datetimes.RelativeDateFormat;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import lombok.Data;
 
@@ -25,7 +26,14 @@ public class DocLite {
     private String tag;
     private Integer serialNumber;
     private LocalDateTime createTime;
+
     private LocalDateTime updateTime;
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+        this.relativeUpdateTime = RelativeDateFormat.format(this.getUpdateTime());
+    }
+
     private String createUserId;
     private String updateUserId;
     private String lockUserId;
@@ -43,4 +51,5 @@ public class DocLite {
 
     @TableField(exist = false)
     private String relativeUpdateTime;
+
 }

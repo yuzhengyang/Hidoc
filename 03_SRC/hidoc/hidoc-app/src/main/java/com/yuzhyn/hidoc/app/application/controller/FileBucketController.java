@@ -31,15 +31,34 @@ public class FileBucketController {
     FileCursorMapper fileCursorMapper;
 
     /**
-     * 查看文件桶列表
+     * 查看当前用户的文件桶列表
+     * 排除以.开头的文件桶（.开头为系统保留）
      *
      * @return
      */
     @PostMapping({"list"})
     public ResponseData list(@RequestBody Map<String, Object> params) {
         List<FileBucket> list = fileBucketMapper.selectList(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, CurrentUserManager.getUser().getId()));
-        list = list.stream().filter(x->!x.getName().contains(".")).collect(Collectors.toList());
+        list = list.stream().filter(x -> !x.getName().contains(".")).collect(Collectors.toList());
         return ResponseData.okData(list);
+    }
+
+    /**
+     * 查看桶中文件列表
+     *
+     * @return
+     */
+    @PostMapping({"files"})
+    public ResponseData files(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "bucketId")) {
+            String bucketId = MapTool.get(params, "bucketId", "").toString();
+
+            List<FileCursor> list = fileCursorMapper.selectList(
+                    new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getBucketId, bucketId));
+
+            return ResponseData.okData(list);
+        }
+        return ResponseData.okData(null);
     }
 
     @PostMapping({"create"})

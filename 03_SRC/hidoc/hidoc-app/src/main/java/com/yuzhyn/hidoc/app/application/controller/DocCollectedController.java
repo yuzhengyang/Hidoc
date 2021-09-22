@@ -201,9 +201,6 @@ public class DocCollectedController {
                 Page<DocLite> page = new Page<>(1, 5);
                 IPage<DocLite> docLites = docLiteMapper.selectPage(page, new LambdaQueryWrapper<DocLite>().eq(DocLite::getCollectedId, collected.getId()).orderByDesc(DocLite::getUpdateTime));
                 if (docLites.getTotal() > 0) {
-                    for (DocLite doc : docLites.getRecords()) {
-                        doc.setRelativeUpdateTime(RelativeDateFormat.format(doc.getUpdateTime()));
-                    }
                     collected.setDocLites(docLites.getRecords());
                     collected.setDocTotal(docLites.getTotal());
                 }
