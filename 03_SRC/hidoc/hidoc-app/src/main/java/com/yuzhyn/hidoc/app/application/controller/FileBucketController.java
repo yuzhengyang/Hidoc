@@ -52,10 +52,7 @@ public class FileBucketController {
     public ResponseData files(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "bucketId")) {
             String bucketId = MapTool.get(params, "bucketId", "").toString();
-
-            List<FileCursor> list = fileCursorMapper.selectList(
-                    new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getBucketId, bucketId));
-
+            List<FileCursor> list = fileCursorMapper.selectFiles(bucketId);
             return ResponseData.okData(list);
         }
         return ResponseData.okData(null);

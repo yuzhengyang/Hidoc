@@ -81,12 +81,7 @@
     </el-dialog>
 
     <el-dialog :title="上传文件" v-model="dialogUploadVisible">
-        <el-upload class="upload-demo" action="https://jsonplaceholder.typicode.com/posts/" :on-preview="handlePreview" :on-remove="handleRemove" :before-remove="beforeRemove" multiple :limit="3" :on-exceed="handleExceed" :file-list="fileList">
-            <el-button size="small" type="primary">点击上传</el-button>
-            <template #tip>
-                <div class="el-upload__tip">只能上传 jpg/png 文件，且不超过 500kb</div>
-            </template>
-        </el-upload>
+        <file-upload v-bind:bucket="currentBucket"></file-upload>
         <template #footer>
             <span class="dialog-footer">
                 <el-button type="primary" @click="dialogUploadVisible = false">完 成</el-button>
@@ -98,11 +93,13 @@
 <script>
 import { ElMessage } from 'element-plus';
 import request from '../../../utils/request.js';
+import { config } from '@/utils/config';
+import  FileUpload from '../components/FileUpload';
 export default {
     data() {
         return {
             rightValue: [],
-            currentCollected: {},
+            currentBucket: {},
             bucketList: [],
             mineList: [],
             coopList: [],
@@ -122,6 +119,7 @@ export default {
             otherUser: [],
             allUser: [],
             memberId: [],
+            fileUploadUrl: '',
             fileList: [
                 {
                     name: 'food.jpeg',
@@ -135,6 +133,8 @@ export default {
         };
     },
     mounted() {
+        this.fileUploadUrl = config().baseServer + '/f/u';
+
         //  debugger;
         let token = this.$store.state.user.token;
         console.log('token-1-1-1: ' + token);
@@ -144,7 +144,7 @@ export default {
 
         this.loadBucket();
     },
-    components: {},
+    components: { FileUpload },
     methods: {
         loadBucket() {
             return request({
@@ -170,13 +170,13 @@ export default {
             console.log(key, keyPath);
         },
         selectCollected(data) {
-            this.currentCollected = data;
+            this.currentBucket = data;
             this.createDocVisible = true;
             request({
                 url: '/doc/list',
                 method: 'post',
                 data: {
-                    collectedId: this.currentCollected.id
+                    collectedId: this.currentBucket.id
                 }
             }).then(res => {
                 if (res.code == 0) {
@@ -195,22 +195,22 @@ export default {
         openEditCollected() {
             console.log('编辑文件夹');
             this.dialogFormMode = 'edit';
-            this.collectedForm.name = this.currentCollected.name;
-            this.collectedForm.description = this.currentCollected.description;
-            this.collectedForm.isOpen = this.currentCollected.isOpen;
+            this.collectedForm.name = this.currentBucket.name;
+            this.collectedForm.description = this.currentBucket.description;
+            this.collectedForm.isOpen = this.currentBucket.isOpen;
             this.dialogFormVisible = true;
         },
-        exportFileList(){
-            request({
-                    url: '/file/export',
-                    method: 'get'
-                }).then(res => {
-                    if (res.code == 0) {
-                        this.dialogFormVisible = false;
-                        this.loadBucket();
-                    }
-                });
-        },
+        // exportFileList(){
+        //     request({
+        //             url: '/file/export',
+        //             method: 'get'
+        //         }).then(res => {
+        //             if (res.code == 0) {
+        //                 this.dialogFormVisible = false;
+        //                 this.loadBucket();
+        //             }
+        //         });
+        // },
         // 打开上传文件窗口
         openUploadDialog() {
             this.dialogUploadVisible = true;
@@ -219,6 +219,7 @@ export default {
             console.log(file, fileList);
         },
         handlePreview(file) {
+            console.log('handlePreview');
             console.log(file);
         },
         handleExceed(files, fileList) {
@@ -250,7 +251,7 @@ export default {
                     url: '/bucket/edit',
                     method: 'post',
                     data: {
-                        id: this.currentCollected.id,
+                        id: this.currentBucket.id,
                         name: this.collectedForm.name,
                         description: '',
                         token: this.$store.state.user.token,
@@ -259,7 +260,7 @@ export default {
                 }).then(res => {
                     if (res.code == 0) {
                         this.dialogFormVisible = false;
-                        this.currentCollected = res.meta.fileBucket;
+                        this.currentBucket = res.meta.fileBucket;
                         this.loadBucket();
                     }
                 });
@@ -270,7 +271,7 @@ export default {
                 url: '/bucket/delete',
                 method: 'post',
                 data: {
-                    id: this.currentCollected.id,
+                    id: this.currentBucket.id,
                     name: this.collectedForm.name,
                     description: this.collectedForm.description,
                     token: this.$store.state.user.token,
@@ -278,7 +279,7 @@ export default {
                 }
             }).then(res => {
                 if (res.code == 0) {
-                    this.currentCollected = {};
+                    this.currentBucket = {};
                     this.createDocVisible = false;
                     this.loadBucket();
                 }
@@ -290,11 +291,11 @@ export default {
 
             let routeData = this.$router.resolve({
                 name: 'collected',
-                params: { collectedId: this.currentCollected.id, docId: row.id }
+                params: { collectedId: this.currentBucket.id, docId: row.id }
             });
             window.open(routeData.path, '_blank');
 
-            // this.$router.push({ name: 'collected', params: { collectedId: this.currentCollected.id, docId: row.id } });
+            // this.$router.push({ name: 'collected', params: { collectedId: this.currentBucket.id, docId: row.id } });
         },
         // 编辑
         docEdit(row) {
@@ -303,7 +304,7 @@ export default {
 
             let routeData = this.$router.resolve({
                 name: 'workbench_editor',
-                params: { collectedId: this.currentCollected.id, docId: row.id }
+                params: { collectedId: this.currentBucket.id, docId: row.id }
             });
             window.open(routeData.path, '_blank');
         },
@@ -324,7 +325,7 @@ export default {
                         duration: 5 * 1000
                     });
 
-                    this.selectCollected(this.currentCollected);
+                    this.selectCollected(this.currentBucket);
                 } else {
                     ElMessage({
                         message: res.msg || 'Error',
