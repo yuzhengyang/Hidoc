@@ -22,9 +22,9 @@ spring:
     password: HIdev210704
     type: com.alibaba.druid.pool.DruidDataSource
     # 初始化大小，最小，最大
-    initialSize: 3
-    minIdle: 3
-    maxActive: 5
+    initialSize: 20
+    minIdle: 20
+    maxActive: 100
     keepAlive: true
     # 配置获取连接等待超时的时间
     maxWait: 5000

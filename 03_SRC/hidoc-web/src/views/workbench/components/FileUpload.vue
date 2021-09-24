@@ -1,5 +1,5 @@
 <template>
-    <el-upload class="upload-demo" :action="fileUploadUrl" :headers="headers" :data="data" :on-preview="handlePreview" :on-remove="handleRemove" :before-remove="beforeRemove" multiple :limit="3" :on-exceed="handleExceed" :file-list="fileList">
+    <el-upload class="upload-demo" :action="fileUploadUrl" :headers="headers" :data="data" :on-success="handlerSuccess" :on-preview="handlePreview" :on-remove="handleRemove" :before-remove="beforeRemove" multiple :limit="10" :on-exceed="handleExceed" :file-list="fileList">
         <el-button size="small" type="primary">点击上传</el-button>
         <template #tip>
             <div class="el-upload__tip">只能上传 jpg/png 文件，且不超过 500kb</div>
@@ -14,23 +14,17 @@ import { getToken } from '@/utils/auth';
 import { config } from '@/utils/config';
 export default {
     props: {
-        bucket: Object
+        bucket: Object,
+        callback: {
+            type: Function
+        }
     },
     data() {
         return {
             fileUploadUrl: '',
             headers: [],
             data: {},
-            fileList: [
-                {
-                    name: 'food.jpeg',
-                    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-                },
-                {
-                    name: 'food2.jpeg',
-                    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-                }
-            ]
+            fileList: []
         };
     },
     mounted() {
@@ -52,6 +46,10 @@ export default {
     },
     components: {},
     methods: {
+        openPanel() {
+            console.log('openPanel');
+            this.fileList = [];
+        },
         handleRemove(file, fileList) {
             console.log(file, fileList);
         },
@@ -66,6 +64,9 @@ export default {
         },
         beforeRemove(file, fileList) {
             return this.$confirm(`确定移除 ${file.name}？`);
+        },
+        handlerSuccess(response, file, fileList) {
+            this.callback({ name: '123123' });
         }
     }
 };

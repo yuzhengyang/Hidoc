@@ -4,23 +4,23 @@
         <el-main>
             <el-row>
                 <el-button-group>
-                    <el-button round type="success" @click="openCreateCollected">创建文件夹</el-button>
-                    <el-button round v-if="createDocVisible" type="warning" @click="openEditCollected">编辑文件夹</el-button>
-                    <el-button round v-if="createDocVisible" type="danger" @click="deleteCollected">删除文件夹</el-button>
+                    <el-button round type="success" @click="openCreateBucket">创建文件夹</el-button>
+                    <el-button round v-if="createDocVisible" type="warning" @click="openEditBucket">编辑文件夹</el-button>
+                    <el-button round v-if="createDocVisible" type="danger" @click="deleteBucket">删除文件夹</el-button>
                 </el-button-group>
                 <span style="width:50px"></span>
                 <el-button-group>
                     <el-button round v-if="createDocVisible" type="success" @click="openUploadDialog">上传文件</el-button>
                 </el-button-group>
-                <span style="width:50px"></span>
+                <!-- <span style="width:50px"></span>
                 <el-button-group>
                     <el-button round type="success" @click="exportFileList">导出文件列表</el-button>
-                </el-button-group>
+                </el-button-group> -->
             </el-row>
             <el-row>
                 <el-col :span="5">
                     <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{ item.name }}</el-menu-item>
+                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
                     </el-menu>
                 </el-col>
                 <el-col :span="19">
@@ -31,13 +31,13 @@
                         <el-table-column prop="historyCount" label="历史版本"></el-table-column>
                         <el-table-column fixed="right" label="操作" width="200">
                             <template #default="scope">
-                                <el-button @click="previewDoc(scope.row)" type="text" size="small">历史</el-button>
-                                <el-button @click="previewDoc(scope.row)" type="text" size="small">下载</el-button>
+                                <el-button @click="fileHistory(scope.row)" type="text" size="small">历史</el-button>
+                                <el-button @click="fileDownload(scope.row)" type="text" size="small">下载</el-button>
 
                                 <el-popover placement="top-start" :width="200" trigger="click">
                                     <p>删除操作不可撤回，确定删除吗？</p>
                                     <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="docDelete(scope.row)">确定删除</el-button>
+                                        <el-button type="danger" size="mini" @click="fileDelete(scope.row)">确定删除</el-button>
                                     </div>
                                     <template #reference>
                                         <el-button type="text" size="small">删除</el-button>
@@ -65,13 +65,13 @@
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveCollected">保 存</el-button>
+                <el-button type="primary" @click="saveBucket">保 存</el-button>
             </span>
         </template>
     </el-dialog>
 
     <el-dialog :title="上传文件" v-model="dialogUploadVisible">
-        <file-upload v-bind:bucket="currentBucket"></file-upload>
+        <file-upload v-bind:bucket="currentBucket" :callback="uploadCallback" ref="fileUpload"></file-upload>
         <template #footer>
             <span class="dialog-footer">
                 <el-button type="primary" @click="dialogUploadVisible = false">完 成</el-button>
@@ -138,9 +138,12 @@ export default {
         handleClose(key, keyPath) {
             console.log(key, keyPath);
         },
-        selectCollected(data) {
+        selectBucket(data) {
             this.currentBucket = data;
             this.createDocVisible = true;
+            this.getBucketFiles();
+        },
+        getBucketFiles() {
             request({
                 url: '/bucket/files',
                 method: 'post',
@@ -153,7 +156,7 @@ export default {
                 }
             });
         },
-        openCreateCollected() {
+        openCreateBucket() {
             console.log('创建文件夹');
             this.dialogFormMode = 'create';
             this.collectedForm.name = '';
@@ -161,7 +164,7 @@ export default {
             this.collectedForm.isOpen = false;
             this.dialogFormVisible = true;
         },
-        openEditCollected() {
+        openEditBucket() {
             console.log('编辑文件夹');
             this.dialogFormMode = 'edit';
             this.collectedForm.name = this.currentBucket.name;
@@ -183,8 +186,9 @@ export default {
         // 打开上传文件窗口
         openUploadDialog() {
             this.dialogUploadVisible = true;
+            this.$refs['fileUpload'].openPanel();
         },
-        saveCollected() {
+        saveBucket() {
             if (this.dialogFormMode == 'create') {
                 return request({
                     url: '/bucket/create',
@@ -222,7 +226,7 @@ export default {
                 });
             }
         },
-        deleteCollected() {
+        deleteBucket() {
             return request({
                 url: '/bucket/delete',
                 method: 'post',
@@ -241,37 +245,17 @@ export default {
                 }
             });
         },
-        // 查看
-        previewDoc(row) {
-            console.log('查看');
-
-            let routeData = this.$router.resolve({
-                name: 'collected',
-                params: { collectedId: this.currentBucket.id, docId: row.id }
-            });
-            window.open(routeData.path, '_blank');
-
-            // this.$router.push({ name: 'collected', params: { collectedId: this.currentBucket.id, docId: row.id } });
+        fileHistory() {},
+        fileDownload(data) {
+            window.location.href = config().baseServer + 'f/d/' + data.urlPrefix + '/' + data.bucketName + '/' + data.fileName;
         },
-        // 编辑
-        docEdit(row) {
-            console.log('编辑');
-            console.log(row);
-
-            let routeData = this.$router.resolve({
-                name: 'workbench_editor',
-                params: { collectedId: this.currentBucket.id, docId: row.id }
-            });
-            window.open(routeData.path, '_blank');
-        },
-        // 删除
-        docDelete(row) {
+        fileDelete() {
             console.log('删除');
             return request({
-                url: '/doc/delete',
+                url: '/doc/deletessss',
                 method: 'post',
                 data: {
-                    id: row.id.toString()
+                    // id: row.id.toString()
                 }
             }).then(res => {
                 if (res.code == 0) {
@@ -281,7 +265,7 @@ export default {
                         duration: 5 * 1000
                     });
 
-                    this.selectCollected(this.currentBucket);
+                    this.selectBucket(this.currentBucket);
                 } else {
                     ElMessage({
                         message: res.msg || 'Error',
@@ -290,6 +274,11 @@ export default {
                     });
                 }
             });
+        },
+        uploadCallback(data) {
+            console.log('uploadCallback');
+            console.log(data);
+            this.getBucketFiles();
         }
     }
 };

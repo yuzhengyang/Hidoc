@@ -22,4 +22,6 @@ public class FileCursorView {
     private String collectedId;
     private String uname;
     private String historyCount;
+    private String urlPrefix;
+    private String bucketName;
 }
