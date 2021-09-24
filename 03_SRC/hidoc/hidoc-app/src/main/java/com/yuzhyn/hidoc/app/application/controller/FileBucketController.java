@@ -5,17 +5,16 @@ import com.yuzhyn.azylee.core.datas.regexs.RegexPattern;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
-import com.yuzhyn.hidoc.app.application.entity.file.FileCursorVersion;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursorView;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
-import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorVersionMapper;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorViewMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
-import com.yuzhyn.azylee.core.datas.strings.StringTool;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,7 @@ public class FileBucketController {
     FileCursorMapper fileCursorMapper;
 
     @Autowired
-    FileCursorVersionMapper fileCursorVersionMapper;
+    FileCursorViewMapper fileCursorViewMapper;
 
     /**
      * 查看当前用户的文件桶列表
@@ -57,7 +56,7 @@ public class FileBucketController {
     public ResponseData files(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "bucketId")) {
             String bucketId = MapTool.get(params, "bucketId", "").toString();
-            List<FileCursorVersion> list = fileCursorVersionMapper.selectFiles(bucketId);
+            List<FileCursorView> list = fileCursorViewMapper.selectFiles(bucketId);
             return ResponseData.okData(list);
         }
         return ResponseData.okData(null);

@@ -16,7 +16,7 @@ public class UrlAccess {
         List<String> urls = new ArrayList<>();
         urls.add("/user/register");
         urls.add("/user/login");
-        urls.add("/user/logout");
+//        urls.add("/user/logout");
         urls.add("/collected/preview");
         urls.add("/collected/test");
         urls.add("/collected/test2");

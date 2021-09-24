@@ -13,6 +13,7 @@ public class UserInfo implements Serializable {
     private SysUser user;
     private SysUserFileConf userFileConf;
     private String ip;
+    private Boolean isCurrent;
     private LocalDateTime loginTime;
     private LocalDateTime expiryTime;
 }

@@ -5,9 +5,12 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 视图查询
+ */
 @Data
 @TableName("file_cursor")
-public class FileCursorVersion {
+public class FileCursorView {
     private String id;
     private String bucketId;
     private String fileId;

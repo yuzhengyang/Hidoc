@@ -196,7 +196,23 @@ public class UserController {
     }
 
     @PostMapping("logout")
-    public ResponseData logout() {
+    public ResponseData logout(@RequestBody Map<String, Object> params) {
+
+        String ip = MapTool.get(params, "ip", "").toString();
+        String token = MapTool.get(params, "token", "").toString();
+
+        if (StringTool.ok(ip, token)) {
+            // 注销指定token的用户
+            UserInfo user = R.Cache.UserInfo.get(token);
+            if (user != null && StringTool.ok(user.getIp()) && user.getIp().equals(ip)) {
+                R.Cache.UserInfo.remove(token);
+            }
+
+        } else {
+            // 注销当前登录用户
+
+        }
+
 //        CurrentUserManager.clearCurrentUser();
 //        UserInfo userInfo = CurrentUserManager.currentUser.get();
 //        return ResponseData.okData("userInfo", userInfo);

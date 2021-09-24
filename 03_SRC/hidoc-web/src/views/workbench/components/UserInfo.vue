@@ -23,27 +23,44 @@
             <el-row style="padding:50px">
                 <el-col :span="16">
                     <el-table :data="tableData" style="width: 100%">
-                        <el-table-column prop="ip" label="登录IP地址" ></el-table-column>
+                        <el-table-column prop="ip" label="登录IP地址"></el-table-column>
                         <el-table-column prop="loginTime" label="登录时间"></el-table-column>
                         <el-table-column prop="expiryTime" label="过期时间"></el-table-column>
-                        <!-- <el-table-column label="最近更新" width="100">
+
+                        <el-table-column label="当前登录" width="100">
                             <template #default="scope">
-                                <el-popover effect="light" trigger="hover" placement="top">
-                                    <template #default>
-                                        <p>{{ scope.row.updateTime }}</p>
-                                    </template>
-                                    <template #reference>
-                                        <div class="name-wrapper">
-                                            {{ scope.row.relativeUpdateTime }}
-                                        </div>
-                                    </template>
-                                </el-popover>
+                                <div class="name-wrapper">
+                                    <div v-if="this.$store.state.user.token == scope.row.token">
+                                        <el-tag size="medium">是</el-tag>
+                                    </div>
+                                    <div v-else>
+                                        <!-- <el-tag size="medium" type="danger">-</el-tag> -->
+                                    </div>
+                                </div>
                             </template>
-                        </el-table-column> -->
+                        </el-table-column>
                         <el-table-column fixed="right" label="操作" width="200">
                             <template #default="scope">
-                                <el-button @click="previewDoc(scope.row)" type="text" size="small">拉黑IP</el-button>
-                                <el-button @click="docEdit(scope.row)" type="text" size="small">下线</el-button>
+
+                                <el-popover placement="top-start" :width="200" trigger="click">
+                                    <p>拉黑IP将导致无法通过该IP登录，确认继续吗？</p>
+                                    <div style="text-align: right; margin: 0">
+                                        <el-button type="danger" size="mini" @click="blockIp(scope.row)">确定删除</el-button>
+                                    </div>
+                                    <template #reference>
+                                        <el-button type="text" size="small">拉黑IP</el-button>
+                                    </template>
+                                </el-popover>
+
+                                <el-popover placement="top-start" :width="200" trigger="click">
+                                    <p>确定下线该设备吗？</p>
+                                    <div style="text-align: right; margin: 0">
+                                        <el-button type="danger" size="mini" @click="forceLogout(scope.row)">确定删除</el-button>
+                                    </div>
+                                    <template #reference>
+                                        <el-button type="text" size="small">强制下线</el-button>
+                                    </template>
+                                </el-popover>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -82,21 +99,54 @@ export default {
             }
         });
 
-        request({
-            url: '/user/getLoginUserInfo',
-            method: 'post'
-        }).then(res => {
-            if (res.code == 0) {
-                this.tableData = res.data;
-            }
-        });
+        this.getLoginUserInfo();
     },
     methods: {
+        getLoginUserInfo() {
+            request({
+                url: '/user/getLoginUserInfo',
+                method: 'post'
+            }).then(res => {
+                if (res.code == 0) {
+                    this.tableData = res.data;
+                }
+            });
+        },
         format(percentage) {
             return percentage === 100 ? '满' : `${percentage}%`;
         },
         onSubmit() {
             console.log('submit!');
+        },
+        blockIp() {
+            ElMessage({
+                message: '功能暂未实现，敬请期待',
+                type: 'warning',
+                duration: 5 * 1000
+            });
+        },
+        forceLogout(data) {
+            console.log(data);
+            request({
+                url: '/user/logout',
+                method: 'post',
+                data: data
+            }).then(res => {
+                if (res.code == 0) {
+                    ElMessage({
+                        message: '下线成功',
+                        type: 'success',
+                        duration: 5 * 1000
+                    });
+                } else {
+                    ElMessage({
+                        message: '下线失败',
+                        type: 'warning',
+                        duration: 5 * 1000
+                    });
+                }
+                this.getLoginUserInfo();
+            });
         }
     }
 };
