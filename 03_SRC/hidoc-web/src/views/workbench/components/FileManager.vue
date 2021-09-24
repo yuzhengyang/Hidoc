@@ -25,23 +25,13 @@
                 </el-col>
                 <el-col :span="19">
                     <el-table :data="tableData" style="width: 100%">
-                        <el-table-column prop="title" label="标题"></el-table-column>
-                        <el-table-column label="最近更新" width="100">
-                            <template #default="scope">
-                                <el-popover effect="light" trigger="hover" placement="top">
-                                    <template #default>
-                                        <p>{{ scope.row.updateTime }}</p>
-                                    </template>
-                                    <template #reference>
-                                        <div class="name-wrapper">
-                                            {{ scope.row.relativeUpdateTime }}
-                                        </div>
-                                    </template>
-                                </el-popover>
-                            </template>
-                        </el-table-column>
+                        <el-table-column prop="fileName" label="标题"></el-table-column>
+                        <el-table-column prop="createTime" label="上传时间"></el-table-column>
+                        <el-table-column prop="expiryTime" label="有效期至"></el-table-column>
+                        <el-table-column prop="historyCount" label="历史版本"></el-table-column>
                         <el-table-column fixed="right" label="操作" width="200">
                             <template #default="scope">
+                                <el-button @click="previewDoc(scope.row)" type="text" size="small">历史</el-button>
                                 <el-button @click="previewDoc(scope.row)" type="text" size="small">下载</el-button>
 
                                 <el-popover placement="top-start" :width="200" trigger="click">
@@ -94,47 +84,26 @@
 import { ElMessage } from 'element-plus';
 import request from '../../../utils/request.js';
 import { config } from '@/utils/config';
-import  FileUpload from '../components/FileUpload';
+import FileUpload from '../components/FileUpload';
 export default {
     data() {
         return {
-            rightValue: [],
             currentBucket: {},
             bucketList: [],
-            mineList: [],
-            coopList: [],
             tableData: [],
             dialogFormMode: 'create',
             dialogFormVisible: false,
             dialogUploadVisible: false,
-            dialogMemberVisible: false,
             createDocVisible: false,
             collectedForm: {
                 name: '',
                 description: '',
                 isOpen: false
             },
-            formLabelWidth: '120px',
-            memberUser: [],
-            otherUser: [],
-            allUser: [],
-            memberId: [],
-            fileUploadUrl: '',
-            fileList: [
-                {
-                    name: 'food.jpeg',
-                    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-                },
-                {
-                    name: 'food2.jpeg',
-                    url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-                }
-            ]
+            formLabelWidth: '120px'
         };
     },
     mounted() {
-        this.fileUploadUrl = config().baseServer + '/f/u';
-
         //  debugger;
         let token = this.$store.state.user.token;
         console.log('token-1-1-1: ' + token);
@@ -173,10 +142,10 @@ export default {
             this.currentBucket = data;
             this.createDocVisible = true;
             request({
-                url: '/doc/list',
+                url: '/bucket/files',
                 method: 'post',
                 data: {
-                    collectedId: this.currentBucket.id
+                    bucketId: this.currentBucket.id
                 }
             }).then(res => {
                 if (res.code == 0) {
@@ -214,19 +183,6 @@ export default {
         // 打开上传文件窗口
         openUploadDialog() {
             this.dialogUploadVisible = true;
-        },
-        handleRemove(file, fileList) {
-            console.log(file, fileList);
-        },
-        handlePreview(file) {
-            console.log('handlePreview');
-            console.log(file);
-        },
-        handleExceed(files, fileList) {
-            this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
-        },
-        beforeRemove(file, fileList) {
-            return this.$confirm(`确定移除 ${file.name}？`);
         },
         saveCollected() {
             if (this.dialogFormMode == 'create') {

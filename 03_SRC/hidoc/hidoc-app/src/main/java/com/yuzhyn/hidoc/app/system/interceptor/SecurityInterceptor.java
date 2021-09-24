@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.Enumeration;
 
 /**
@@ -62,8 +63,19 @@ public class SecurityInterceptor implements HandlerInterceptor {
             if (name.equals("access-token")) {
                 UserInfo userInfo = R.Cache.UserInfo.get(value);
                 if (userInfo != null) {
-                    isLogin = true;
-                    CurrentUserManager.set(userInfo);
+
+                    // 判断登录身份有效期
+                    if(LocalDateTime.now().isBefore(userInfo.getExpiryTime())){
+                        isLogin = true;
+                        CurrentUserManager.set(userInfo);
+                    }else{
+                        response.setCharacterEncoding("UTF-8");
+                        response.setContentType("application/json; charset=utf-8");
+                        ResponseData rs = new ResponseData(50014, "登录身份过期，请重新登录！");
+                        response.setContentLength(rs.toJSONString().getBytes().length);
+                        response.getOutputStream().write(rs.toJSONString().getBytes());
+                        return false;
+                    }
                 }
             }
         }
@@ -80,7 +92,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
             log.info("未登录用户，访问受限内容，已拒绝");
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json; charset=utf-8");
-            ResponseData rs = new ResponseData(50014, "拒绝访问受限内容，请登录访问！");
+            ResponseData rs = new ResponseData(50008, "拒绝访问受限内容，请登录访问！");
             response.setContentLength(rs.toJSONString().getBytes().length);
             response.getOutputStream().write(rs.toJSONString().getBytes());
             return false;

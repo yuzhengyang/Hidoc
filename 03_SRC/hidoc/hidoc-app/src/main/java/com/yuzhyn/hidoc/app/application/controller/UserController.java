@@ -21,15 +21,14 @@ import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserMapper;
 import com.yuzhyn.hidoc.app.application.model.UserInfo;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import org.ehcache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping({"user", "u"})
@@ -128,6 +127,9 @@ public class UserController {
                 userInfo.setUser(user);
                 userInfo.setUserFileConf(conf);
                 userInfo.setToken(UUIDTool.get());
+                userInfo.setIp(CurrentUserManager.ip.get());
+                userInfo.setLoginTime(LocalDateTime.now());
+                userInfo.setExpiryTime(LocalDateTime.now().plusHours(8));
                 R.Cache.UserInfo.put(userInfo.getToken(), userInfo);
                 UserInfo userinfoCache = R.Cache.UserInfo.get(userInfo.getToken());
 
@@ -206,5 +208,19 @@ public class UserController {
         List<SysUser> list = sysUserMapper.selectList(null);
         list = new ArrayList<>();
         return ResponseData.okData(list);
+    }
+
+    @PostMapping("getLoginUserInfo")
+    public ResponseData getLoginUserInfo() {
+
+        List<UserInfo> userInfoList = new ArrayList<>();
+
+        for (Iterator<Cache.Entry<String, UserInfo>> i = R.Cache.UserInfo.iterator(); i.hasNext(); ) {
+            Cache.Entry<String, UserInfo> item = i.next();
+            if (CurrentUserManager.getUser().getId().equals(item.getValue().getUser().getId())) {
+                userInfoList.add(item.getValue());
+            }
+        }
+        return ResponseData.okData(userInfoList);
     }
 }

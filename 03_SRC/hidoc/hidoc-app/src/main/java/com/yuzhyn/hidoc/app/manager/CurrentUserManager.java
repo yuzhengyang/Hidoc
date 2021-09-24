@@ -15,6 +15,8 @@ public class CurrentUserManager {
     private static ThreadLocal<SysUser> user = ThreadLocal.withInitial(() -> null);
     private static ThreadLocal<SysUserFileConf> fileConfig = ThreadLocal.withInitial(() -> null);
 
+    public static ThreadLocal<String> ip = ThreadLocal.withInitial(() -> "");
+
     public static boolean isLogin() {
         return login.get() && user != null;
     }
@@ -46,5 +48,6 @@ public class CurrentUserManager {
         CurrentUserManager.token.remove();
         CurrentUserManager.user.remove();
         CurrentUserManager.fileConfig.remove();
+        CurrentUserManager.ip.remove();
     }
 }

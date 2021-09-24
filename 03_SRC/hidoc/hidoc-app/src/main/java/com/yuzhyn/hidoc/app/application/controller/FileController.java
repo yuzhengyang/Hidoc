@@ -99,7 +99,7 @@ public class FileController {
                 List<FileCursor> sysFileList = fileService.uploadFiles(collectedId, expiryTime, bucketName, files, curUser);
                 return ResponseData.okData(sysFileList);
             } else {
-                return ResponseData.error("用户无权限或配额受限");
+                return ResponseData.error("用户无权限或空间受限");
             }
         }
         return ResponseData.error("请选择文件");

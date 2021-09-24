@@ -5,8 +5,10 @@ import com.yuzhyn.azylee.core.datas.regexs.RegexPattern;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursorVersion;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorVersionMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,9 @@ public class FileBucketController {
     @Autowired
     FileCursorMapper fileCursorMapper;
 
+    @Autowired
+    FileCursorVersionMapper fileCursorVersionMapper;
+
     /**
      * 查看当前用户的文件桶列表
      * 排除以.开头的文件桶（.开头为系统保留）
@@ -52,7 +57,7 @@ public class FileBucketController {
     public ResponseData files(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "bucketId")) {
             String bucketId = MapTool.get(params, "bucketId", "").toString();
-            List<FileCursor> list = fileCursorMapper.selectFiles(bucketId);
+            List<FileCursorVersion> list = fileCursorVersionMapper.selectFiles(bucketId);
             return ResponseData.okData(list);
         }
         return ResponseData.okData(null);

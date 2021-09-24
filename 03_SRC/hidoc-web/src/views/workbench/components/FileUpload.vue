@@ -37,7 +37,7 @@ export default {
         console.log('mount begin');
         this.fileUploadUrl = config().baseServer + '/f/u';
         this.headers['Access-Token'] = getToken();
-        this.data.s = 1;
+        this.data.bucketName = this.bucket.name;
 
         console.log(this.bucket);
         console.log(this.bucket.id);

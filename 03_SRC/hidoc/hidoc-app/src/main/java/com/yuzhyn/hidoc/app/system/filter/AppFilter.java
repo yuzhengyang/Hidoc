@@ -31,6 +31,7 @@ public class AppFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         Long beginTime = System.currentTimeMillis();
         HttpServletRequest request = (HttpServletRequest) servletRequest;
+        CurrentUserManager.ip.set(ClientIPTool.getIp(request));
         String uri = URLDecoder.decode(request.getRequestURI(), "utf-8");
         String method = request.getMethod();
         log.info("AppFilter 过滤器处理: " + uri + " ,method: " + method);
@@ -79,7 +80,7 @@ public class AppFilter implements Filter {
         if (method.toUpperCase().equals("POST") || method.toUpperCase().equals("GET")) {
             SysAccessLog sysAccessLog = new SysAccessLog();
             sysAccessLog.setId(R.SnowFlake.nexts());
-            sysAccessLog.setIp(ClientIPTool.getIp(request));
+            sysAccessLog.setIp(CurrentUserManager.ip.get());
             sysAccessLog.setCreateTime(LocalDateTime.now());
             sysAccessLog.setUri(uri);
             sysAccessLog.setMethod(method);
