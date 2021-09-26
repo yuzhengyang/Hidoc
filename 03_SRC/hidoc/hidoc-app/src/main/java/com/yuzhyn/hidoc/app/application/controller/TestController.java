@@ -3,6 +3,7 @@ package com.yuzhyn.hidoc.app.application.controller;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,6 +37,50 @@ public class TestController {
 
     @Autowired
     SysAccessLogMapper sysAccessLogMapper;
+
+    /**
+     * 存储 indexeddb
+     * 参考：
+     * https://blog.csdn.net/xhom_w/article/details/103463460
+     * http://www.ruanyifeng.com/blog/2018/07/indexeddb.html
+     * @return
+     */
+    @GetMapping({"loadbig"})
+    public ResponseData loadbig() {
+        long beg = System.currentTimeMillis();
+
+//        //region 分批处理
+//        for (int i = 0; i < 500; i++) {
+//            List<SysAccessLog> list = sysAccessLogMapper.selectList(null);
+//            fillData(list);
+//        }
+//        //endregion
+
+
+        long size = 0;
+
+//        List<String> jsons = new ArrayList<>();
+
+        //region 全量处理
+        List list = new ArrayList();
+        for (int i = 0; i < 5; i++) {
+            List<SysAccessLog> _l = sysAccessLogMapper.selectList(null);
+            list.addAll(_l);
+            fillData(_l);
+
+//            String s = JSONObject.toJSONString(_l);
+//            jsons.add(s);
+
+//            size = size + s.length();
+        }
+        //endregion
+
+
+        long end = System.currentTimeMillis();
+        log.info("共计花费：" + ((end - beg) / 1000) + " 秒");
+
+        return ResponseData.okData(list);
+    }
 
     @GetMapping({"export"})
     public ResponseData export() {

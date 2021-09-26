@@ -33,6 +33,10 @@
                             <i class="el-icon-user"></i>
                             <template #title>个人信息</template>
                         </el-menu-item>
+                        <el-menu-item index="9000" @click="changeMenu(9000)">
+                            <i class="el-icon-box"></i>
+                            <template #title>实验室</template>
+                        </el-menu-item>
                     </el-menu>
                 </el-col>
                 <el-col :span="21">
@@ -41,6 +45,7 @@
                     <material-library v-if="this.currentMenuIndex == 3000"></material-library>
                     <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
                     <user-info v-if="this.currentMenuIndex == 4000"></user-info>
+                    <laboratory v-if="this.currentMenuIndex == 9000"></laboratory>
                 </el-col>
             </el-row>
         </el-main>
@@ -56,6 +61,7 @@ import DocTabPage from './components/DocTabPage';
 import FileManager from './components/FileManager';
 import UserInfo from './components/UserInfo';
 import MaterialLibrary from './components/MaterialLibrary';
+import Laboratory from './components/Laboratory';
 // import { Delete } from '@element-plus/icons';
 export default {
     name: 'Home',
@@ -90,7 +96,7 @@ export default {
         // console.log('name: ' + name);
         // this.loadCollected();
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);

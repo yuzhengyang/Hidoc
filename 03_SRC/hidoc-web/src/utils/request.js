@@ -9,7 +9,7 @@ import { config } from '@/utils/config';
 const service = axios.create({
     baseURL: config().baseServer, // url = base url + request url
     // withCredentials: true, // send cookies when cross-domain requests
-    timeout: 5000 // request timeout
+    timeout: 120 * 1000 // request timeout
 });
 
 // request interceptor

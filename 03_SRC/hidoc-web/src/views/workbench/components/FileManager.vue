@@ -12,10 +12,6 @@
                 <el-button-group>
                     <el-button round v-if="createDocVisible" type="success" @click="openUploadDialog">上传文件</el-button>
                 </el-button-group>
-                <!-- <span style="width:50px"></span>
-                <el-button-group>
-                    <el-button round type="success" @click="exportFileList">导出文件列表</el-button>
-                </el-button-group> -->
             </el-row>
             <el-row>
                 <el-col :span="5">
@@ -172,17 +168,6 @@ export default {
             this.collectedForm.isOpen = this.currentBucket.isOpen;
             this.dialogFormVisible = true;
         },
-        // exportFileList(){
-        //     request({
-        //             url: '/file/export',
-        //             method: 'get'
-        //         }).then(res => {
-        //             if (res.code == 0) {
-        //                 this.dialogFormVisible = false;
-        //                 this.loadBucket();
-        //             }
-        //         });
-        // },
         // 打开上传文件窗口
         openUploadDialog() {
             this.dialogUploadVisible = true;

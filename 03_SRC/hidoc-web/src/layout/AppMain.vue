@@ -45,8 +45,8 @@
                             </el-button>
                             <template #dropdown>
                                 <el-dropdown-menu>
-                                    <el-dropdown-item @click="workbench"><i class="el-icon-notebook-1"></i> 进入工作台 </el-dropdown-item>
-                                    <el-dropdown-item @click="changePasswordDialogVisible = true"><i class="el-icon-notebook-1"></i> 修改密码 </el-dropdown-item>
+                                    <el-dropdown-item @click="workbench"><i class="el-icon-monitor"></i> 进入工作台 </el-dropdown-item>
+                                    <el-dropdown-item @click="changePasswordDialogVisible = true"><i class="el-icon-key"></i> 修改密码 </el-dropdown-item>
                                     <el-dropdown-item @click="logout"><i class="el-icon-circle-close"></i> 退出 </el-dropdown-item>
                                 </el-dropdown-menu>
                             </template>
