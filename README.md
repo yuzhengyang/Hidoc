@@ -57,6 +57,30 @@ PostgreSQL
 
 账号密码：duanyu / duanyu
 
+
+
+## 发布部署
+
+### 前端WEB
+
+前端使用nginx部署启动
+
+
+
+### 后端JAVA服务
+
+后端使用打包的Jar包直接启动
+
+
+
+### 数据库
+
+数据库默认为PostgreSQL，需自行安装
+
+安装后配置Java服务的yml配置文件
+
+
+
 ## 赞助
 
 暂无
