@@ -62,6 +62,17 @@ export default {
         };
     },
     mounted() {
+        // ========== ========== 关闭标签页时提示 ========== ==========
+        window.isCloseHint = true;
+        window.addEventListener('beforeunload', function (e) {
+            if (window.isCloseHint) {
+                var confirmationMessage = '您所作的更改可能未保存，确认离开吗？';
+                (e || window.event).returnValue = confirmationMessage; // 兼容 Gecko + IE
+                return confirmationMessage; // 兼容 Gecko + Webkit, Safari, Chrome
+            }
+        });
+        // ========== ========== ========== ==========
+
         console.log('编辑器 config: ' + config().imageServer);
 
         let token = this.$store.state.user.token;
