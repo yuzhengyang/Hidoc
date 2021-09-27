@@ -1,12 +1,12 @@
 <template>
     <el-row style="margin:10px;">
         <el-col :span="24">
-            <el-button>Default</el-button>
             <el-button type="primary" @click="exportFileList">导出文件列表</el-button>
             <el-button type="success" @click="loadBigObject">大对象加载</el-button>
-            <el-button type="info">Info</el-button>
+            <el-button type="info" @click="loadIndexedDbData">读取大对象加载在IndexedDb中的内容</el-button>
             <el-button type="warning">Warning</el-button>
             <el-button type="danger">Danger</el-button>
+            <el-button>Default</el-button>
         </el-col>
     </el-row>
 
@@ -99,11 +99,63 @@ export default {
                         var objectStore;
                         if (!db.objectStoreNames.contains('SysAccessLog')) {
                             objectStore = db.createObjectStore('SysAccessLog', { keyPath: 'id' });
+                            objectStore.createIndex('myindex', ['ip', 'method'], { unique: false });
                         }
                         console.log('数据表创建成功');
                     };
                 }
             });
+        },
+        loadIndexedDbData() {
+            var request = window.indexedDB.open('temp', 1);
+            var db;
+
+            // 打开错误回调
+            request.onerror = function (event) {
+                console.log('数据库打开报错');
+            };
+
+            // 打开成功回调
+            request.onsuccess = function (event) {
+                db = request.result;
+                console.log('数据库打开成功');
+
+                // 打开成功后，读取数据并打印到控制台
+                var transaction = db.transaction(['SysAccessLog']);
+                var objectStore = transaction.objectStore('SysAccessLog');
+                
+                // 根据主键读取数据（单条）
+                // var getRequest = objectStore.get('97829451131518985');
+
+                // 根据索引查询数据（多条）
+                var index = objectStore.index('myindex');
+                var getRequest = index.openCursor(IDBKeyRange.only(['10.16.12.106', 'GET']));
+
+                // 根据索引查询数据（单条，第一次匹配到的数据）
+                // var getRequest = index.get(IDBKeyRange.only(['', '']));
+
+                // 查询错误回调
+                getRequest.onerror = function (event) {
+                    console.log('事务失败');
+                };
+
+                // 查询成功回调
+                getRequest.onsuccess = function (event) {
+                    // 此处是游标的循环处理
+                    var res = event.target.result;
+                    if (res) {
+                        var key = res.key;
+                        var value = res.value;
+                        console.log(key + ':' + JSON.stringify(value));
+                        res.continue();
+                    }
+                };
+            };
+
+            // 数据库升级回调
+            request.onupgradeneeded = function (event) {
+                db = event.target.result;
+            };
         }
     }
 };

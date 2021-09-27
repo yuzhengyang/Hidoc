@@ -116,6 +116,7 @@ public class TestController {
 
     private List fillData(List<SysAccessLog> list) {
         for (SysAccessLog item : list) {
+            item.setId(R.SnowFlake.nexts());
             item.setS1(UUIDTool.get());
             item.setS2(UUIDTool.get());
             item.setS3(UUIDTool.get());
