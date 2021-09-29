@@ -33,8 +33,12 @@
                             <i class="el-icon-user"></i>
                             <template #title>个人信息</template>
                         </el-menu-item>
-                        <el-menu-item index="9000" @click="changeMenu(9000)">
+                        <el-menu-item index="8000" @click="changeMenu(8000)">
                             <i class="el-icon-box"></i>
+                            <template #title>数据收集器</template>
+                        </el-menu-item>
+                        <el-menu-item index="9000" @click="changeMenu(9000)">
+                            <i class="el-icon-pear"></i>
                             <template #title>实验室</template>
                         </el-menu-item>
                     </el-menu>
@@ -45,6 +49,7 @@
                     <material-library v-if="this.currentMenuIndex == 3000"></material-library>
                     <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
                     <user-info v-if="this.currentMenuIndex == 4000"></user-info>
+                    <data-collector v-if="this.currentMenuIndex == 8000"></data-collector>
                     <laboratory v-if="this.currentMenuIndex == 9000"></laboratory>
                 </el-col>
             </el-row>
@@ -62,6 +67,7 @@ import FileManager from './components/FileManager';
 import UserInfo from './components/UserInfo';
 import MaterialLibrary from './components/MaterialLibrary';
 import Laboratory from './components/Laboratory';
+import DataCollector from './components/DataCollector';
 // import { Delete } from '@element-plus/icons';
 export default {
     name: 'Home',
@@ -96,7 +102,7 @@ export default {
         // console.log('name: ' + name);
         // this.loadCollected();
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);

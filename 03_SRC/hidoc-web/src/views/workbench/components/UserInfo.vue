@@ -45,7 +45,7 @@
                                 <el-popover placement="top-start" :width="200" trigger="click">
                                     <p>拉黑IP将导致无法通过该IP登录，确认继续吗？</p>
                                     <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="blockIp(scope.row)">确定删除</el-button>
+                                        <el-button type="danger" size="mini" @click="blockIp(scope.row)">确定</el-button>
                                     </div>
                                     <template #reference>
                                         <el-button type="text" size="small">拉黑IP</el-button>
@@ -55,7 +55,7 @@
                                 <el-popover placement="top-start" :width="200" trigger="click">
                                     <p>确定下线该设备吗？</p>
                                     <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="forceLogout(scope.row)">确定删除</el-button>
+                                        <el-button type="danger" size="mini" @click="forceLogout(scope.row)">确定</el-button>
                                     </div>
                                     <template #reference>
                                         <el-button type="text" size="small">强制下线</el-button>
