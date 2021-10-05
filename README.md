@@ -63,7 +63,51 @@ PostgreSQL
 
 ### 前端WEB
 
+首先修改前端访问后端的地址，在前端目录下 config.js 文件，需修改ip地址和端口号
+
+配置内容如下：
+
+```javascript
+var config = {
+    name: 'yuzhengyang',
+    baseServer: 'http:///101.132.159.3:24001/',
+    imageServer: 'http://101.132.159.3:24001/f/d/u/'
+};
+```
+
+
+
 前端使用nginx部署启动
+
+配置如下：
+
+```nginx
+user   root;
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen          8080;
+        server_name     localhost;
+        location / {
+            root /home/app/hidoc/hidoc-web;
+            try_files $uri $uri/ /index.html;
+        }
+    }
+}
+
+```
+
+
 
 
 
@@ -71,17 +115,37 @@ PostgreSQL
 
 后端使用打包的Jar包直接启动
 
+启动命令：
+
+```bash
+nohup java -Dfile.encoding=utf-8 -jar hidoc-app-0.0.1-SNAPSHOT.jar --spring.config.location=application.yml> ./nohup_output &
+
+```
+
+
+
 
 
 ### 数据库
 
-数据库默认为PostgreSQL，需自行安装
+建议安装 PostgreSQL 13
 
-安装后配置Java服务的yml配置文件
+注意：由于使用了PG数据库的JSON类型等特性，目前仅支持PG数据库
+
+
+
+安装数据库后，需要配置Java服务的yml配置文件，修改数据库连接信息
+
+
+
+## 关于作者
+
+- Email：[yuzhyn@163.com](mailto:yuzhyn@163.com)
 
 
 
 ## 赞助
 
-暂无
+如果对您有所帮助，您可以赞赏支持哟
 
+![赞赏码](https://raw.githubusercontent.com/yuzhengyang/Fork/master/Documents/QRCode/WeiXinQRCodeMini.jpg)
