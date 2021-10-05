@@ -44,7 +44,8 @@ public class SecurityInterceptor implements HandlerInterceptor {
             boolean isLogin = CurrentUserManager.isLogin();
             if (isLogin) {
                 SysUser user = CurrentUserManager.getUser();
-                log.warn("LocalThread 泄露：" + user.getId() + ", " + user.getName());
+                CurrentUserManager.clearCurrentUser();
+                log.warn("LocalThread 泄露：" + user.getId() + ", " + user.getName() + "（强制清除泄露的内容）");
             }
         } catch (Exception ex) {
             log.error("LocalThread 泄露检查异常");
@@ -58,17 +59,17 @@ public class SecurityInterceptor implements HandlerInterceptor {
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String name = headerNames.nextElement();
-                String value = request.getHeader(name);
+            String value = request.getHeader(name);
 //            log.info("header: " + name + " = " + value);
             if (name.equals("access-token")) {
                 UserInfo userInfo = R.Cache.UserInfo.get(value);
                 if (userInfo != null) {
 
                     // 判断登录身份有效期
-                    if(LocalDateTime.now().isBefore(userInfo.getExpiryTime())){
+                    if (LocalDateTime.now().isBefore(userInfo.getExpiryTime())) {
                         isLogin = true;
                         CurrentUserManager.set(userInfo);
-                    }else{
+                    } else {
                         response.setCharacterEncoding("UTF-8");
                         response.setContentType("application/json; charset=utf-8");
                         ResponseData rs = new ResponseData(50014, "登录身份过期，请重新登录！");
