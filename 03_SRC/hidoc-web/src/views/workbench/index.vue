@@ -37,10 +37,10 @@
                             <i class="el-icon-box"></i>
                             <template #title>数据收集器</template>
                         </el-menu-item>
-                        <el-menu-item index="9000" @click="changeMenu(9000)">
+                        <!-- <el-menu-item index="9000" @click="changeMenu(9000)">
                             <i class="el-icon-pear"></i>
                             <template #title>实验室</template>
-                        </el-menu-item>
+                        </el-menu-item> -->
                     </el-menu>
                 </el-col>
                 <el-col :span="21">

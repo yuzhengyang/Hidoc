@@ -47,6 +47,7 @@ public class DataCollController {
             String senderId = MapTool.get(params, "senderId", "").toString();
             String senderName = MapTool.get(params, "senderName", "").toString();
             String data = MapTool.get(params, "data", "").toString();
+            String dataType = MapTool.get(params, "dataType", "").toString();
             LocalDateTime createTime = MapTool.getLocalDateTime(params, "createTime", "");
 
             JSONObject jsonObject = JSONObject.parseObject(data);
@@ -54,7 +55,7 @@ public class DataCollController {
                 return ResponseData.error("创建失败，提交的数据为空");
             }
 
-            if (StringTool.ok(token, mac, senderId, senderName, data) && createTime != null) {
+            if (StringTool.ok(token, senderId, senderName, data) && createTime != null) {
                 // 查询收集计划
                 // 条件：1、token相同 2、可用 3、没删除 4、开始时间<=now 5、结束时间>=now 6、开始时间<=数据创建时间 7、结束时间>=数据创建时间
                 DataCollPlan plan = dataCollPlanMapper.selectOne(new LambdaQueryWrapper<DataCollPlan>().eq(DataCollPlan::getToken, token)
@@ -73,6 +74,7 @@ public class DataCollController {
                     dataColl.setSenderId(senderId);
                     dataColl.setSenderName(senderName);
                     dataColl.setData(jsonObject);
+                    dataColl.setDataType(dataType);
 
                     int flag = dataCollMapper.insert(dataColl);
                     if (flag > 0) {
