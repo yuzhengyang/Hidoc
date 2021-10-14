@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 
 import ElementPlus from 'element-plus';
-import 'element-plus/dist/index.css'
+import 'element-plus/dist/index.css';
 
 import App from './App.vue';
 import router from './router';
@@ -46,7 +46,6 @@ import 'codemirror/addon/scroll/simplescrollbars.css';
 // style
 import 'codemirror/lib/codemirror.css';
 
-
 VMdEditor.Codemirror = Codemirror;
 VMdEditor.use(vuepressTheme, {
     Hljs: hljs,
@@ -60,7 +59,6 @@ VMdEditor.use(vuepressTheme, {
 VMdPreview.use(vuepressTheme, {
     Hljs: hljs
 });
-
 
 // 插件
 // 公式
@@ -88,6 +86,9 @@ VMdEditor.use(createCopyCodePlugin());
 // 内容定位
 import createAlignPlugin from '@kangc/v-md-editor/lib/plugins/align';
 VMdEditor.use(createAlignPlugin());
+// 自定义解析测试
+import createMdFilePlugin from './plugin/md-file';
+VMdEditor.use(createMdFilePlugin());
 
 const app = createApp(App);
 app.use(router);

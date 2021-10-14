@@ -19,11 +19,13 @@
 
 ```
 
-UPDATE doc SET content = REPLACE(content, 'http://10.16.13.152:24001/i/f/d/u/', 'http://10.16.13.183:24001/i/f/d/u/');
 
-UPDATE doc_history SET content = REPLACE(content, 'http://10.16.13.152:24001/i/f/d/u/', 'http://10.16.13.183:24001/i/f/d/u/');
 
+数据修复：
+1、图片地址修复
+UPDATE doc SET content = REPLACE(content, 'http://10.16.13.183:24001/f/d/u/', 'http://10.16.12.174:24001/f/d/u/');
+UPDATE doc_history SET content = REPLACE(content, 'http://10.16.13.183:24001/f/d/u/', 'http://10.16.12.174:24001/f/d/u/');
+
+2、文件路径修复（windows和linux路径不同）
 UPDATE sys_file SET content = REPLACE(path, '\', '/');
-
-
 ```

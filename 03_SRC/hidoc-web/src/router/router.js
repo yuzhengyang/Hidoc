@@ -47,7 +47,7 @@ const router = createRouter({
             name: 'docfocus',
             path: '/docfocus/:docId',
             component: () => import('@/views/preview/docfocus')
-        },
+        }
     ]
 });
 

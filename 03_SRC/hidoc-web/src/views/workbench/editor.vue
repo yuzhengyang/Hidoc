@@ -2,7 +2,7 @@
     <el-container>
         <el-header>
             <el-row>
-                <el-col :span="8">{{this.collected.name}}</el-col>
+                <el-col :span="8">{{ this.collected.name }}</el-col>
                 <el-col :span="8">
                     <el-input v-model="title" placeholder="请输入文档标题"></el-input>
                 </el-col>
@@ -15,7 +15,7 @@
             </el-row>
         </el-header>
         <el-main>
-            <v-md-editor v-model="content" height="100%" :disabled-menus="[]" @upload-image="handleUploadImage"></v-md-editor>
+            <v-md-editor ref="editor" v-model="content" height="100%" :include-level="[1, 2, 3, 4]" :disabled-menus="[]" left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code" @upload-image="handleUploadImage" @change="textChange"></v-md-editor>
         </el-main>
         <!-- <el-footer>
             <el-row>
@@ -43,10 +43,6 @@ export default {
             inputValue: '',
             collected: {},
             activeName: 'public',
-            tableData: [
-                { title: 'UREPORT参数设置方法说明', createUser: '林永忠', updateTime: '2016-05-02' },
-                { title: '钻取查询问题解决', createUser: '薛青麟', updateTime: '2016-05-02' }
-            ],
             dialogFormVisible: false,
             collectedForm: {
                 name: '',
@@ -55,16 +51,21 @@ export default {
             },
             formLabelWidth: '120px',
             content: '',
+            contentHtml: '',
             title: '',
             docId: '',
             mode: '',
-            operationStatus: true
+            operationStatus: true,
+            loadStatus: 'create'
         };
     },
     mounted() {
+        this.loadStatus = 'mounted';
+        this.$refs.editor.toggleToc();
+
         // ========== ========== 关闭标签页时提示 ========== ==========
         window.isCloseHint = true;
-        window.addEventListener('beforeunload', function (e) {
+        window.addEventListener('beforeunload', function(e) {
             if (window.isCloseHint) {
                 var confirmationMessage = '您所作的更改可能未保存，确认离开吗？';
                 (e || window.event).returnValue = confirmationMessage; // 兼容 Gecko + IE
@@ -110,6 +111,7 @@ export default {
                             this.content = res.meta.doc.content;
                             this.title = res.meta.doc.title;
                             this.docId = res.meta.doc.id;
+                            this.loadStatus = 'active';
 
                             switch (res.status) {
                                 case 'ok': {
@@ -197,6 +199,20 @@ export default {
             this.inputVisible = false;
             this.inputValue = '';
         },
+        textChange(text, html) {
+            debugger;
+
+            console.log(this.loadStatus);
+            if (this.loadStatus == 'active') {
+                console.log(text);
+                console.log(html);
+                this.contentHtml = '';
+
+                this.$refs.editor.$watch = null;
+
+                this.$refs.editor.codemirrorInstance.setValue('zhangsan'); //.codemirrorInstance.setValue('zhangsan');
+            }
+        },
         // 保存文档
         save() {
             return request({
@@ -212,6 +228,7 @@ export default {
                 }
             }).then(res => {
                 if (res.code == 0) {
+                    window.isCloseHint = false;
                     window.close();
                 }
             });
@@ -230,6 +247,7 @@ export default {
                     }
                 }).then(res => {
                     if (res.code == 0) {
+                        window.isCloseHint = false;
                         window.close();
                     } else {
                         ElMessage({
