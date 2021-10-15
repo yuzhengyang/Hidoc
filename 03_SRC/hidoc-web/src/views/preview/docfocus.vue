@@ -6,6 +6,7 @@
 <script>
 import request from '../../utils/request.js';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { mdFormat } from '../../utils/mdtools';
 export default {
     data() {
         return {
@@ -29,6 +30,8 @@ export default {
             }).then(res => {
                 if (res.code == 0) {
                     this.doc = res.meta.doc;
+                    // 预览前对文本进行处理，然后再渲染预览
+                    this.doc.content = mdFormat(this.doc.content);
                     document.title = this.doc.title;
                 }
             });

@@ -86,9 +86,9 @@ VMdEditor.use(createCopyCodePlugin());
 // 内容定位
 import createAlignPlugin from '@kangc/v-md-editor/lib/plugins/align';
 VMdEditor.use(createAlignPlugin());
-// 自定义解析测试
-import createMdFilePlugin from './plugin/md-file';
-VMdEditor.use(createMdFilePlugin());
+// 自定义解析测试（暂不继续了，从入门到放弃）
+// import createMdFilePlugin from './plugin/md-file';
+// VMdEditor.use(createMdFilePlugin());
 
 const app = createApp(App);
 app.use(router);

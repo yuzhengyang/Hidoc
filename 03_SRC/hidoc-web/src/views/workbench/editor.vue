@@ -15,7 +15,7 @@
             </el-row>
         </el-header>
         <el-main>
-            <v-md-editor ref="editor" v-model="content" height="100%" :include-level="[1, 2, 3, 4]" :disabled-menus="[]" left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code" @upload-image="handleUploadImage" @change="textChange"></v-md-editor>
+            <v-md-editor ref="editor" v-model="content" height="100%" :include-level="[1, 2, 3, 4]" :disabled-menus="[]" left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code" :before-preview-change="beforePreviewChange" @upload-image="handleUploadImage" @change="textChange"></v-md-editor>
         </el-main>
         <!-- <el-footer>
             <el-row>
@@ -34,6 +34,7 @@
 import { ElMessage } from 'element-plus';
 import request from '../../utils/request.js';
 import { config } from '@/utils/config';
+import { mdFormat } from '../../utils/mdtools';
 export default {
     name: 'editor',
     data() {
@@ -61,6 +62,7 @@ export default {
     },
     mounted() {
         this.loadStatus = 'mounted';
+        // 默认开启目录导航
         this.$refs.editor.toggleToc();
 
         // ========== ========== 关闭标签页时提示 ========== ==========
@@ -74,7 +76,7 @@ export default {
         });
         // ========== ========== ========== ==========
 
-        console.log('编辑器 config: ' + config().imageServer);
+        console.log('编辑器 config: ' + config());
 
         let token = this.$store.state.user.token;
         console.log('token: ' + token);
@@ -172,7 +174,7 @@ export default {
             }).then(res => {
                 if (res.code == 0) {
                     insertImage({
-                        url: config().imageServer + res.data[0].uname,
+                        url: config().hdImageFlag + res.data[0].uname,
                         desc: '图片'
                         // width: 'auto',
                         // height: 'auto',
@@ -190,7 +192,6 @@ export default {
                 this.$refs.saveTagInput.$refs.input.focus();
             });
         },
-
         handleInputConfirm() {
             let inputValue = this.inputValue;
             if (inputValue) {
@@ -199,18 +200,19 @@ export default {
             this.inputVisible = false;
             this.inputValue = '';
         },
+        beforePreviewChange(text, next) {
+            // 预览前对文本进行处理，然后再渲染预览
+            if (this.loadStatus == 'active') {
+                next(mdFormat(text));
+            }else{
+                  next(text);
+            }
+        },
         textChange(text, html) {
-            debugger;
-
             console.log(this.loadStatus);
             if (this.loadStatus == 'active') {
-                console.log(text);
-                console.log(html);
-                this.contentHtml = '';
-
-                this.$refs.editor.$watch = null;
-
-                this.$refs.editor.codemirrorInstance.setValue('zhangsan'); //.codemirrorInstance.setValue('zhangsan');
+                this.$refs.editor;
+                this.$refs.editor.codemirrorInstance;
             }
         },
         // 保存文档

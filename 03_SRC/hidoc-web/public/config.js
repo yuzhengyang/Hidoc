@@ -1,11 +1,11 @@
 // var config = {
-//     name: 'yuzhengyang',
+//     author: 'yuzhengyang',
 //     baseServer: 'http://192.168.3.128:24001/',
-//     imageServer: 'http://192.168.3.128:24001/f/d/u/'
+    // hdImageFlag: '#hd.image->'
 // };
 
 var config = {
-    name: 'yuzhengyang',
+    author: 'yuzhengyang',
     baseServer: 'http://10.16.12.174:24001/',
-    imageServer: 'http://10.16.12.174:24001/f/d/u/'
+    hdImageFlag: '#hd.image->'
 };
