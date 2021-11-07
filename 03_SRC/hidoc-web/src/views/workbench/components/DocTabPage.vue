@@ -19,19 +19,21 @@
             </el-row>
             <el-row>
                 <el-col :span="5">
-                    <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                        <el-submenu index="1">
+                    <el-menu default-active="2" @open="handleOpen" @close="handleClose">
+                        <el-sub-menu index="1">
                             <template #title>
-                                <span>个人知识库</span>
+                                <span style="font-size:14px;font-weight:bold;border-bottom:1px solid black"> 个人知识库 </span>
                             </template>
-                            <el-menu-item v-for="item in mineList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{item.name}} <el-tag v-show="item.isOpen" size="mini">公开</el-tag> <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag></el-menu-item>
-                        </el-submenu>
-                        <el-submenu index="2">
+                            <el-menu-item v-for="item in mineList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{item.name}} <el-tag v-show="item.isOpen" size="mini">公开</el-tag>
+                                <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag>
+                            </el-menu-item>
+                        </el-sub-menu>
+                        <el-sub-menu index="2">
                             <template #title>
-                                <span>团队协作</span>
+                                <span style="font-size:14px;font-weight:bold;border-bottom:1px solid black"> 团队协作 </span>
                             </template>
                             <el-menu-item v-for="item in coopList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{item.name}}</el-menu-item>
-                        </el-submenu>
+                        </el-sub-menu>
                     </el-menu>
                 </el-col>
                 <el-col :span="19">

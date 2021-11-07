@@ -69,6 +69,9 @@ public class SecurityInterceptor implements HandlerInterceptor {
                     if (LocalDateTime.now().isBefore(userInfo.getExpiryTime())) {
                         isLogin = true;
                         CurrentUserManager.set(userInfo);
+                        // 给用户续期有效期
+                        userInfo.setExpiryTime(LocalDateTime.now().plusHours(8));
+                        R.Cache.UserInfo.replace(value, userInfo);
                     } else {
                         response.setCharacterEncoding("UTF-8");
                         response.setContentType("application/json; charset=utf-8");

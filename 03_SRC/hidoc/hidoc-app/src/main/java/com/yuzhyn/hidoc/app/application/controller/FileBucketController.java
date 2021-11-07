@@ -78,7 +78,7 @@ public class FileBucketController {
             Boolean isOpen = MapTool.getBoolean(params, "isOpen", false);
 
             if (name.length() == 0 || !RegexPattern.GENERAL.isMatch(name)) {
-                return ResponseData.error("账号不符合规则，仅支持字母数字下划线组合");
+                return ResponseData.error("名称不符合规则，仅支持字母数字下划线组合");
             }
 
             FileBucket fileBucket = new FileBucket();

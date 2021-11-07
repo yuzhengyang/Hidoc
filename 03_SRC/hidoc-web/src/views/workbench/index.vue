@@ -46,6 +46,7 @@
                 <el-col :span="21">
                     <dash-board v-if="this.currentMenuIndex == 1000"></dash-board>
                     <doc-tab-page v-if="this.currentMenuIndex == 2000"></doc-tab-page>
+                    <recycle-bin v-if="this.currentMenuIndex == 2010"></recycle-bin>
                     <material-library v-if="this.currentMenuIndex == 3000"></material-library>
                     <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
                     <user-info v-if="this.currentMenuIndex == 4000"></user-info>
@@ -68,6 +69,7 @@ import UserInfo from './components/UserInfo';
 import MaterialLibrary from './components/MaterialLibrary';
 import Laboratory from './components/Laboratory';
 import DataCollector from './components/DataCollector';
+import RecycleBin from './components/RecycleBin'
 // import { Delete } from '@element-plus/icons';
 export default {
     name: 'Home',
@@ -102,7 +104,7 @@ export default {
         // console.log('name: ' + name);
         // this.loadCollected();
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector,RecycleBin },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);

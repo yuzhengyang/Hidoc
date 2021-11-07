@@ -39,3 +39,4 @@ hs_err_pid*
 *.iml
 03_SRC/hidoc/logs/
 03_SRC/hidoc/hidoc_data/sysfile/
+/03_SRC/hidoc/hidoc_data

@@ -52,4 +52,7 @@ public class DocLite {
     @TableField(exist = false)
     private String relativeUpdateTime;
 
+    @TableField(exist = false)
+    private String collectedName;
+
 }

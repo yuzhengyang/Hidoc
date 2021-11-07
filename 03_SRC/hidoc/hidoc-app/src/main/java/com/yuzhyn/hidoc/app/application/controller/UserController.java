@@ -8,12 +8,14 @@ import com.yuzhyn.azylee.core.datas.regexs.RegexPattern;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocCollected;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
+import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocCollectedMapper;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocLiteMapper;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
@@ -52,6 +54,9 @@ public class UserController {
     @Autowired
     FileCursorMapper fileCursorMapper;
 
+    @Autowired
+    FileBucketMapper fileBucketMapper;
+
     @PostMapping("register")
     public ResponseData register(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "username", "email", "password", "realname")) {
@@ -88,6 +93,13 @@ public class UserController {
                 conf.setUrlPrefix(name);
                 conf.setUsedSpace(0L);
                 sysUserFileConfMapper.insert(conf);
+
+                FileBucket fileBucket = new FileBucket();
+                fileBucket.setId(R.SnowFlake.nexts());
+                fileBucket.setIsOpen(true);
+                fileBucket.setName(".hidoc");
+                fileBucket.setUserId(user.getId());
+                fileBucketMapper.insert(fileBucket);
 
                 return ResponseData.okData("sysUser", user);
             }

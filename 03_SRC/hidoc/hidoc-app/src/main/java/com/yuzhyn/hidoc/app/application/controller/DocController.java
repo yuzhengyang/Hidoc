@@ -272,6 +272,7 @@ public class DocController {
                 if (StringTool.ok(lockUserId) && !lockUserId.equals(CurrentUserManager.getUser().getId())) {
                     return ResponseData.error("文档已被他人锁定");
                 } else {
+                    docLite.setUpdateTime(LocalDateTime.now());
                     docLite.setIsDelete(true);
                     int flag = docLiteMapper.updateById(docLite);
                     if (flag > 0) {
@@ -281,6 +282,23 @@ public class DocController {
             }
         }
         return ResponseData.error("删除失败");
+    }
+
+    @PostMapping("restore")
+    public ResponseData restore(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "id")) {
+            String id = MapTool.getString(params, "id", "");
+            DocLite docLite = docLiteMapper.selectById(id);
+            if (docLite != null) {
+                docLite.setUpdateTime(LocalDateTime.now());
+                docLite.setIsDelete(false);
+                int flag = docLiteMapper.updateById(docLite);
+                if (flag > 0) {
+                    return ResponseData.ok();
+                }
+            }
+        }
+        return ResponseData.error("还原失败");
     }
 
     @PostMapping("list")
@@ -305,6 +323,26 @@ public class DocController {
             }
             responseData.putData(list);
         }
+        return responseData;
+    }
+
+    @PostMapping("deletedList")
+    public ResponseData deletedList(@RequestBody Map<String, Object> params) {
+        ResponseData responseData = ResponseData.ok();
+        List<DocLite> list = docLiteMapper.selectList(new LambdaQueryWrapper<DocLite>()
+                .eq(DocLite::getOwnerUserId, CurrentUserManager.getUser().getId())
+                .eq(DocLite::getIsDelete, true)
+                .orderByDesc(DocLite::getUpdateTime));
+        if (ListTool.ok(list)) {
+            for (DocLite doc : list) {
+                SysUserLite ownerUser = sysUserLiteMapper.selectById(doc.getOwnerUserId());
+                if (ownerUser != null) doc.setOwnerUser(ownerUser);
+
+                DocCollected collected = docCollectedMapper.selectById(doc.getCollectedId());
+                if (collected != null) doc.setCollectedName(collected.getName());
+            }
+        }
+        responseData.putData(list);
         return responseData;
     }
 }
