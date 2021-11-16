@@ -106,6 +106,13 @@
             <artifactId>easyexcel</artifactId>
             <version>3.0.0-beta3</version>
         </dependency>
+
+        <!-- JavaParser Java源码解析器 -->
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>3.23.1</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>

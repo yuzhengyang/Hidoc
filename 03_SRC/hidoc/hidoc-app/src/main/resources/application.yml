@@ -16,8 +16,8 @@ spring:
 #    driverClassName: com.mysql.jdbc.Driver
 #    url: jdbc:mysql://127.0.0.1:3306/hidoc?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://192.168.81.139:5432/hidoc
-#    url: jdbc:postgresql://10.16.13.183:5432/hidoc
+#    url: jdbc:postgresql://192.168.81.139:5432/hidoc
+    url: jdbc:postgresql://10.16.12.174:5432/hidoc
     username: postgres
     password: HIdev210704
     type: com.alibaba.druid.pool.DruidDataSource
