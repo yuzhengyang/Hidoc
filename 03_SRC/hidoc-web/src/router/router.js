@@ -18,6 +18,11 @@ const router = createRouter({
                     name: 'preview'
                 },
                 {
+                    path: '/javadoc',
+                    component: () => import('@/views/javadoc'),
+                    name: 'javadoc'
+                },
+                {
                     path: '/collected/:collectedId/:docId',
                     name: 'collected',
                     component: () => import('@/views/preview/collected')

@@ -1,7 +1,7 @@
 <template>
     <el-container style="height:100%;">
         <!-- 标题区域 -->
-        <el-header>
+        <el-header class="app-main-header">
             <el-row>
                 <el-col :span="4">
                     <div class="grid-content bg-purple" @click="home" style="cursor:pointer;height:55px;"><img alt="Vue logo" src="../assets/logo.png" height="60"></div>
@@ -11,13 +11,11 @@
                 </el-col>
                 <el-col :span="6">
                     <div class="grid-content bg-purple-light">
-                        <!-- <el-input placeholder="请输入内容" prefix-icon="el-icon-search" v-model="input2">
-                        </el-input> -->
-                        <el-input placeholder="搜索一下" v-model="keyword">
+                        <!-- <el-input placeholder="搜索一下" v-model="keyword">
                             <template #suffix>
                                 <i class="el-input__icon el-icon-search" style="cursor:pointer;" @click="search"></i>
                             </template>
-                        </el-input>
+                        </el-input> -->
                     </div>
                 </el-col>
                 <el-col :span="6">
@@ -166,7 +164,7 @@ body,
     /* text-align: center; */
     /* margin-top: 60px; */
 }
-.el-header {
+.app-main-header {
     background-color: #d1d3d4;
     color: #333;
     text-align: center;

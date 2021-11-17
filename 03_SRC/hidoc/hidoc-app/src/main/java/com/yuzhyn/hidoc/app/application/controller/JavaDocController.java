@@ -2,6 +2,9 @@ package com.yuzhyn.hidoc.app.application.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -12,9 +15,12 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
+import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.strings.StringConst;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
+import com.yuzhyn.hidoc.app.application.entity.doc.Doc;
+import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClass;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocMethod;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocProject;
@@ -30,16 +36,14 @@ import org.jsoup.nodes.Document;
 import org.omg.CORBA.Environment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -55,6 +59,39 @@ public class JavaDocController {
     @Autowired
     JavaDocMethodMapper javaDocMethodMapper;
 
+    @PostMapping("search")
+    public ResponseData search(@RequestBody Map<String, Object> params) {
+        String mode = MapTool.get(params, "mode", "").toString();
+        String text = MapTool.get(params, "text", "").toString();
+        String textLike = "%" + text.replace(' ', '%') + "%";
+
+        ResponseData responseData = ResponseData.ok();
+        IPage<JavaDocClass> classPage = javaDocClassMapper.selectPage(new Page<JavaDocClass>(1, 100), new LambdaQueryWrapper<JavaDocClass>()
+                .or().like(JavaDocClass::getName, textLike)
+                .or().like(JavaDocClass::getCommentInfo, textLike)
+                .or().like(JavaDocClass::getCommentScene, textLike)
+                .or().like(JavaDocClass::getCommentLimit, textLike)
+                .or().like(JavaDocClass::getCommentExample, textLike)
+                .or().like(JavaDocClass::getCommentLog, textLike)
+                .or().like(JavaDocClass::getCommentKeywords, textLike));
+        List<JavaDocClass> classList = classPage.getRecords();
+
+        IPage<JavaDocMethod> methodPage = javaDocMethodMapper.selectPage(new Page<JavaDocMethod>(1, 100), new LambdaQueryWrapper<JavaDocMethod>()
+                .or().like(JavaDocMethod::getName, textLike)
+                .or().like(JavaDocMethod::getCommentInfo, textLike)
+                .or().like(JavaDocMethod::getCommentScene, textLike)
+                .or().like(JavaDocMethod::getCommentLimit, textLike)
+                .or().like(JavaDocMethod::getCommentExample, textLike)
+                .or().like(JavaDocMethod::getCommentLog, textLike)
+                .or().like(JavaDocMethod::getCommentKeywords, textLike));
+        List<JavaDocMethod> methodList = methodPage.getRecords();
+
+        List<Object> objectList = new ArrayList<>();
+        objectList.addAll(classList);
+        objectList.addAll(methodList);
+        responseData.putData(objectList);
+        return responseData;
+    }
 
     @PostMapping({"upload", "u"})
     @Transactional

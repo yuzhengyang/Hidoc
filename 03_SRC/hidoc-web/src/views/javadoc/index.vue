@@ -4,8 +4,8 @@
             <el-row>
                 <el-col :span="16">
                     <el-button-group>
-                        <el-button type="primary" plain @click="gotoPage('')">文集</el-button>
-                        <el-button type="primary" plain @click="gotoPage('javadoc')">JavaDoc</el-button>
+                        <el-button type="primary" plain @click="gotoPage('preview')">文集</el-button>
+                        <el-button type="primary" plain @click="gotoPage('')">JavaDoc</el-button>
                     </el-button-group>
                 </el-col>
                 <el-col :span="8" style="text-align:right;">
@@ -32,12 +32,8 @@
             <el-row>
                 <el-col :span="24">
                     <el-row>
-                        <el-col :span="8" v-for="item in collectedList" :key="item">
-                            <doc-collected-card v-bind:data="item"></doc-collected-card>
-                        </el-col>
+                        <el-col :span="24" style="background-color:#f00"></el-col>
                     </el-row>
-
-                    <el-backtop></el-backtop>
                 </el-col>
             </el-row>
         </el-main>
@@ -45,48 +41,35 @@
 </template>
 
 <script>
-import { ElMessage } from 'element-plus';
-import DocCollectedCard from './components/DocCollectedCard';
-import request from '../../utils/request.js';
 import { Search, Share, Guide } from '@element-plus/icons';
+import request from '../../utils/request.js';
 export default {
     data() {
         return {
-            collectedList: [],
             searchText: '',
             searchMode: ''
         };
     },
+    components: { Search },
     mounted() {
-        document.title = 'Hidoc-首页';
-        // debugger;
-        let token = this.$store.state.user.token;
-        console.log('token: ' + token);
-
-        request({
-            url: '/collected/preview',
-            method: 'post',
-            data: {}
-        }).then(res => {
-            if (res.code == 0) {
-                this.collectedList = res.data;
-            }
-        });
+        document.title = 'Hidoc-JavaDoc';
+        this.search();
     },
-    components: { DocCollectedCard, Search },
     methods: {
         search() {
             console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
-        },
-        register() {
-            this.$router.push({ path: '/register', params: {} });
-        },
-        login() {
-            this.$router.push({ path: '/login', params: {} });
-        },
-        async logout() {
-            await this.$store.dispatch('user/logout');
-            this.$router.push(`/login?redirect=${this.$route.fullPath}`);
+            request({
+                url: '/javadoc/search',
+                method: 'post',
+                data: {
+                    mode: this.searchMode,
+                    text: this.searchText
+                }
+            }).then(res => {
+                if (res.code == 0) {
+                    console.log(res);
+                }
+            });
         },
         gotoPage(page) {
             if (page == 'preview') {

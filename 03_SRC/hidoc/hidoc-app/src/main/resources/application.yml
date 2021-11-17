@@ -16,15 +16,15 @@ spring:
 #    driverClassName: com.mysql.jdbc.Driver
 #    url: jdbc:mysql://127.0.0.1:3306/hidoc?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driverClassName: org.postgresql.Driver
-#    url: jdbc:postgresql://192.168.81.139:5432/hidoc
-    url: jdbc:postgresql://10.16.12.174:5432/hidoc
+    url: jdbc:postgresql://192.168.81.139:5432/hidoc
+#    url: jdbc:postgresql://10.16.12.174:5432/hidoc
     username: postgres
     password: HIdev210704
     type: com.alibaba.druid.pool.DruidDataSource
     # 初始化大小，最小，最大
-    initialSize: 20
-    minIdle: 20
-    maxActive: 100
+    initialSize: 100
+    minIdle: 100
+    maxActive: 200
     keepAlive: true
     # 配置获取连接等待超时的时间
     maxWait: 5000

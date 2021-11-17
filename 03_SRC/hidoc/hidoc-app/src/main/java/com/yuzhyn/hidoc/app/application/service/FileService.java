@@ -40,6 +40,35 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <div javadoc="info" javadoc-cn="一句话精简概括">
+ *     文件处理
+ * </div>
+ *
+ * <div javadoc="scene" javadoc-cn="使用场景说明">
+ *     操作文件时，使用文件处理服务，可快速完成响应操作
+ * </div>
+ *
+ * <div javadoc="limit" javadoc-cn="使用限制说明">
+ *     暂无限制
+ * </div>
+ *
+ * <div javadoc="code" javadoc-cn="使用代码示例">
+ *     声明
+ *     ```java
+ *     @Autowired
+ *     FileService fileService;
+ *     ```
+ * </div>
+ *
+ * <div javadoc="log" javadoc-cn="修改日志">
+ * 版本         修改时间       修改人           修改内容
+ * 1.0.0.0     2021-11-17     yuzhengyang     增加注释内容
+ * </div>
+ *
+ * @author yuzhengyang
+ * @version 1.0
+ */
 @Slf4j
 @Service
 public class FileService {
@@ -61,7 +90,9 @@ public class FileService {
 
 
     /**
-     * 检查用户文件空间是否够用
+     * <div javadoc="info" javadoc-cn="一句话精简概括">
+     *     检查用户文件空间是否够用
+     * </div>
      *
      * @param userId
      * @param fileSize
@@ -79,7 +110,13 @@ public class FileService {
     //region 文件上传功能函数
 
     /**
-     * 上传文件
+     * <div javadoc="info" javadoc-cn="一句话精简概括">
+     *     上传文件
+     * </div>
+     *
+     * <div javadoc="limit" javadoc-cn="使用限制说明">
+     *     上传文件时，必须为登录状态
+     * </div>
      *
      * @param collectedId
      * @param expiryTime
@@ -141,7 +178,9 @@ public class FileService {
     }
 
     /**
-     * 保存文件到磁盘
+     * <div javadoc="info" javadoc-cn="一句话精简概括">
+     *     保存文件到磁盘
+     * </div>
      *
      * @param file
      * @param sysFile
