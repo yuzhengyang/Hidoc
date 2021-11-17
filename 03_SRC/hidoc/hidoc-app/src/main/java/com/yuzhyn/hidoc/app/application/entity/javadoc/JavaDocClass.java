@@ -36,5 +36,9 @@ public class JavaDocClass {
     private String commentLimit;
     private String commentExample;
     private String commentLog;
+    private String commentKeywords;
+
+    @TableField(typeHandler = JsonbTypeHandler.class)
+    private JSONArray commentLogJson;
 
 }

@@ -12,6 +12,8 @@ import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.Comment;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
+import com.yuzhyn.azylee.core.datas.strings.StringConst;
+import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClass;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocMethod;
@@ -23,6 +25,9 @@ import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocProjectMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.omg.CORBA.Environment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,12 +103,13 @@ public class JavaDocController {
                             // 填充引用信息
                             if (ListTool.ok(parentNode.getImports())) {
                                 List<Object> importsJson = new ArrayList<>(parentNode.getImports().size());
-                                StringBuilder imports = new StringBuilder();
+                                StringBuilder stringBuilder = new StringBuilder();
                                 for (ImportDeclaration nodeItem : parentNode.getImports()) {
-                                    imports.append(nodeItem.getNameAsString());
+                                    stringBuilder.append(nodeItem.getNameAsString());
+                                    stringBuilder.append(" ");
                                     importsJson.add(nodeItem.getNameAsString());
                                 }
-                                javaDocClass.setImports(imports.toString());
+                                javaDocClass.setImports(stringBuilder.toString());
                                 javaDocClass.setImportsJson(new JSONArray(importsJson));
                             }
                             // 填充修饰词
@@ -113,6 +119,7 @@ public class JavaDocController {
                                     if (modObject.getClass().equals(Modifier.class)) {
                                         Modifier modItem = (Modifier) modObject;
                                         stringBuilder.append(modItem.getKeyword().asString());
+                                        stringBuilder.append(" ");
                                     }
                                 }
                                 javaDocClass.setQualifier(stringBuilder.toString());
@@ -122,12 +129,17 @@ public class JavaDocController {
                                 StringBuilder stringBuilder = new StringBuilder();
                                 for (Comment commentItem : parentNode.getOrphanComments()) {
                                     stringBuilder.append(commentItem.getContent());
+                                    stringBuilder.append(StringConst.NEWLINE);
                                 }
-                                javaDocClass.setCommentInfo(stringBuilder.toString());
-                                javaDocClass.setCommentScene(stringBuilder.toString());
-                                javaDocClass.setCommentLimit(stringBuilder.toString());
-                                javaDocClass.setCommentExample(stringBuilder.toString());
-                                javaDocClass.setCommentLog(stringBuilder.toString());
+                                String[] commentArrays = parseComment(stringBuilder.toString());
+                                javaDocClass.setCommentInfo(commentArrays[0]);
+                                javaDocClass.setCommentScene(commentArrays[1]);
+                                javaDocClass.setCommentLimit(commentArrays[2]);
+                                javaDocClass.setCommentExample(commentArrays[3]);
+                                javaDocClass.setCommentLog(commentArrays[4]);
+                                javaDocClass.setCommentKeywords(commentArrays[5]);
+
+                                javaDocClass.setCommentLogJson(parseCommentLog(commentArrays[4]));
                             }
                         }
                         javaDocClassList.add(javaDocClass);
@@ -172,11 +184,15 @@ public class JavaDocController {
                                     // 填充注释内容
                                     if (methodItem.getComment().isPresent()) {
                                         String content = methodItem.getComment().get().getContent();
-                                        javaDocMethod.setCommentInfo(content);
-                                        javaDocMethod.setCommentScene(content);
-                                        javaDocMethod.setCommentLimit(content);
-                                        javaDocMethod.setCommentExample(content);
-                                        javaDocMethod.setCommentLog(content);
+                                        String[] commentArrays = parseComment(content);
+                                        javaDocMethod.setCommentInfo(commentArrays[0]);
+                                        javaDocMethod.setCommentScene(commentArrays[1]);
+                                        javaDocMethod.setCommentLimit(commentArrays[2]);
+                                        javaDocMethod.setCommentExample(commentArrays[3]);
+                                        javaDocMethod.setCommentLog(commentArrays[4]);
+                                        javaDocMethod.setCommentKeywords(commentArrays[5]);
+
+                                        javaDocMethod.setCommentLogJson(parseCommentLog(commentArrays[4]));
                                     }
                                     javaDocMethodList.add(javaDocMethod);
                                 }
@@ -207,33 +223,107 @@ public class JavaDocController {
         return ResponseData.ok("JavaDoc创建完成");
     }
 
-    private String getComment(int type, String s) {
-        /*
-        * javaDocClass.setCommentInfo(stringBuilder.toString());
-          javaDocClass.setCommentScene(stringBuilder.toString());
-          javaDocClass.setCommentLimit(stringBuilder.toString());
-          javaDocClass.setCommentExample(stringBuilder.toString());
-          javaDocClass.setCommentLog(stringBuilder.toString());
-        * */
-        StringBuilder stringBuilder = new StringBuilder();
-        String headFlag = "";
-        switch (type) {
-            case 1:
-                headFlag = "";
-                break;
-            case 2:
-                headFlag = "";
-                break;
-            case 3:
-                headFlag = "";
-                break;
-            case 4:
-                headFlag = "";
-                break;
-            case 5:
-                headFlag = "";
-                break;
+    private String[] parseComment(String s) {
+        String[] result = new String[]{"", "", "", "", "", ""};
+
+        if (StringTool.ok(s)) {
+            String lines[] = s.split("\\r?\\n");
+            String curblock = "";
+//            StringBuilder html = new StringBuilder();
+            for (String line : lines) {
+                String trimline = line.trim(); // 去掉前后空格的内容
+                String txtline = trimline;
+                if (txtline.equals("* <p>")) txtline = ""; // 清空掉 "* <p>" 的行
+                if (txtline.startsWith("*")) txtline = txtline.substring(1); // 去掉 " *" 的内容
+
+//                html.append(txtline);
+//                html.append(StringConst.NEWLINE);
+
+                // 分析当前所在区块（>开始，<结束），区块包括：info、scene、limit、example、log、keywords
+                curblock = parseCommentBlockSign(txtline, curblock);
+                int blockid = -1;
+                if (curblock.equals("info")) blockid = 0;
+                if (curblock.equals("scene")) blockid = 1;
+                if (curblock.equals("limit")) blockid = 2;
+                if (curblock.equals("example")) blockid = 3;
+                if (curblock.equals("log")) blockid = 4;
+                if (curblock.equals("keywords")) blockid = 5;
+
+                if (blockid >= 0 && blockid < result.length) {
+                    result[blockid] += txtline;
+                    result[blockid] += StringConst.NEWLINE;
+                }
+            }
+
+            // 最后整理一下文本内容，缩进一下距离等
+            for (int i = 0; i < result.length; i++) {
+                result[i] = StringTool.retractSpaceArrayAuto(result[i]);
+            }
+
+//            Document doc = Jsoup.parse(html.toString());
+//            System.out.println(doc); // 输出带标签的html文档
         }
-        return "";
+
+        return result;
+    }
+
+    private String parseCommentBlockSign(String txtline, String curblock) {
+        String result = "";
+        if (txtline.contains("<div")) {
+            if (txtline.contains("javadoc=\"info\"") || txtline.contains("javadoc='info'")) {
+                result = "info>";
+            }
+            if (txtline.contains("javadoc=\"scene\"") || txtline.contains("javadoc='scene'")) {
+                result = "scene>";
+            }
+            if (txtline.contains("javadoc=\"limit\"") || txtline.contains("javadoc='limit'")) {
+                result = "limit>";
+            }
+            if (txtline.contains("javadoc=\"example\"") || txtline.contains("javadoc='example'")) {
+                result = "example>";
+            }
+            if (txtline.contains("javadoc=\"log\"") || txtline.contains("javadoc='log'")) {
+                result = "log>";
+            }
+            if (txtline.contains("javadoc=\"keywords\"") || txtline.contains("javadoc='keywords'")) {
+                result = "keywords>";
+            }
+        }
+        if (txtline.contains("</div>")) {
+            result = "<";
+        }
+
+        // 对上次标记进行处理，去除开始和结束标记，可以正式获取文本信息
+        if (StringTool.ok(curblock) && curblock.endsWith(">")) {
+            curblock = curblock.replaceAll(">", "");
+        }
+
+        if (StringTool.ok(result)) {
+            // 如果是开始或结束标记，则直接返回
+            return result;
+        } else {
+            // 否则按照传入的标记处理（在遇到结束标记时，返回空白，表示不再任何块中）
+            if (curblock.equals("<")) return "";
+            else return curblock;
+        }
+    }
+
+    private JSONArray parseCommentLog(String s) {
+        JSONArray jsonArray = new JSONArray();
+        String[] lines = StringTool.splitLine(s);
+        for (String line : lines) {
+            if (line.contains("版本") && line.contains("修改时间") && line.contains("修改人") && line.contains("修改内容")) {
+                // 这行肯定是标题啦
+            } else {
+                String[] logs = StringTool.splitLine(line, "  ", 4, " ", true);
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("version", logs[0]);
+                jsonObject.put("time", logs[1]);
+                jsonObject.put("author", logs[2]);
+                jsonObject.put("content", logs[3]);
+                jsonArray.add(jsonObject);
+            }
+        }
+        return jsonArray;
     }
 }
