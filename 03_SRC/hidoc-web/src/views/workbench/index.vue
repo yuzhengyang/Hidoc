@@ -29,15 +29,19 @@
                             <i class="el-icon-files"></i>
                             <template #title>我的文件</template>
                         </el-menu-item>
-                        <el-menu-item index="4000" @click="changeMenu(4000)">
-                            <i class="el-icon-user"></i>
-                            <template #title>个人信息</template>
+                        <el-menu-item index="7000" @click="changeMenu(7000)">
+                            <i class="el-icon-notebook-2"></i>
+                            <template #title>JavaDoc</template>
                         </el-menu-item>
                         <el-menu-item index="8000" @click="changeMenu(8000)">
                             <i class="el-icon-box"></i>
                             <template #title>数据收集器</template>
                         </el-menu-item>
-                        <!-- <el-menu-item index="9000" @click="changeMenu(9000)">
+                        <el-menu-item index="9000" @click="changeMenu(9000)">
+                            <i class="el-icon-user"></i>
+                            <template #title>个人信息</template>
+                        </el-menu-item>
+                        <!-- <el-menu-item index="9999" @click="changeMenu(9999)">
                             <i class="el-icon-pear"></i>
                             <template #title>实验室</template>
                         </el-menu-item> -->
@@ -49,9 +53,10 @@
                     <recycle-bin v-if="this.currentMenuIndex == 2010"></recycle-bin>
                     <material-library v-if="this.currentMenuIndex == 3000"></material-library>
                     <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
-                    <user-info v-if="this.currentMenuIndex == 4000"></user-info>
+                    <java-doc v-if="this.currentMenuIndex == 7000"></java-doc>
                     <data-collector v-if="this.currentMenuIndex == 8000"></data-collector>
-                    <laboratory v-if="this.currentMenuIndex == 9000"></laboratory>
+                    <user-info v-if="this.currentMenuIndex == 9000"></user-info>
+                    <laboratory v-if="this.currentMenuIndex == 9999"></laboratory>
                 </el-col>
             </el-row>
         </el-main>
@@ -70,6 +75,7 @@ import MaterialLibrary from './components/MaterialLibrary';
 import Laboratory from './components/Laboratory';
 import DataCollector from './components/DataCollector';
 import RecycleBin from './components/RecycleBin'
+import JavaDoc from './components/JavaDoc';
 // import { Delete } from '@element-plus/icons';
 export default {
     name: 'Home',
@@ -104,7 +110,7 @@ export default {
         // console.log('name: ' + name);
         // this.loadCollected();
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector,RecycleBin },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector,RecycleBin,JavaDoc },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);
