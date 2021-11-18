@@ -8,12 +8,21 @@
             </div>
         </template>
         <div class="text item" style="padding:0px;">
-            {{ data.commentInfo }}
-            {{ data.commentScene }}
-            {{ data.commentLimit }}
+
+            <div v-html="data.commentInfo"></div>
+            <div v-html="data.commentScene"></div>
+            <div v-html="data.commentLimit"></div>
+
             <v-md-editor v-model="this.dataObj.commentExample" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
-            {{ data.commentLog }}
             {{ data.CommentKeywords }}
+
+
+            <el-table :data="data.commentLogJson" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
+                <el-table-column prop="version" label="版本" sortable width="180" />
+                <el-table-column prop="time" label="修改时间" sortable width="180" />
+                <el-table-column prop="author" label="修改人" width="180" />
+                <el-table-column prop="content" label="修改内容" />
+            </el-table>
         </div>
     </el-card>
     <el-card v-if="data._class == 'JavaDocMethod'" shadow="hover">

@@ -1,6 +1,6 @@
 <template>
     <el-container>
-        <el-header>
+        <el-header height="30px">
             <el-row>
                 <el-col :span="16">
                     <el-button-group>
