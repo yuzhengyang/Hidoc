@@ -41,4 +41,11 @@ public class JavaDocMethod {
 
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONArray commentLogJson;
+
+
+    @TableField(exist = false)
+    private String _class = "JavaDocMethod";
+
+    @TableField(exist = false)
+    private JavaDocClass javaDocClass;
 }

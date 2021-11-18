@@ -9,10 +9,12 @@ import com.yuzhyn.hidoc.app.system.ibatis.handler.JsonbTypeHandler;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @TableName(value = "java_doc_class", autoResultMap = true)
 public class JavaDocClass {
+
     /**
      * 主键ID
      */
@@ -41,4 +43,9 @@ public class JavaDocClass {
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONArray commentLogJson;
 
+    @TableField(exist = false)
+    private String _class = "JavaDocClass";
+
+    @TableField(exist = false)
+    private List<JavaDocMethod> javaDocMethodList;
 }

@@ -20,6 +20,7 @@ import com.yuzhyn.azylee.core.datas.strings.StringConst;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.Doc;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocHistoryLite;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClass;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocMethod;
@@ -44,6 +45,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @RestController
@@ -85,6 +88,17 @@ public class JavaDocController {
                 .or().like(JavaDocMethod::getCommentLog, textLike)
                 .or().like(JavaDocMethod::getCommentKeywords, textLike));
         List<JavaDocMethod> methodList = methodPage.getRecords();
+
+        List<String> methodClassIdList = methodList.stream().map(JavaDocMethod::getClassId).distinct().collect(toList());
+        List<JavaDocClass> methodClassList = javaDocClassMapper.selectBatchIds(methodClassIdList);
+
+        for (JavaDocMethod methodItem : methodList) {
+            for (JavaDocClass classItem : methodClassList) {
+                if (methodItem.getClassId().equals(classItem.getId())) {
+                    methodItem.setJavaDocClass(classItem);
+                }
+            }
+        }
 
         List<Object> objectList = new ArrayList<>();
         objectList.addAll(classList);

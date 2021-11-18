@@ -31,9 +31,14 @@
         <el-main>
             <el-row>
                 <el-col :span="24">
-                    <el-row>
-                        <el-col :span="24" style="background-color:#f00"></el-col>
+                    <el-row v-for="item in javadocItem" :key="item">
+                        <el-col :span="1"></el-col>
+                        <el-col :span="22">
+                            <java-doc-item-card v-bind:data="item"></java-doc-item-card>
+                        </el-col>
                     </el-row>
+
+                    <el-backtop></el-backtop>
                 </el-col>
             </el-row>
         </el-main>
@@ -42,15 +47,17 @@
 
 <script>
 import { Search, Share, Guide } from '@element-plus/icons';
+import JavaDocItemCard from './components/JavaDocItemCard';
 import request from '../../utils/request.js';
 export default {
     data() {
         return {
             searchText: '',
-            searchMode: ''
+            searchMode: '',
+            javadocItem: []
         };
     },
-    components: { Search },
+    components: { JavaDocItemCard, Search },
     mounted() {
         document.title = 'Hidoc-JavaDoc';
         this.search();
@@ -67,7 +74,7 @@ export default {
                 }
             }).then(res => {
                 if (res.code == 0) {
-                    console.log(res);
+                    this.javadocItem = res.data;
                 }
             });
         },

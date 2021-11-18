@@ -30,6 +30,8 @@ public class UrlAccess {
         urls.add("/f/d");
         // 数据收集器接入
         urls.add("/datacoll/create");
+        // javadoc搜索
+        urls.add("/javadoc/search");
         // 其他测试入口
 //        urls.add("/collected/test");
 //        urls.add("/collected/test2");
