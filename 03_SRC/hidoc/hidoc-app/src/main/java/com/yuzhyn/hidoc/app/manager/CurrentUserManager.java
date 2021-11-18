@@ -14,6 +14,7 @@ public class CurrentUserManager {
     private static ThreadLocal<String> token = ThreadLocal.withInitial(() -> null);
     private static ThreadLocal<SysUser> user = ThreadLocal.withInitial(() -> null);
     private static ThreadLocal<SysUserFileConf> fileConfig = ThreadLocal.withInitial(() -> null);
+    private static ThreadLocal<String> requestMethod = ThreadLocal.withInitial(() -> null);
 
     public static ThreadLocal<String> ip = ThreadLocal.withInitial(() -> "");
 
@@ -33,6 +34,11 @@ public class CurrentUserManager {
         return fileConfig.get();
     }
 
+    public static String getRequestMethod() {
+        return requestMethod.get();
+    }
+
+
     public static void set(UserInfo userInfo) {
         Alog.i("Thread.currentThread: " + Thread.currentThread());
         if (userInfo.getToken() != null) {
@@ -43,11 +49,16 @@ public class CurrentUserManager {
         if (userInfo.getUserFileConf() != null) CurrentUserManager.fileConfig.set(userInfo.getUserFileConf());
     }
 
+    public static void setRequestMethod(String method) {
+        CurrentUserManager.requestMethod.set(method.toUpperCase());
+    }
+
     public static void clearCurrentUser() {
         CurrentUserManager.login.remove();
         CurrentUserManager.token.remove();
         CurrentUserManager.user.remove();
         CurrentUserManager.fileConfig.remove();
         CurrentUserManager.ip.remove();
+        CurrentUserManager.requestMethod.remove();
     }
 }

@@ -88,6 +88,14 @@ public class SecurityInterceptor implements HandlerInterceptor {
             log.info("已核对身份，用户信息已载入缓存");
             return true;
         } else {
+
+            // 过滤掉不需要权限验证的请求（OPTIONS）
+            String method = CurrentUserManager.getRequestMethod();
+            if (method != null && method.equals("OPTIONS")) {
+                log.info("特殊请求方法，已过滤");
+                return true;
+            }
+
             if (UrlAccess.isAnonymous(uri)) {
                 log.info("未登录用户，访问开放内容，已准许");
                 return true;

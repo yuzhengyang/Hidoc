@@ -34,6 +34,7 @@ public class AppFilter implements Filter {
         CurrentUserManager.ip.set(ClientIPTool.getIp(request));
         String uri = URLDecoder.decode(request.getRequestURI(), "utf-8");
         String method = request.getMethod();
+        CurrentUserManager.setRequestMethod(method);
         log.info("AppFilter 过滤器处理: " + uri + " ,method: " + method);
 
         // *************************************************************************************
