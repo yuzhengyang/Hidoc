@@ -29,9 +29,11 @@ import com.yuzhyn.hidoc.app.application.entity.doc.Doc;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocHistoryLite;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClass;
+import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClassLite;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocMethod;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocProject;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
+import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocClassLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocClassMapper;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocMethodMapper;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocProjectMapper;
@@ -67,6 +69,9 @@ public class JavaDocController {
     JavaDocClassMapper javaDocClassMapper;
 
     @Autowired
+    JavaDocClassLiteMapper javaDocClassLiteMapper;
+
+    @Autowired
     JavaDocMethodMapper javaDocMethodMapper;
 
     @Autowired
@@ -79,43 +84,57 @@ public class JavaDocController {
         String textLike = "%" + text.replace(' ', '%') + "%";
 
         ResponseData responseData = ResponseData.ok();
-        IPage<JavaDocClass> classPage = javaDocClassMapper.selectPage(new Page<JavaDocClass>(1, 100), new LambdaQueryWrapper<JavaDocClass>()
-                .or().like(JavaDocClass::getName, textLike)
-                .or().like(JavaDocClass::getCommentInfo, textLike)
-                .or().like(JavaDocClass::getCommentScene, textLike)
-                .or().like(JavaDocClass::getCommentLimit, textLike)
-                .or().like(JavaDocClass::getCommentExample, textLike)
-                .or().like(JavaDocClass::getCommentLog, textLike)
-                .or().like(JavaDocClass::getCommentKeywords, textLike));
-        List<JavaDocClass> classList = classPage.getRecords();
+        List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);
 
-        IPage<JavaDocMethod> methodPage = javaDocMethodMapper.selectPage(new Page<JavaDocMethod>(1, 100), new LambdaQueryWrapper<JavaDocMethod>()
-                .or().like(JavaDocMethod::getName, textLike)
-                .or().like(JavaDocMethod::getCommentInfo, textLike)
-                .or().like(JavaDocMethod::getCommentScene, textLike)
-                .or().like(JavaDocMethod::getCommentLimit, textLike)
-                .or().like(JavaDocMethod::getCommentExample, textLike)
-                .or().like(JavaDocMethod::getCommentLog, textLike)
-                .or().like(JavaDocMethod::getCommentKeywords, textLike));
-        List<JavaDocMethod> methodList = methodPage.getRecords();
+        if (ListTool.ok(projectList)) {
+            List<String> projectVersionList = projectList.stream().map(JavaDocProject::getVersion).distinct().collect(toList());
+            List<JavaDocClassLite> classList = null;
+            List<JavaDocMethod> methodList = null;
 
-        if (ListTool.ok(methodList)) {
-            List<String> methodClassIdList = methodList.stream().map(JavaDocMethod::getClassId).distinct().collect(toList());
-            List<JavaDocClass> methodClassList = javaDocClassMapper.selectBatchIds(methodClassIdList);
+            if (mode.equals("class") || mode.equals("all")) {
+                IPage<JavaDocClassLite> classPage = javaDocClassLiteMapper.selectPage(new Page<JavaDocClassLite>(1, 20), new LambdaQueryWrapper<JavaDocClassLite>()
+                        .and(p -> p.in(JavaDocClassLite::getVersion, projectVersionList))
+                        .and(q -> q.or().like(JavaDocClassLite::getName, textLike)
+                                .or().like(JavaDocClassLite::getCommentInfo, textLike)
+                                .or().like(JavaDocClassLite::getCommentScene, textLike)
+                                .or().like(JavaDocClassLite::getCommentLimit, textLike)
+                                .or().like(JavaDocClassLite::getCommentExample, textLike)
+                                .or().like(JavaDocClassLite::getCommentLog, textLike)
+                                .or().like(JavaDocClassLite::getCommentKeywords, textLike))
+                );
+                classList = classPage.getRecords();
+            }
+            if (mode.equals("method") || mode.equals("all")) {
+                IPage<JavaDocMethod> methodPage = javaDocMethodMapper.selectPage(new Page<JavaDocMethod>(1, 20), new LambdaQueryWrapper<JavaDocMethod>()
+                        .and(p -> p.in(JavaDocMethod::getVersion, projectVersionList))
+                        .and(q -> q.or().like(JavaDocMethod::getName, textLike)
+                                .or().like(JavaDocMethod::getCommentInfo, textLike)
+                                .or().like(JavaDocMethod::getCommentScene, textLike)
+                                .or().like(JavaDocMethod::getCommentLimit, textLike)
+                                .or().like(JavaDocMethod::getCommentExample, textLike)
+                                .or().like(JavaDocMethod::getCommentLog, textLike)
+                                .or().like(JavaDocMethod::getCommentKeywords, textLike)));
+                methodList = methodPage.getRecords();
 
-            for (JavaDocMethod methodItem : methodList) {
-                for (JavaDocClass classItem : methodClassList) {
-                    if (methodItem.getClassId().equals(classItem.getId())) {
-                        methodItem.setJavaDocClass(classItem);
+                if (ListTool.ok(methodList)) {
+                    List<String> methodClassIdList = methodList.stream().map(JavaDocMethod::getClassId).distinct().collect(toList());
+                    List<JavaDocClassLite> methodClassList = javaDocClassLiteMapper.selectBatchIds(methodClassIdList);
+
+                    for (JavaDocMethod methodItem : methodList) {
+                        for (JavaDocClassLite classItem : methodClassList) {
+                            if (methodItem.getClassId().equals(classItem.getId())) {
+                                methodItem.setJavaDocClassLite(JSONObject.parseObject(JSONObject.toJSONString(classItem)));
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        List<Object> objectList = new ArrayList<>();
-        objectList.addAll(classList);
-        objectList.addAll(methodList);
-        responseData.putData(objectList);
+            JSONArray jsonArray = new JSONArray();
+            if (ListTool.ok(classList)) jsonArray.addAll(classList);
+            if (ListTool.ok(methodList)) jsonArray.addAll(methodList);
+            responseData.putData(jsonArray);
+        }
         return responseData;
     }
 
@@ -169,9 +188,9 @@ public class JavaDocController {
         }
     }
 
-    @PostMapping({"upload", "u"})
-    public ResponseData upload(@RequestParam(value = "projectId") String projectId, @RequestParam("file") MultipartFile[] files) {
-        return javaDocService.upload(projectId, files);
-    }
+//    @PostMapping({"upload", "u"})
+//    public ResponseData upload(@RequestParam(value = "projectId") String projectId, @RequestParam("file") MultipartFile[] files) {
+//        return javaDocService.upload(projectId, files);
+//    }
 
 }

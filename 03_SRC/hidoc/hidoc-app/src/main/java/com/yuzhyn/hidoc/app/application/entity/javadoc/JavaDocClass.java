@@ -48,4 +48,6 @@ public class JavaDocClass {
 
     @TableField(exist = false)
     private List<JavaDocMethod> javaDocMethodList;
+
+    private String originalDocument;
 }

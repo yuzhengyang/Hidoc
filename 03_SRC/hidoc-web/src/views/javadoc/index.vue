@@ -1,31 +1,34 @@
 <template>
     <el-container>
         <el-header height="30px">
-            <el-row>
-                <el-col :span="16">
-                    <el-button-group>
-                        <el-button type="primary" plain @click="gotoPage('preview')">文集</el-button>
-                        <el-button type="primary" plain @click="gotoPage('')">JavaDoc</el-button>
-                    </el-button-group>
-                </el-col>
-                <el-col :span="8" style="text-align:right;">
-                    <el-input v-model="searchText" placeholder="搜索一下" class="input-with-select">
-                        <template #prepend>
-                            <el-select v-model="searchMode" placeholder="Select" style="width: 110px">
-                                <el-option label="全文" value="1"></el-option>
-                                <el-option label="关键字" value="2"></el-option>
-                            </el-select>
-                        </template>
-                        <template #append>
-                            <el-button @click="search()">
-                                <el-icon>
-                                    <Search />
-                                </el-icon>
-                            </el-button>
-                        </template>
-                    </el-input>
-                </el-col>
-            </el-row>
+            <el-affix :offset="70">
+                <el-row>
+                    <el-col :span="16">
+                        <el-button-group>
+                            <el-button type="primary" plain @click="gotoPage('preview')">文集</el-button>
+                            <el-button type="primary" plain @click="gotoPage('')">JavaDoc</el-button>
+                        </el-button-group>
+                    </el-col>
+                    <el-col :span="8" style="text-align:right;">
+                        <el-input v-model="searchText" placeholder="搜索一下" class="input-with-select">
+                            <template #prepend>
+                                <el-select v-model="searchMode" placeholder="全部" style="width: 80px">
+                                    <el-option label="全部" value="all"></el-option>
+                                    <el-option label="方法" value="method"></el-option>
+                                    <el-option label="类" value="class"></el-option>
+                                </el-select>
+                            </template>
+                            <template #append>
+                                <el-button @click="search()">
+                                    <el-icon>
+                                        <Search />
+                                    </el-icon>
+                                </el-button>
+                            </template>
+                        </el-input>
+                    </el-col>
+                </el-row>
+            </el-affix>
         </el-header>
         <!-- 内容区域 -->
         <el-main>
@@ -46,6 +49,7 @@
 </template>
 
 <script>
+import { ElMessageBox, ElMessage } from 'element-plus';
 import { Search, Share, Guide } from '@element-plus/icons';
 import JavaDocItemCard from './components/JavaDocItemCard';
 import request from '../../utils/request.js';
@@ -53,7 +57,7 @@ export default {
     data() {
         return {
             searchText: '',
-            searchMode: '',
+            searchMode: 'all',
             javadocItem: []
         };
     },
@@ -75,6 +79,11 @@ export default {
             }).then(res => {
                 if (res.code == 0) {
                     this.javadocItem = res.data;
+                    ElMessage({
+                        message: '搜索完成',
+                        type: 'success',
+                        duration: 1 * 1000
+                    });
                 }
             });
         },

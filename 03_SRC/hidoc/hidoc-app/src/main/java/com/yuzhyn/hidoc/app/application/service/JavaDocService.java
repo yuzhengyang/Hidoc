@@ -15,6 +15,7 @@ import com.github.javaparser.ast.comments.Comment;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.strings.StringConst;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
+import com.yuzhyn.azylee.core.ios.txts.TxtTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClass;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocMethod;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -80,8 +82,7 @@ public class JavaDocService {
         for (String fileItem : fileList) {
             try {
                 // parse() 参数可以是 String, File, InputStream等
-                CompilationUnit cu = StaticJavaParser.parse(new File(fileItem));
-                parseJavaDoc(cu, javaDocProject, javaDocClassList, javaDocMethodList);
+                parseJavaDoc(fileItem, javaDocProject, javaDocClassList, javaDocMethodList);
             } catch (IOException ex) {
             }
         }
@@ -110,56 +111,59 @@ public class JavaDocService {
         return ResponseData.error("没有发现要创建的内容");
     }
 
-    @Transactional
-    public ResponseData upload(String projectId, MultipartFile[] files) {
+//    @Transactional
+//    public ResponseData upload(String projectId, MultipartFile[] files) {
+//
+//        // 参数判断检查
+//        if (!ListTool.ok(files)) return ResponseData.error("请选择文件");
+//
+//        JavaDocProject javaDocProject = javaDocProjectMapper.selectById(projectId);
+//        if (javaDocProject == null) return ResponseData.error("JavaDoc项目不存在");
+//
+//        SysUser curUser = CurrentUserManager.getUser();
+//
+//        // 更新项目信息
+//        javaDocProject.setUpdateUserId(curUser.getId());
+//        javaDocProject.setUpdateTime(LocalDateTime.now());
+//        javaDocProject.setVersion(String.valueOf(System.currentTimeMillis()));
+//        List<JavaDocClass> javaDocClassList = new ArrayList<>();
+//        List<JavaDocMethod> javaDocMethodList = new ArrayList<>();
+//
+//        // 准备数据开始分解存储
+//        for (MultipartFile file : files) {
+//            try {
+//                parseJavaDoc(cu, javaDocProject, javaDocClassList, javaDocMethodList);
+//            } catch (IOException ex) {
+//            }
+//        }
+//
+//        // 最终汇总数据
+//        if (javaDocProject != null && javaDocClassList != null && javaDocMethodList != null) {
+//            javaDocProjectMapper.updateById(javaDocProject);
+//
+//            if (ListTool.ok(javaDocClassList)) {
+//                for (JavaDocClass item : javaDocClassList) {
+//                    javaDocClassMapper.insert(item);
+//                }
+//            }
+//
+//            if (ListTool.ok(javaDocMethodList)) {
+//                for (JavaDocMethod item : javaDocMethodList) {
+//                    javaDocMethodMapper.insert(item);
+//                }
+//            }
+//            return ResponseData.ok("JavaDoc创建完成");
+//        }
+//        return ResponseData.error("没有发现要创建的内容");
+//    }
 
-        // 参数判断检查
-        if (!ListTool.ok(files)) return ResponseData.error("请选择文件");
-
-        JavaDocProject javaDocProject = javaDocProjectMapper.selectById(projectId);
-        if (javaDocProject == null) return ResponseData.error("JavaDoc项目不存在");
-
+    private void parseJavaDoc(String filepath, JavaDocProject javaDocProject, List<JavaDocClass> javaDocClassList, List<JavaDocMethod> javaDocMethodList) throws FileNotFoundException {
         SysUser curUser = CurrentUserManager.getUser();
+        List<String> oriDocTextList = TxtTool.readLine(filepath);
+        String oriDocText = String.join(StringConst.NEWLINE, oriDocTextList);
 
-        // 更新项目信息
-        javaDocProject.setUpdateUserId(curUser.getId());
-        javaDocProject.setUpdateTime(LocalDateTime.now());
-        javaDocProject.setVersion(String.valueOf(System.currentTimeMillis()));
-        List<JavaDocClass> javaDocClassList = new ArrayList<>();
-        List<JavaDocMethod> javaDocMethodList = new ArrayList<>();
-
-        // 准备数据开始分解存储
-        for (MultipartFile file : files) {
-            try {
-                // parse() 参数可以是 String, File, InputStream等
-                CompilationUnit cu = StaticJavaParser.parse(file.getInputStream());
-                parseJavaDoc(cu, javaDocProject, javaDocClassList, javaDocMethodList);
-            } catch (IOException ex) {
-            }
-        }
-
-        // 最终汇总数据
-        if (javaDocProject != null && javaDocClassList != null && javaDocMethodList != null) {
-            javaDocProjectMapper.updateById(javaDocProject);
-
-            if (ListTool.ok(javaDocClassList)) {
-                for (JavaDocClass item : javaDocClassList) {
-                    javaDocClassMapper.insert(item);
-                }
-            }
-
-            if (ListTool.ok(javaDocMethodList)) {
-                for (JavaDocMethod item : javaDocMethodList) {
-                    javaDocMethodMapper.insert(item);
-                }
-            }
-            return ResponseData.ok("JavaDoc创建完成");
-        }
-        return ResponseData.error("没有发现要创建的内容");
-    }
-
-    private void parseJavaDoc(CompilationUnit cu, JavaDocProject javaDocProject, List<JavaDocClass> javaDocClassList, List<JavaDocMethod> javaDocMethodList) {
-        SysUser curUser = CurrentUserManager.getUser();
+        // parse() 参数可以是 String, File, InputStream等
+        CompilationUnit cu = StaticJavaParser.parse(new File(filepath));
         List<TypeDeclaration> typeList = cu.findAll(TypeDeclaration.class);
 
         // 遍历类信息
@@ -173,6 +177,7 @@ public class JavaDocService {
                 javaDocClass.setCreateUserId(curUser.getId());
                 javaDocClass.setCreateTime(LocalDateTime.now());
                 javaDocClass.setName(typeItem.getNameAsString());
+                javaDocClass.setOriginalDocument(cu.toString());
 
                 if (typeItem.hasParentNode() && typeItem.getParentNode().isPresent() && typeItem.getParentNode().get().findCompilationUnit().isPresent()) {
                     CompilationUnit parentNode = typeItem.getParentNode().get().findCompilationUnit().get();
@@ -205,12 +210,18 @@ public class JavaDocService {
                         javaDocClass.setQualifier(stringBuilder.toString());
                     }
                     // 填充注释内容
+                    StringBuilder stringBuilder = new StringBuilder();
+                    if (typeItem.getComment().isPresent()) {
+                        String content = typeItem.getComment().get().getContent();
+                        stringBuilder.append(content);
+                    }
                     if (ListTool.ok(parentNode.getOrphanComments())) {
-                        StringBuilder stringBuilder = new StringBuilder();
                         for (Comment commentItem : parentNode.getOrphanComments()) {
                             stringBuilder.append(commentItem.getContent());
                             stringBuilder.append(StringConst.NEWLINE);
                         }
+                    }
+                    if (stringBuilder.length() > 0) {
                         String[] commentArrays = parseComment(stringBuilder.toString());
                         javaDocClass.setCommentInfo(commentArrays[0]);
                         javaDocClass.setCommentScene(commentArrays[1]);
@@ -288,15 +299,12 @@ public class JavaDocService {
         if (StringTool.ok(s)) {
             String lines[] = s.split("\\r?\\n");
             String curblock = "";
-//            StringBuilder html = new StringBuilder();
+            String planBTxt = ""; // 如果没有按照模板书写注释，则按照常规解析内容（普通文本，排除@标志行）
             for (String line : lines) {
                 String trimline = line.trim(); // 去掉前后空格的内容
                 String txtline = trimline;
                 if (txtline.equals("* <p>")) txtline = ""; // 清空掉 "* <p>" 的行
                 if (txtline.startsWith("*")) txtline = txtline.substring(1); // 去掉 " *" 的内容
-
-//                html.append(txtline);
-//                html.append(StringConst.NEWLINE);
 
                 // 分析当前所在区块（>开始，<结束），区块包括：info、scene、limit、example、log、keywords
                 curblock = parseCommentBlockSign(txtline, curblock);
@@ -307,6 +315,19 @@ public class JavaDocService {
                 if (curblock.equals("example")) blockid = 3;
                 if (curblock.equals("log")) blockid = 4;
                 if (curblock.equals("keywords")) blockid = 5;
+
+                // 对planB进行赋值（不在区块中，不是@标志开始的内容）
+                if (curblock.equals("") && (!txtline.trim().startsWith("@") || txtline.trim().toLowerCase().startsWith("@description"))) {
+                    if (txtline.trim().toLowerCase().startsWith("@description")) {
+                        txtline = txtline.trim().substring("@description".length());
+                    }
+                    if (txtline.trim().startsWith(":") || txtline.trim().startsWith("：")) {
+                        txtline = txtline.trim().substring(":".length());
+                    }
+
+                    planBTxt += txtline;
+                    planBTxt += StringConst.NEWLINE;
+                }
 
                 if (blockid >= 0 && blockid < result.length) {
                     result[blockid] += txtline;
@@ -319,8 +340,8 @@ public class JavaDocService {
                 result[i] = StringTool.retractSpaceArrayAuto(result[i]);
             }
 
-//            Document doc = Jsoup.parse(html.toString());
-//            System.out.println(doc); // 输出带标签的html文档
+            // 对planB进行返回（在info内容为空时，返回planB）
+            if (!StringTool.ok(result[0])) result[0] = planBTxt;
         }
 
         return result;
