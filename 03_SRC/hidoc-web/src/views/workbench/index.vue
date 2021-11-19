@@ -78,7 +78,6 @@ import RecycleBin from './components/RecycleBin'
 import JavaDoc from './components/JavaDoc';
 // import { Delete } from '@element-plus/icons';
 export default {
-    name: 'Home',
     data() {
         return {
             currentMenuIndex: 1000,

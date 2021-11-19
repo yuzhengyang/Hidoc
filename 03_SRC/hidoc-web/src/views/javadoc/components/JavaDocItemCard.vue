@@ -4,7 +4,7 @@
             <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" :disabled="this.dataObj.commentExample == ''" @click="showDialog('commentExampleDialog')">示例说明</el-button>
             <el-button type="warning" size="small" round v-if="data.commentLog != ''" :disabled="data.commentLog == ''" @click="showDialog('commentLogDialog')">修改记录</el-button>
             <el-button type="success" size="small" round v-if="data.javaDocClassLite ? true : false" @click="showDialog('classDetailsDialog')">类信息</el-button>
-            <!-- <el-button type="primary" size="small" @click="showDialog('originDocumentDialog')">源文件</el-button> -->
+            <el-button type="primary" size="small" round @click="showDialog('originDocumentDialog')">源文件</el-button>
         </template>
         <el-descriptions-item>
             <template #label>
@@ -63,34 +63,38 @@
         </template>
     </el-dialog>
     <!-- 类信息 -->
-    <el-dialog v-model="classDetailsDialog" title="类信息" width="90%" center="true" fullscreen="true">
+    <el-dialog v-model="classDetailsDialog" title="类信息" width="90%" center fullscreen>
         <el-container>
             <el-main>
                 <div>
                     <h3>概述</h3>
-                    <div v-if="this.dataObj.javaDocClassLite.commentInfo != ''">
+                    <div v-if="this.dataObj.javaDocClassLite.commentInfo ? true : false">
                         <div v-html="this.dataObj.javaDocClassLite.commentInfo"></div>
                     </div>
                     <div v-else>无</div>
 
                     <h3>场景</h3>
-                    <div v-if="this.dataObj.javaDocClassLite.commentScene != ''">
+                    <div v-if="this.dataObj.javaDocClassLite.commentScene ? true : false">
                         <div v-html="this.dataObj.javaDocClassLite.commentScene"></div>
                     </div>
                     <div v-else>无</div>
 
                     <h3>限制</h3>
-                    <div v-if="this.dataObj.javaDocClassLite.commentLimit != ''">
+                    <div v-if="this.dataObj.javaDocClassLite.commentLimit ? true : false">
                         <div v-html="this.dataObj.javaDocClassLite.commentLimit"></div>
                     </div>
                     <div v-else>无</div>
 
                     <h3>示例</h3>
-                    <v-md-editor v-model="this.dataObj.javaDocClassLite.commentExample" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+                    <div v-if="this.dataObj.javaDocClassLite.commentExample ? true : false">
+                        <v-md-editor v-model="this.dataObj.javaDocClassLite.commentExample" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+                    </div>
+                    <div v-else>无</div>
+
 
                     <h3>版本</h3>
                     <div>
-                        <el-table :data="this.dataObj.javaDocClassLite.commentLogJson" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
+                        <el-table :data="this.dataObj.javaDocClassLite.commentLogJson ? true : false" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
                             <el-table-column prop="version" label="版本" sortable width="180" />
                             <el-table-column prop="time" label="修改时间" sortable width="180" />
                             <el-table-column prop="author" label="修改人" width="180" />
@@ -99,7 +103,7 @@
                     </div>
 
                     <h3>关键字</h3>
-                    <div v-if="this.dataObj.javaDocClassLite.commentKeywords != ''">
+                    <div v-if="this.dataObj.javaDocClassLite.commentKeywords ? true : false">
                         <div v-html="this.dataObj.javaDocClassLite.commentKeywords"></div>
                     </div>
                     <div v-else>无</div>
@@ -114,10 +118,26 @@
             </span>
         </template>
     </el-dialog>
+    <!-- 源文件 -->
+    <el-dialog v-model="originDocumentDialog" title="源文件" width="90%" center fullscreen>
+        <el-container>
+            <el-main>
+                <v-md-editor v-model="this.originalDocumentText" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+            </el-main>
+        </el-container>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-affix position="bottom" :offset="20">
+                    <el-button type="primary" @click="originDocumentDialog = false" style="width:300px">关闭</el-button>
+                </el-affix>
+            </span>
+        </template>
+    </el-dialog>
 </template>
 
 <script>
 import { ElMessageBox, ElMessage } from 'element-plus';
+import request from '../../../utils/request.js';
 export default {
     props: {
         data: Object
@@ -128,6 +148,7 @@ export default {
             commentLogDialog: false,
             classDetailsDialog: false,
             originDocumentDialog: false,
+            originalDocumentText: '',
             dataObj: {}
         };
     },
@@ -166,7 +187,29 @@ export default {
                     this.classDetailsDialog = true;
                     break;
                 case 'originDocumentDialog':
-                    this.originDocumentDialog = true;
+                    {
+                        let classId = '';
+                        if (this.dataObj._class == 'JavaDocClass') classId = this.dataObj.id;
+                        if (this.dataObj._class == 'JavaDocMethod') classId = this.dataObj.classId;
+                        request({
+                            url: '/javadoc/getOriginalDocument',
+                            method: 'post',
+                            data: {
+                                classId: classId
+                            }
+                        }).then(res => {
+                            if (res.code == 0) {
+                                this.originalDocumentText = '```java' + '\r\n' + res.meta.originalDocument + '\r\n' + '```';
+                                // console.log(this.originalDocumentText);
+                                // ElMessage({
+                                //     message: '搜索完成',
+                                //     type: 'success',
+                                //     duration: 1 * 1000
+                                // });
+                            }
+                        });
+                        this.originDocumentDialog = true;
+                    }
                     break;
             }
         }

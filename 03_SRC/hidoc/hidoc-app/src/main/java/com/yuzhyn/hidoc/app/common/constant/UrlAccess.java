@@ -32,6 +32,8 @@ public class UrlAccess {
         urls.add("/datacoll/create");
         // javadoc搜索
         urls.add("/javadoc/search");
+        // javadoc查询源文件
+        urls.add("/javadoc/getOriginalDocument");
         // 其他测试入口
 //        urls.add("/collected/test");
 //        urls.add("/collected/test2");

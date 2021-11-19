@@ -1,7 +1,8 @@
 <template>
     <el-container>
-        <el-header height="30px">
+        <el-header height="40px">
             <el-affix :offset="70">
+                <!--  style="background-color:#FFF;" -->
                 <el-row>
                     <el-col :span="16">
                         <el-button-group>
