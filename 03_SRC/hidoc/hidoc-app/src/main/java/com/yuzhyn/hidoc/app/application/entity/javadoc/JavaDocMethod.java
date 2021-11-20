@@ -19,7 +19,9 @@ public class JavaDocMethod {
     @TableId("id")
     private String id;
     private String classId;
+    private String className;
     private String projectId;
+    private String projectName;
 
     private String version;
     private String createUserId;
@@ -42,10 +44,12 @@ public class JavaDocMethod {
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONArray commentLogJson;
 
+    private String sourceCode;
 
     @TableField(exist = false)
     private String _class = "JavaDocMethod";
 
     @TableField(exist = false)
     private JSONObject javaDocClassLite;
+
 }

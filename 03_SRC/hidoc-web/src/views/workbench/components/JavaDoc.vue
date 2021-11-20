@@ -23,7 +23,7 @@
         </el-main>
     </el-container>
 
-    <el-dialog :title="上传文件" v-model="dialogUploadVisible">
+    <el-dialog title="上传文件" v-model="dialogUploadVisible">
         <java-doc-zip-upload :callback="uploadCallback" ref="javaDocZipUpload"></java-doc-zip-upload>
         <template #footer>
             <span class="dialog-footer">
@@ -64,12 +64,20 @@ export default {
         },
         // 打开上传文件窗口
         openUploadDialog() {
+            // 第一次会报错，找不到refdom
             this.dialogUploadVisible = true;
             this.$refs['javaDocZipUpload'].openPanel();
         },
         uploadCallback(data) {
             console.log('uploadCallback');
             console.log(data);
+            if (data.response.code == 0) {
+                // debugger;
+                this.dialogUploadVisible = false;
+                this.$message.success(data.response.msg);
+            }else{
+                this.$message.error(data.response.msg);
+            }
             this.loadProjectList();
         }
     }

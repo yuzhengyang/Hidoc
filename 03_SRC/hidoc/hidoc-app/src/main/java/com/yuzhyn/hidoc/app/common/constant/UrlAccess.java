@@ -34,6 +34,8 @@ public class UrlAccess {
         urls.add("/javadoc/search");
         // javadoc查询源文件
         urls.add("/javadoc/getOriginalDocument");
+        // javadoc查询方法源码
+        urls.add("/javadoc/getSourceCode");
         // 其他测试入口
 //        urls.add("/collected/test");
 //        urls.add("/collected/test2");

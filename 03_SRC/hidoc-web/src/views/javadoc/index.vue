@@ -11,7 +11,7 @@
                         </el-button-group>
                     </el-col>
                     <el-col :span="8" style="text-align:right;">
-                        <el-input v-model="searchText" placeholder="搜索一下" class="input-with-select">
+                        <el-input v-model="searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchEnter">
                             <template #prepend>
                                 <el-select v-model="searchMode" placeholder="全部" style="width: 80px">
                                     <el-option label="全部" value="all"></el-option>
@@ -41,8 +41,7 @@
                             <java-doc-item-card v-bind:data="item"></java-doc-item-card>
                         </el-col>
                     </el-row>
-
-                    <el-backtop></el-backtop>
+                    <!-- <el-backtop></el-backtop> -->
                 </el-col>
             </el-row>
         </el-main>
@@ -68,6 +67,11 @@ export default {
         this.search();
     },
     methods: {
+        searchEnter(e) {
+            if (e.keyCode == 13) {
+                this.search();
+            }
+        },
         search() {
             console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
             request({

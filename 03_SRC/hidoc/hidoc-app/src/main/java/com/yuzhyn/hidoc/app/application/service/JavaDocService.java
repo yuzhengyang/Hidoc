@@ -173,6 +173,7 @@ public class JavaDocService {
                 JavaDocClass javaDocClass = new JavaDocClass();
                 javaDocClass.setId(R.SnowFlake.nexts());
                 javaDocClass.setProjectId(javaDocProject.getId());
+                javaDocClass.setProjectName(javaDocProject.getName());
                 javaDocClass.setVersion(javaDocProject.getVersion());
                 javaDocClass.setCreateUserId(curUser.getId());
                 javaDocClass.setCreateTime(LocalDateTime.now());
@@ -243,11 +244,14 @@ public class JavaDocService {
                             JavaDocMethod javaDocMethod = new JavaDocMethod();
                             javaDocMethod.setId(R.SnowFlake.nexts());
                             javaDocMethod.setClassId(javaDocClass.getId());
+                            javaDocMethod.setClassName(javaDocClass.getName());
                             javaDocMethod.setProjectId(javaDocProject.getId());
+                            javaDocMethod.setProjectName(javaDocProject.getName());
                             javaDocMethod.setVersion(javaDocProject.getVersion());
                             javaDocMethod.setCreateUserId(curUser.getId());
                             javaDocMethod.setCreateTime(LocalDateTime.now());
                             javaDocMethod.setName(methodItem.getNameAsString());
+                            javaDocMethod.setSourceCode(methodItem.toString());
                             // 填充修饰词
                             if (ListTool.ok(methodItem.getModifiers())) {
                                 StringBuilder stringBuilder = new StringBuilder();
@@ -281,7 +285,7 @@ public class JavaDocService {
                                 javaDocMethod.setCommentLimit(commentArrays[2]);
                                 javaDocMethod.setCommentExample(commentArrays[3]);
                                 javaDocMethod.setCommentLog(commentArrays[4]);
-                                javaDocMethod.setCommentKeywords(commentArrays[5]);
+                                javaDocMethod.setCommentKeywords(commentArrays[5] + " , " + javaDocClass.getCommentKeywords());
 
                                 javaDocMethod.setCommentLogJson(parseCommentLog(commentArrays[4]));
                             }

@@ -4,7 +4,8 @@
             <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" :disabled="this.dataObj.commentExample == ''" @click="showDialog('commentExampleDialog')">示例说明</el-button>
             <el-button type="warning" size="small" round v-if="data.commentLog != ''" :disabled="data.commentLog == ''" @click="showDialog('commentLogDialog')">修改记录</el-button>
             <el-button type="success" size="small" round v-if="data.javaDocClassLite ? true : false" @click="showDialog('classDetailsDialog')">类信息</el-button>
-            <el-button type="primary" size="small" round @click="showDialog('originDocumentDialog')">源文件</el-button>
+            <el-button type="danger" size="small" round v-if="data.javaDocClassLite ? true : false" @click="showDialog('sourceCodeDialog')">方法源码</el-button>
+            <el-button type="danger" size="small" round @click="showDialog('originDocumentDialog')">源文件</el-button>
         </template>
         <el-descriptions-item>
             <template #label>
@@ -28,7 +29,13 @@
             <template #label>
                 搜索关键字
             </template>
-            {{ data.commentKeywords }}
+            <div v-html="data.commentKeywords"></div>
+        </el-descriptions-item>
+        <el-descriptions-item v-if="data.projectName != ''">
+            <template #label>
+                来源
+            </template>
+            <div v-html="data.projectName"></div>
         </el-descriptions-item>
     </el-descriptions>
 
@@ -93,14 +100,15 @@
 
 
                     <h3>版本</h3>
-                    <div>
-                        <el-table :data="this.dataObj.javaDocClassLite.commentLogJson ? true : false" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
+                    <div v-if="this.dataObj.javaDocClassLite.commentLog ? true : false">
+                        <el-table :data="this.dataObj.javaDocClassLite.commentLogJson" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
                             <el-table-column prop="version" label="版本" sortable width="180" />
                             <el-table-column prop="time" label="修改时间" sortable width="180" />
                             <el-table-column prop="author" label="修改人" width="180" />
                             <el-table-column prop="content" label="修改内容" />
                         </el-table>
                     </div>
+                    <div v-else>无</div>
 
                     <h3>关键字</h3>
                     <div v-if="this.dataObj.javaDocClassLite.commentKeywords ? true : false">
@@ -114,6 +122,21 @@
             <span class="dialog-footer">
                 <el-affix position="bottom" :offset="20">
                     <el-button type="primary" @click="classDetailsDialog = false" style="width:300px">我知道了</el-button>
+                </el-affix>
+            </span>
+        </template>
+    </el-dialog>
+    <!-- 方法源码 -->
+    <el-dialog v-model="sourceCodeDialog" title="方法源码" width="90%" center fullscreen>
+        <el-container>
+            <el-main>
+                <v-md-editor v-model="this.sourceCodeText" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+            </el-main>
+        </el-container>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-affix position="bottom" :offset="20">
+                    <el-button type="primary" @click="sourceCodeDialog = false" style="width:300px">关闭</el-button>
                 </el-affix>
             </span>
         </template>
@@ -148,6 +171,8 @@ export default {
             commentLogDialog: false,
             classDetailsDialog: false,
             originDocumentDialog: false,
+            sourceCodeDialog: false,
+            sourceCodeText: '',
             originalDocumentText: '',
             dataObj: {}
         };
@@ -185,6 +210,33 @@ export default {
                     break;
                 case 'classDetailsDialog':
                     this.classDetailsDialog = true;
+                    break;
+                case 'sourceCodeDialog':
+                    {
+                        let id = '';
+                        let type = '';
+                        if (this.dataObj._class == 'JavaDocClass') {
+                            type = 'class';
+                            id = this.dataObj.id;
+                        }
+                        if (this.dataObj._class == 'JavaDocMethod') {
+                            type = 'method';
+                            id = this.dataObj.id;
+                        }
+                        request({
+                            url: '/javadoc/getSourceCode',
+                            method: 'post',
+                            data: {
+                                id: id,
+                                type: type
+                            }
+                        }).then(res => {
+                            if (res.code == 0) {
+                                this.sourceCodeText = '```java' + '\r\n' + res.meta.sourceCode + '\r\n' + '```';
+                            }
+                        });
+                        this.sourceCodeDialog = true;
+                    }
                     break;
                 case 'originDocumentDialog':
                     {

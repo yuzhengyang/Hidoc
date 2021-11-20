@@ -29,15 +29,9 @@ import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.Doc;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocHistoryLite;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
-import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClass;
-import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClassLite;
-import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocMethod;
-import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocProject;
+import com.yuzhyn.hidoc.app.application.entity.javadoc.*;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
-import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocClassLiteMapper;
-import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocClassMapper;
-import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocMethodMapper;
-import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocProjectMapper;
+import com.yuzhyn.hidoc.app.application.mapper.javadoc.*;
 import com.yuzhyn.hidoc.app.application.service.JavaDocService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
@@ -58,6 +52,42 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
+
+/**
+ * <div javadoc="info" javadoc-cn="一句话精简概括">
+ *     JavaDoc自定义文档
+ * </div>
+ *
+ * <div javadoc="scene" javadoc-cn="使用场景说明">
+ *     上传工程ZIP文件，自动解析注释，并结构话文档
+ * </div>
+ *
+ * <div javadoc="limit" javadoc-cn="使用限制说明">
+ *     不得滥用，或无限制上传
+ * </div>
+ *
+ * <div javadoc="example" javadoc-cn="使用代码示例">
+ *     搜索示例
+ *     ```java
+ *     methodWrapper = methodWrapper.and(p -> {
+ *         for (String key : keywordArray) {
+ *             String keyLike = "%" + key + "%";
+ *             p.apply("name||class_name||comment_info||comment_scene||comment_limit||comment_keywords ILIKE {0}", keyLike);
+ *         }
+ *     });
+ *     ```
+ * </div>
+ *
+ * <div javadoc="log" javadoc-cn="修改日志">
+ * 版本         修改时间       修改人         修改内容
+ * 1.0.0.0     2021-11-20    yuzhengyang    创建功能
+ * 1.0.0.1     2021-11-20    yuzhengyang    优化功能
+ * </div>
+ *
+ * <div javadoc="keywords" javadoc-cn="搜索关键字">
+ *     Hidoc，JavaDoc，自定义，解析，Java文档
+ * </div>
+ */
 @Slf4j
 @RestController
 @RequestMapping("javadoc")
@@ -76,16 +106,62 @@ public class JavaDocController {
     JavaDocMethodMapper javaDocMethodMapper;
 
     @Autowired
+    JavaDocMethodLiteMapper javaDocMethodLiteMapper;
+
+    @Autowired
     JavaDocService javaDocService;
 
+    /**
+     * <div javadoc="info" javadoc-cn="一句话精简概括">
+     *     搜索文档
+     * </div>
+     *
+     * <div javadoc="scene" javadoc-cn="使用场景说明">
+     *     根据关键字，搜索类、方法中包含关键字的信息
+     * </div>
+     *
+     * <div javadoc="limit" javadoc-cn="使用限制说明">
+     *     未考虑
+     * </div>
+     *
+     * <div javadoc="example" javadoc-cn="使用代码示例">
+     *     搜索示例
+     *     ```java
+     *     methodWrapper = methodWrapper.and(p -> {
+     *         for (String key : keywordArray) {
+     *             String keyLike = "%" + key + "%";
+     *             p.apply("name||class_name||comment_info||comment_scene||comment_limit||comment_keywords ILIKE {0}", keyLike);
+     *         }
+     *     });
+     *     ```
+     * <p>
+     *     SQL示例
+     *     ```sql
+     *     SELECT * FROM java_doc_class WHERE version||name ILIKE '%0%' ORDER BY SUM(version||name)
+     *     ```
+     * </div>
+     *
+     * <div javadoc="log" javadoc-cn="修改日志">
+     * 版本         修改时间       修改人         修改内容
+     * 1.0.0.0     2021-11-20    yuzhengyang    创建功能
+     * 1.0.0.1     2021-11-20    yuzhengyang    优化功能1
+     * 1.0.0.3     2021-11-20    yuzhengyang    优化功能3
+     * 1.0.0.2     2021-11-20    yuzhengyang    优化功能2
+     * </div>
+     *
+     * <div javadoc="keywords" javadoc-cn="搜索关键字">
+     *     搜索
+     * </div>
+     */
     @PostMapping("search")
     public ResponseData search(@RequestBody Map<String, Object> params) {
         int selectClassPageSize = 100, selectMethodPageSize = 100;
         String mode = MapTool.get(params, "mode", "").toString();
         String text = MapTool.get(params, "text", "").toString();
-        String textLike = "%" + text.replace(' ', '%') + "%";
+//        String textLike = "%" + text.replace(' ', '%') + "%"; // 替换空格为通配符有局限性，比如有强制的前后顺序
         String begTag = "<span style='color:red;'>";
         String endTag = "</span>";
+        String[] keywordArray = StringTool.split(text, " ", true, true);
 
         ResponseData responseData = ResponseData.ok();
         List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);
@@ -93,19 +169,29 @@ public class JavaDocController {
         if (ListTool.ok(projectList)) {
             List<String> projectVersionList = projectList.stream().map(JavaDocProject::getVersion).distinct().collect(toList());
             List<JavaDocClassLite> classList = null;
-            List<JavaDocMethod> methodList = null;
+            List<JavaDocMethodLite> methodList = null;
 
             if (mode.equals("class") || mode.equals("all")) {
-                IPage<JavaDocClassLite> classPage = javaDocClassLiteMapper.selectPage(new Page<JavaDocClassLite>(1, selectClassPageSize), new LambdaQueryWrapper<JavaDocClassLite>()
-                        .and(p -> p.in(JavaDocClassLite::getVersion, projectVersionList))
-                        .and(q -> q.or().like(JavaDocClassLite::getName, textLike)
-                                .or().like(JavaDocClassLite::getCommentInfo, textLike)
-                                .or().like(JavaDocClassLite::getCommentScene, textLike)
-                                .or().like(JavaDocClassLite::getCommentLimit, textLike)
-                                .or().like(JavaDocClassLite::getCommentExample, textLike)
-                                .or().like(JavaDocClassLite::getCommentLog, textLike)
-                                .or().like(JavaDocClassLite::getCommentKeywords, textLike))
-                );
+
+                LambdaQueryWrapper<JavaDocClassLite> classWrapper = new LambdaQueryWrapper<JavaDocClassLite>();
+                classWrapper = classWrapper.and(p -> p.in(JavaDocClassLite::getVersion, projectVersionList));
+                if (ListTool.ok(keywordArray)) {
+                    classWrapper = classWrapper.and(p -> {
+                        for (String key : keywordArray) {
+                            String keyLike = "%" + key + "%";
+                            p.apply("COALESCE(name,'')||" +
+                                    "COALESCE(project_name,'')||" +
+                                    "COALESCE(comment_info,'')||" +
+                                    "COALESCE(comment_scene,'')||" +
+                                    "COALESCE(comment_limit,'')||" +
+                                    "COALESCE(comment_keywords,'') ILIKE {0}", keyLike);
+//                            .or().apply("comment_example ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
+//                            .or().apply("comment_log ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
+                        }
+                    });
+                }
+
+                IPage<JavaDocClassLite> classPage = javaDocClassLiteMapper.selectPage(new Page<JavaDocClassLite>(1, selectClassPageSize), classWrapper);
                 classList = classPage.getRecords();
                 // 后端关键字高亮
                 if (ListTool.ok(classList)) {
@@ -120,19 +206,32 @@ public class JavaDocController {
                 }
             }
             if (mode.equals("method") || mode.equals("all")) {
-                IPage<JavaDocMethod> methodPage = javaDocMethodMapper.selectPage(new Page<JavaDocMethod>(1, selectMethodPageSize), new LambdaQueryWrapper<JavaDocMethod>()
-                        .and(p -> p.in(JavaDocMethod::getVersion, projectVersionList))
-                        .and(q -> q.or().like(JavaDocMethod::getName, textLike)
-                                .or().like(JavaDocMethod::getCommentInfo, textLike)
-                                .or().like(JavaDocMethod::getCommentScene, textLike)
-                                .or().like(JavaDocMethod::getCommentLimit, textLike)
-                                .or().like(JavaDocMethod::getCommentExample, textLike)
-                                .or().like(JavaDocMethod::getCommentLog, textLike)
-                                .or().like(JavaDocMethod::getCommentKeywords, textLike)));
+
+                LambdaQueryWrapper<JavaDocMethodLite> methodWrapper = new LambdaQueryWrapper<JavaDocMethodLite>();
+                methodWrapper = methodWrapper.and(p -> p.in(JavaDocMethodLite::getVersion, projectVersionList));
+                if (ListTool.ok(keywordArray)) {
+                    methodWrapper = methodWrapper.and(p -> {
+                        for (String key : keywordArray) {
+                            String keyLike = "%" + key + "%";
+                            p.apply("COALESCE(name,'')||" +
+                                    "COALESCE(project_name,'')||" +
+                                    "COALESCE(class_name,'')||" +
+                                    "COALESCE(comment_info,'')||" +
+                                    "COALESCE(comment_scene,'')||" +
+                                    "COALESCE(comment_limit,'')||" +
+                                    "COALESCE(comment_keywords,'') ILIKE {0}", keyLike);
+//                            .or().apply("comment_example ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
+//                            .or().apply("comment_log ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
+                        }
+                    });
+                }
+
+                IPage<JavaDocMethodLite> methodPage = javaDocMethodLiteMapper.selectPage(new Page<JavaDocMethodLite>(1, selectMethodPageSize), methodWrapper);
+
                 methodList = methodPage.getRecords();
                 // 后端关键字高亮
                 if (ListTool.ok(methodList)) {
-                    for (JavaDocMethod methodItem : methodList) {
+                    for (JavaDocMethodLite methodItem : methodList) {
                         methodItem.setCommentInfo(HtmlStringTool.keywordsHightLight(methodItem.getCommentInfo(), text, begTag, endTag));
                         methodItem.setCommentScene(HtmlStringTool.keywordsHightLight(methodItem.getCommentScene(), text, begTag, endTag));
                         methodItem.setCommentLimit(HtmlStringTool.keywordsHightLight(methodItem.getCommentLimit(), text, begTag, endTag));
@@ -143,10 +242,10 @@ public class JavaDocController {
                 }
                 // 补充类信息
                 if (ListTool.ok(methodList)) {
-                    List<String> methodClassIdList = methodList.stream().map(JavaDocMethod::getClassId).distinct().collect(toList());
+                    List<String> methodClassIdList = methodList.stream().map(JavaDocMethodLite::getClassId).distinct().collect(toList());
                     List<JavaDocClassLite> methodClassList = javaDocClassLiteMapper.selectBatchIds(methodClassIdList);
 
-                    for (JavaDocMethod methodItem : methodList) {
+                    for (JavaDocMethodLite methodItem : methodList) {
                         for (JavaDocClassLite classItem : methodClassList) {
                             if (methodItem.getClassId().equals(classItem.getId())) {
                                 methodItem.setJavaDocClassLite(JSONObject.parseObject(JSONObject.toJSONString(classItem)));
@@ -173,6 +272,31 @@ public class JavaDocController {
         }
         return ResponseData.error("没有找到类源文件");
     }
+
+    @PostMapping("getSourceCode")
+    public ResponseData getSourceCode(@RequestBody Map<String, Object> params) {
+        String type = MapTool.get(params, "type", "").toString();
+        String id = MapTool.get(params, "id", "").toString();
+        switch (type) {
+            case "class":
+                JavaDocClass javaDocClass = javaDocClassMapper.selectById(id);
+                if (javaDocClass != null) {
+                    // 这里其实没有使用，这里的内容是文件内容，并不是严格的类源代码
+                    return ResponseData.okData("sourceCode", javaDocClass.getOriginalDocument());
+                }
+                break;
+            case "method":
+                JavaDocMethod method = javaDocMethodMapper.selectById(id);
+                if (method != null) {
+                    return ResponseData.okData("sourceCode", method.getSourceCode());
+                }
+                break;
+            default:
+                break;
+        }
+        return ResponseData.error("没有找到源代码信息");
+    }
+
 
     @PostMapping("projectList")
     public ResponseData projectList(@RequestBody Map<String, Object> params) {

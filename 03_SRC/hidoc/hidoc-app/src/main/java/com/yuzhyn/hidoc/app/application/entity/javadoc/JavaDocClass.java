@@ -21,6 +21,7 @@ public class JavaDocClass {
     @TableId("id")
     private String id;
     private String projectId;
+    private String projectName;
 
     private String version;
     private String createUserId;
