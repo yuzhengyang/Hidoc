@@ -63,7 +63,7 @@ import static java.util.stream.Collectors.toList;
  * </div>
  *
  * <div javadoc="limit" javadoc-cn="使用限制说明">
- *     不得滥用，或无限制上传
+ *     限制上传zip，10M以内的文件
  * </div>
  *
  * <div javadoc="example" javadoc-cn="使用代码示例">
