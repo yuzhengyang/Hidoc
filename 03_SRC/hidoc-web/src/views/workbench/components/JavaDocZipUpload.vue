@@ -2,7 +2,7 @@
     <el-upload class="upload-demo" accept=".zip" :action="fileUploadUrl" :headers="headers" :data="data" :on-success="handlerSuccess" :on-preview="handlePreview" :on-remove="handleRemove" :before-upload="beforeUpload" :before-remove="beforeRemove" multiple :limit="10" :on-exceed="handleExceed" :file-list="fileList">
         <el-button size="small" type="primary">点击上传</el-button>
         <template #tip>
-            <div class="el-upload__tip">只能上传 .zip 文件，且不超过 10MB（建议使用HiDevTools工具打包）</div>
+            <div class="el-upload__tip">只能上传 .zip 文件，且不超过 100MB（HiDevTools工具提供更方便的打包功能）</div>
         </template>
     </el-upload>
 </template>
@@ -60,13 +60,13 @@ export default {
         beforeUpload(file) {
             // debugger;
             const isZip = file.type === 'application/x-zip-compressed';
-            const isLt10M = file.size / 1024 / 1024 < 10;
+            const isLt10M = file.size / 1024 / 1024 < 100;
 
             if (!isZip) {
                 this.$message.error('仅支持 .zip 文件');
             }
             if (!isLt10M) {
-                this.$message.error('zip 文件不能超过 10MB');
+                this.$message.error('zip 文件不能超过 100MB');
             }
             return isZip && isLt10M;
         },
