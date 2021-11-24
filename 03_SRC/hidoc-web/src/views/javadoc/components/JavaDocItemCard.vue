@@ -35,7 +35,7 @@
             <template #label>
                 来源
             </template>
-            <div v-html="data.projectName"></div>
+            <div>工程：{{ data.projectName }} {{ (data.javaDocClassLite ? '，类：' + data.javaDocClassLite.name + '，方法：' : '，类：') + data.name }}</div>
         </el-descriptions-item>
     </el-descriptions>
 
@@ -97,7 +97,6 @@
                         <v-md-editor v-model="this.dataObj.javaDocClassLite.commentExample" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
                     </div>
                     <div v-else>无</div>
-
 
                     <h3>版本</h3>
                     <div v-if="this.dataObj.javaDocClassLite.commentLog ? true : false">

@@ -157,11 +157,13 @@ public class JavaDocController {
     public ResponseData search(@RequestBody Map<String, Object> params) {
         int selectClassPageSize = 100, selectMethodPageSize = 100;
         String mode = MapTool.get(params, "mode", "").toString();
+        String name = MapTool.get(params, "name", "").toString();
         String text = MapTool.get(params, "text", "").toString();
+        String[] nameArray = StringTool.split(name, " ", true, true);
+        String[] textArray = StringTool.split(text, " ", true, true);
 //        String textLike = "%" + text.replace(' ', '%') + "%"; // 替换空格为通配符有局限性，比如有强制的前后顺序
         String begTag = "<span style='color:red;'>";
         String endTag = "</span>";
-        String[] keywordArray = StringTool.split(text, " ", true, true);
 
         ResponseData responseData = ResponseData.ok();
         List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);
@@ -175,12 +177,28 @@ public class JavaDocController {
 
                 LambdaQueryWrapper<JavaDocClassLite> classWrapper = new LambdaQueryWrapper<JavaDocClassLite>();
                 classWrapper = classWrapper.and(p -> p.in(JavaDocClassLite::getVersion, projectVersionList));
-                if (ListTool.ok(keywordArray)) {
+                if (ListTool.ok(nameArray)) {
                     classWrapper = classWrapper.and(p -> {
-                        for (String key : keywordArray) {
+                        for (String key : nameArray) {
                             String keyLike = "%" + key + "%";
-                            p.apply("COALESCE(name,'')||" +
-                                    "COALESCE(project_name,'')||" +
+                            p.apply("COALESCE(name,'') ILIKE {0}", keyLike);
+//                                    "COALESCE(project_name,'')||" +
+//                                    "COALESCE(comment_info,'')||" +
+//                                    "COALESCE(comment_scene,'')||" +
+//                                    "COALESCE(comment_limit,'')||" +
+//                                    "COALESCE(comment_keywords,'')
+//                            .or().apply("comment_example ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
+//                            .or().apply("comment_log ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
+                        }
+                    });
+                }
+                if (ListTool.ok(textArray)) {
+                    classWrapper = classWrapper.and(p -> {
+                        for (String key : textArray) {
+                            String keyLike = "%" + key + "%";
+                            p.apply(
+//                                    "COALESCE(name,'')||" +
+//                                    "COALESCE(project_name,'')||" +
                                     "COALESCE(comment_info,'')||" +
                                     "COALESCE(comment_scene,'')||" +
                                     "COALESCE(comment_limit,'')||" +
@@ -196,9 +214,9 @@ public class JavaDocController {
                 // 后端关键字高亮
                 if (ListTool.ok(classList)) {
                     for (JavaDocClassLite classItem : classList) {
-                        classItem.setCommentInfo(HtmlStringTool.keywordsHightLight(classItem.getCommentInfo(), text, begTag, endTag));
-                        classItem.setCommentScene(HtmlStringTool.keywordsHightLight(classItem.getCommentScene(), text, begTag, endTag));
-                        classItem.setCommentLimit(HtmlStringTool.keywordsHightLight(classItem.getCommentLimit(), text, begTag, endTag));
+                        classItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentInfo()), text, begTag, endTag));
+                        classItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentScene()), text, begTag, endTag));
+                        classItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentLimit()), text, begTag, endTag));
 //                        classItem.setCommentExample(HtmlStringTool.keywordsHightLight(classItem.getCommentExample(), text, begTag, endTag));
 //                        classItem.setCommentLog(HtmlStringTool.keywordsHightLight(classItem.getCommentLog(), text, begTag, endTag));
                         classItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(classItem.getCommentKeywords(), text, begTag, endTag));
@@ -209,13 +227,30 @@ public class JavaDocController {
 
                 LambdaQueryWrapper<JavaDocMethodLite> methodWrapper = new LambdaQueryWrapper<JavaDocMethodLite>();
                 methodWrapper = methodWrapper.and(p -> p.in(JavaDocMethodLite::getVersion, projectVersionList));
-                if (ListTool.ok(keywordArray)) {
+                if (ListTool.ok(nameArray)) {
                     methodWrapper = methodWrapper.and(p -> {
-                        for (String key : keywordArray) {
+                        for (String key : nameArray) {
                             String keyLike = "%" + key + "%";
                             p.apply("COALESCE(name,'')||" +
-                                    "COALESCE(project_name,'')||" +
-                                    "COALESCE(class_name,'')||" +
+//                                    "COALESCE(project_name,'')||" +
+                                    "COALESCE(class_name,'') ILIKE {0}", keyLike);
+//                                    "COALESCE(comment_info,'')||" +
+//                                    "COALESCE(comment_scene,'')||" +
+//                                    "COALESCE(comment_limit,'')||" +
+//                                    "COALESCE(comment_keywords,'')
+//                            .or().apply("comment_example ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
+//                            .or().apply("comment_log ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
+                        }
+                    });
+                }
+                if (ListTool.ok(textArray)) {
+                    methodWrapper = methodWrapper.and(p -> {
+                        for (String key : textArray) {
+                            String keyLike = "%" + key + "%";
+                            p.apply(
+//                                    "COALESCE(name,'')||" +
+//                                    "COALESCE(project_name,'')||" +
+//                                    "COALESCE(class_name,'')||" +
                                     "COALESCE(comment_info,'')||" +
                                     "COALESCE(comment_scene,'')||" +
                                     "COALESCE(comment_limit,'')||" +
@@ -232,9 +267,9 @@ public class JavaDocController {
                 // 后端关键字高亮
                 if (ListTool.ok(methodList)) {
                     for (JavaDocMethodLite methodItem : methodList) {
-                        methodItem.setCommentInfo(HtmlStringTool.keywordsHightLight(methodItem.getCommentInfo(), text, begTag, endTag));
-                        methodItem.setCommentScene(HtmlStringTool.keywordsHightLight(methodItem.getCommentScene(), text, begTag, endTag));
-                        methodItem.setCommentLimit(HtmlStringTool.keywordsHightLight(methodItem.getCommentLimit(), text, begTag, endTag));
+                        methodItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentInfo()), text, begTag, endTag));
+                        methodItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentScene()), text, begTag, endTag));
+                        methodItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentLimit()), text, begTag, endTag));
 //                        methodItem.setCommentExample(HtmlStringTool.keywordsHightLight(methodItem.getCommentExample(), text, begTag, endTag));
 //                        methodItem.setCommentLog(HtmlStringTool.keywordsHightLight(methodItem.getCommentLog(), text, begTag, endTag));
                         methodItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(methodItem.getCommentKeywords(), text, begTag, endTag));

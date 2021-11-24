@@ -4,14 +4,36 @@
             <el-affix :offset="70">
                 <!--  style="background-color:#FFF;" -->
                 <el-row>
-                    <el-col :span="16">
+                    <el-col :span="8">
                         <el-button-group>
                             <el-button type="primary" plain @click="gotoPage('preview')">文集</el-button>
                             <el-button type="primary" plain @click="gotoPage('')">JavaDoc</el-button>
                         </el-button-group>
                     </el-col>
-                    <el-col :span="8" style="text-align:right;">
-                        <el-input v-model="searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchEnter">
+                    <el-col :span="4"></el-col>
+                    <el-col :span="12">
+                        <el-row style="text-align:right;background-color:#FFF;border-radius: 4px;">
+                            <el-col :span="4">
+                                <el-select v-model="searchMode" placeholder="全部">
+                                    <el-option label="全部" value="all"></el-option>
+                                    <el-option label="方法" value="method"></el-option>
+                                    <el-option label="类" value="class"></el-option>
+                                </el-select>
+                            </el-col>
+                            <el-col :span="6">
+                                <el-input v-model="searchName" placeholder="类名、方法名" class="input-with-select" @keydown="searchEnter" clearable />
+                            </el-col>
+                            <el-col :span="12">
+                                <el-input v-model="searchText" placeholder="文本内容" class="input-with-select" @keydown="searchEnter" clearable />
+                            </el-col>
+                            <el-col :span="2">
+                                <el-button type="success" @click="search()" style="height:40px">
+                                    <el-icon><Search /></el-icon>
+                                </el-button>
+                            </el-col>
+                        </el-row>
+
+                        <!-- <el-input v-model="searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchEnter" clearable >
                             <template #prepend>
                                 <el-select v-model="searchMode" placeholder="全部" style="width: 80px">
                                     <el-option label="全部" value="all"></el-option>
@@ -26,7 +48,7 @@
                                     </el-icon>
                                 </el-button>
                             </template>
-                        </el-input>
+                        </el-input> -->
                     </el-col>
                 </el-row>
             </el-affix>
@@ -57,6 +79,7 @@ export default {
     data() {
         return {
             searchText: '',
+            searchName: '',
             searchMode: 'all',
             javadocItem: []
         };
@@ -79,6 +102,7 @@ export default {
                 method: 'post',
                 data: {
                     mode: this.searchMode,
+                    name: this.searchName,
                     text: this.searchText
                 }
             }).then(res => {
