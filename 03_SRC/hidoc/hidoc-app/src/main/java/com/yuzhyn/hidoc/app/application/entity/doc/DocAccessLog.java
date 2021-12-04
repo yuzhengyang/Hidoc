@@ -16,4 +16,6 @@ public class DocAccessLog {
     private String userId;
     private String collectedId;
     private String docId;
+    private String createUserId;
+    private String ownerUserId;
 }

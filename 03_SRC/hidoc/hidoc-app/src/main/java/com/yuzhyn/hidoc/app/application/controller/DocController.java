@@ -7,6 +7,7 @@ import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.mapper.doc.*;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineStatusLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
+import com.yuzhyn.hidoc.app.application.service.DocAccessLogService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,9 @@ public class DocController {
     @Autowired
     DocHistoryLiteMapper docHistoryLiteMapper;
 
+    @Autowired
+    DocAccessLogService docAccessLogService;
+
     @PostMapping("get")
     public ResponseData get(@RequestBody Map<String, Object> params) {
         R.AccessTimes++;
@@ -66,6 +70,8 @@ public class DocController {
             String id = MapTool.get(params, "id", "").toString();
             Doc doc = docMapper.selectById(id);
             if (doc != null) {
+                docAccessLogService.createLog(doc);
+
                 ResponseData responseData = ResponseData.ok();
                 DocCollected collected = docCollectedMapper.selectById(doc.getCollectedId());
                 responseData.putDataMap("collected", collected);

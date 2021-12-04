@@ -1,7 +1,9 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
 import com.yuzhyn.hidoc.app.aarg.R;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
+import com.yuzhyn.hidoc.app.application.mapper.doc.DocAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysAccessLogMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class AppDefaultSchedule {
     @Autowired
     SysAccessLogMapper sysAccessLogMapper;
 
+    @Autowired
+    DocAccessLogMapper docAccessLogMapper;
+
     @Async
     @Scheduled(cron = "0 */2 * * * ?")
     public void job() {
@@ -40,6 +45,8 @@ public class AppDefaultSchedule {
 
         // 保存访问接口日志
         saveSysAccessLog();
+        // 保存文章阅读日志
+        saveDocAccessLog();
     }
 
     public void saveSysAccessLog() {
@@ -48,6 +55,21 @@ public class AppDefaultSchedule {
             if (sysAccessLog != null) {
                 try {
                     sysAccessLogMapper.insert(sysAccessLog);
+                } catch (Exception ex) {
+                    log.error(ExceptionTool.getStackTrace(ex));
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    public void saveDocAccessLog() {
+        for (int i = 0; i < 1000 * 60; i++) {
+            DocAccessLog docAccessLog = R.Queue.DocAccessLogQuene.poll();
+            if (docAccessLog != null) {
+                try {
+                    docAccessLogMapper.insert(docAccessLog);
                 } catch (Exception ex) {
                     log.error(ExceptionTool.getStackTrace(ex));
                 }

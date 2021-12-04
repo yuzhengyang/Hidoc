@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.aarg;
 
+import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
@@ -41,6 +42,7 @@ public final class R {
 
     public static class Queue{
         public static ConcurrentLinkedQueue<SysAccessLog> SysAccessLogQuene = new ConcurrentLinkedQueue<>();
+        public static ConcurrentLinkedQueue<DocAccessLog> DocAccessLogQuene = new ConcurrentLinkedQueue<>();
     }
 
     public static class Paths {
