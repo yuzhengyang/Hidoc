@@ -65,18 +65,41 @@
         <el-tab-pane label="收集数据">
             <el-row style="padding:50px">
                 <el-col :span="24">
-                    筛选条件：创建时间（必填），计划名称，数据来源，终端类型，IP地址，MAC地址，用户姓名，详细内容
+                    <el-row>
+                        <el-col :span="3">
+                            <el-input v-model="searchDataParams.planName" placeholder="计划名称" class="input-with-select" @keydown="searchDataEnter" clearable />
+                        </el-col>
+                        <el-col :span="3">
+                            <el-input v-model="searchDataParams.dataSource" placeholder="数据来源" class="input-with-select" @keydown="searchDataEnter" clearable />
+                        </el-col>
+                        <el-col :span="3">
+                            <el-input v-model="searchDataParams.ip" placeholder="IP地址" class="input-with-select" @keydown="searchDataEnter" clearable />
+                        </el-col>
+                        <el-col :span="3">
+                            <el-input v-model="searchDataParams.senderId" placeholder="发送端ID" class="input-with-select" @keydown="searchDataEnter" clearable />
+                        </el-col>
+                        <el-col :span="3">
+                            <el-input v-model="searchDataParams.senderName" placeholder="发送端名称" class="input-with-select" @keydown="searchDataEnter" clearable />
+                        </el-col>
+                        <el-col :span="2">
+                            <el-button type="success" @click="searchData()" style="height:40px">
+                                <el-icon>
+                                    <Search />
+                                </el-icon>
+                            </el-button>
+                        </el-col>
+                    </el-row>
                 </el-col>
                 <el-col :span="24">
-                    <el-table :data="tableData" style="width: 100%">
-                        <el-table-column prop="ip" label="创建时间"></el-table-column>
-                        <el-table-column prop="ip" label="计划名称"></el-table-column>
-                        <el-table-column prop="ip" label="数据来源"></el-table-column>
-                        <el-table-column prop="ip" label="终端类型"></el-table-column>
-                        <el-table-column prop="ip" label="IP地址"></el-table-column>
-                        <el-table-column prop="ip" label="MAC地址"></el-table-column>
-                        <el-table-column prop="ip" label="用户姓名"></el-table-column>
-                        <el-table-column prop="ip" label="详细内容"></el-table-column>
+                    <el-table :data="dataList" style="width: 100%">
+                        <el-table-column prop="createTime" label="创建时间" width="160"></el-table-column>
+                        <el-table-column prop="planName" label="计划名称" width="180"></el-table-column>
+                        <el-table-column prop="dataSource" label="数据来源" width="120"></el-table-column>
+                        <el-table-column prop="ip" label="IP地址" width="120"></el-table-column>
+                        <el-table-column prop="mac" label="MAC地址" width="120"></el-table-column>
+                        <el-table-column prop="senderId" label="发送端ID" width="120"></el-table-column>
+                        <el-table-column prop="senderName" label="发送端名称" width="120"></el-table-column>
+                        <el-table-column prop="dataString" label="详细内容"></el-table-column>
                     </el-table>
                 </el-col>
             </el-row>
@@ -142,6 +165,7 @@
 import { ElMessage } from 'element-plus';
 import request from '../../../utils/request.js';
 import { datetimeFormat } from '../../../utils/datetime.js';
+import { Search, Share, Guide } from '@element-plus/icons';
 export default {
     data() {
         return {
@@ -155,14 +179,62 @@ export default {
                 stopTime: '',
                 isEnable: false
             },
-            planList: []
+            planList: [],
+            dataList: [],
+            searchDataParams: {
+                createTime: '',
+                planName: '',
+                dataSource: '',
+                ip: '',
+                mac: '',
+                senderId: '',
+                senderName: '',
+                dataString: ''
+            }
         };
     },
+    components: { Search },
     mounted() {
         this.loadPlan();
-        this.loadData();
     },
     methods: {
+        searchDataEnter(e) {
+            if (e.keyCode == 13) {
+                this.searchData();
+            }
+        },
+        searchData() {
+            console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
+            // request({
+            //     url: '/javadoc/search',
+            //     method: 'post',
+            //     data: {
+            //         mode: this.searchMode,
+            //         name: this.searchName,
+            //         text: this.searchText
+            //     }
+            // }).then(res => {
+            //     if (res.code == 0) {
+            //         this.javadocItem = res.data;
+            //         ElMessage({
+            //             message: '搜索完成',
+            //             type: 'success',
+            //             duration: 1 * 1000
+            //         });
+            //     }
+            // });
+            this.searchDataParams.token = this.$store.state.user.token;
+            return request({
+                url: '/datacoll/list',
+                method: 'post',
+                data: this.searchDataParams
+            }).then(res => {
+                if (res.code == 0) {
+                    console.log(res);
+                    this.dataList = res.data;
+                }
+            });
+        },
         openCreateCollected() {
             this.dialogFormVisible = true;
         },
@@ -175,17 +247,6 @@ export default {
                 if (res.code == 0) {
                     this.planList = res.meta.plans;
                     console.log(this.planList);
-                }
-            });
-        },
-        loadData() {
-            return request({
-                url: '/datacoll/list',
-                method: 'post',
-                data: { token: this.$store.state.user.token }
-            }).then(res => {
-                if (res.code == 0) {
-                    console.log(res);
                 }
             });
         },

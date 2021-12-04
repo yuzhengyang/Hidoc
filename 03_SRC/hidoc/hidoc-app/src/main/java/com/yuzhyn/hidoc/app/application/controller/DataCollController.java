@@ -3,12 +3,17 @@ package com.yuzhyn.hidoc.app.application.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.datacoll.DataColl;
 import com.yuzhyn.hidoc.app.application.entity.datacoll.DataCollPlan;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocCollectedMember;
+import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClassLite;
 import com.yuzhyn.hidoc.app.application.mapper.datacoll.DataCollMapper;
 import com.yuzhyn.hidoc.app.application.mapper.datacoll.DataCollPlanMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -101,9 +107,54 @@ public class DataCollController {
      */
     @PostMapping("list")
     public ResponseData list(@RequestBody Map<String, Object> params) {
-        List<DataColl> datas = dataCollMapper.selectList(null);
+
+        String planName = MapTool.get(params, "planName", "").toString();
+        String createTime = MapTool.get(params, "createTime", "").toString();
+        String dataSource = MapTool.get(params, "dataSource", "").toString();
+        String ip = MapTool.get(params, "ip", "").toString();
+        String mac = MapTool.get(params, "mac", "").toString();
+        String senderId = MapTool.get(params, "senderId", "").toString();
+        String senderName = MapTool.get(params, "senderName", "").toString();
+        String dataString = MapTool.get(params, "dataString", "").toString();
+
+        planName = "%" + planName + "%";
+        dataSource = "%" + dataSource + "%";
+        senderId = "%" + senderId + "%";
+        senderName = "%" + senderName + "%";
+
         ResponseData responseData = ResponseData.ok();
-        responseData.putDataMap("datas", datas);
+        List<DataCollPlan> planList = dataCollPlanMapper.selectList(new LambdaQueryWrapper<DataCollPlan>()
+                .eq(DataCollPlan::getCreateUserId, CurrentUserManager.getUser().getId())
+                .like(DataCollPlan::getName, planName));
+
+
+        if (ListTool.ok(planList)) {
+            List<String> planIds = planList.stream().map(DataCollPlan::getId).collect(Collectors.toList());
+            if (ListTool.ok(planIds)) {
+                LambdaQueryWrapper<DataColl> wrapper = new LambdaQueryWrapper<DataColl>();
+                if (StringTool.ok(dataSource)) wrapper.like(DataColl::getDataSource, dataSource);
+                if (StringTool.ok(senderId)) wrapper.like(DataColl::getSenderId, senderId);
+                if (StringTool.ok(senderName)) wrapper.like(DataColl::getSenderName, senderName);
+                wrapper.in(DataColl::getPlanId, planIds);
+                wrapper.orderByDesc(DataColl::getCreateTime);
+
+                IPage<DataColl> dataCollPage = dataCollMapper.selectPage(new Page<DataColl>(1, 300), wrapper);
+                List<DataColl> datas = dataCollPage.getRecords();
+
+                if (ListTool.ok(datas)) {
+                    for (DataColl dataItem : datas) {
+                        for (DataCollPlan planItem : planList) {
+                            if (dataItem.getPlanId().equals(planItem.getId())) {
+                                dataItem.setPlanName(planItem.getName());
+                            }
+                        }
+                        dataItem.setDataString(JSONObject.toJSONString(dataItem.getData()));
+                    }
+                }
+                responseData.putData(datas);
+            }
+        }
+
         return responseData;
     }
 }

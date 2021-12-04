@@ -86,4 +86,11 @@ public class DataColl {
      */
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONObject data;
+
+    @TableField(exist = false)
+    private String planName;
+
+    @TableField(exist = false)
+    private String dataString;
+
 }
