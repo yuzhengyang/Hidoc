@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.service;
+package com.yuzhyn.hidoc.app.application.service.javadoc;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -42,7 +42,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class JavaDocService {
+public class JavaDocCreateService {
 
     @Autowired
     JavaDocProjectMapper javaDocProjectMapper;
