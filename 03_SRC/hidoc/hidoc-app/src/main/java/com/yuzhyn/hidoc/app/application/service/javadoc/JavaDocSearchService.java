@@ -62,7 +62,6 @@ public class JavaDocSearchService {
 
     public ResponseData search(Map<String, Object> params) {
 
-        int selectClassPageSize = 100, selectMethodPageSize = 100;
         String mode = MapTool.get(params, "mode", "").toString();
         String name = MapTool.get(params, "name", "").toString();
         String text = MapTool.get(params, "text", "").toString();
@@ -71,6 +70,15 @@ public class JavaDocSearchService {
 //        String textLike = "%" + text.replace(' ', '%') + "%"; // 替换空格为通配符有局限性，比如有强制的前后顺序
         String begTag = "<span style='color:red;'>";
         String endTag = "</span>";
+
+        // 不输入任何信息，直接搜索是没有意义的，这里限制搜索个数，仅做示意
+        int selectClassPageSize = 5, selectMethodPageSize = 5;
+        if (StringTool.ok(name) || StringTool.ok(text)) {
+            selectClassPageSize = 50;
+            selectMethodPageSize = 50;
+            if (mode.equals("class")) selectClassPageSize = 100;
+            if (mode.equals("method")) selectMethodPageSize = 100;
+        }
 
         ResponseData responseData = ResponseData.ok();
         List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);

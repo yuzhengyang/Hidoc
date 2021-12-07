@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
@@ -23,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -204,7 +207,9 @@ public class JavaDocController {
             }
         }
         ResponseData responseData = ResponseData.ok();
-        responseData.putData(Arrays.asList(packages.toArray(new String[0])));
+        List<String> packageList = Arrays.asList(packages.toArray(new String[0]));
+        Collections.sort(packageList);
+        responseData.putData(packageList);
         return responseData;
     }
 
@@ -262,9 +267,22 @@ public class JavaDocController {
         }
 
         ResponseData responseData = ResponseData.ok();
-        List<JavaDocMethodLite> classList = javaDocMethodLiteMapper.selectList(wrapper);
-        if (ListTool.ok(classList)) {
-            responseData.putData(classList);
+        List<JavaDocMethodLite> methodList = javaDocMethodLiteMapper.selectList(wrapper);
+        if (ListTool.ok(methodList)) {
+
+            // 补充类信息
+            List<String> methodClassIdList = methodList.stream().map(JavaDocMethodLite::getClassId).distinct().collect(toList());
+            List<JavaDocClassLite> methodClassList = javaDocClassLiteMapper.selectBatchIds(methodClassIdList);
+
+            for (JavaDocMethodLite methodItem : methodList) {
+                for (JavaDocClassLite classItem : methodClassList) {
+                    if (methodItem.getClassId().equals(classItem.getId())) {
+                        methodItem.setJavaDocClassLite(JSONObject.parseObject(JSONObject.toJSONString(classItem)));
+                    }
+                }
+            }
+
+            responseData.putData(methodList);
         }
         return responseData;
     }
