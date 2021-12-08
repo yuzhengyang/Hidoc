@@ -90,10 +90,14 @@ VMdEditor.use(createAlignPlugin());
 // import createMdFilePlugin from './plugin/md-file';
 // VMdEditor.use(createMdFilePlugin());
 
+// 百度图表EChart
+import * as echarts from 'echarts';
+
 const app = createApp(App);
 app.use(router);
 app.use(store);
 app.use(ElementPlus);
 app.use(VMdEditor);
 app.use(VMdPreview);
+app.config.globalProperties.$echarts = echarts;
 app.mount('#app');
