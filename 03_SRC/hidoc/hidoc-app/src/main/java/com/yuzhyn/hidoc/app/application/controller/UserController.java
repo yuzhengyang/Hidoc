@@ -2,13 +2,17 @@ package com.yuzhyn.hidoc.app.application.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
 import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
 import com.yuzhyn.azylee.core.datas.encrypts.MixdeTool;
 import com.yuzhyn.azylee.core.datas.regexs.RegexPattern;
 import com.yuzhyn.hidoc.app.aarg.R;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocCollected;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
 import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
+import com.yuzhyn.hidoc.app.application.mapper.doc.DocAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocCollectedMapper;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocLiteMapper;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
@@ -29,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -56,6 +61,9 @@ public class UserController {
 
     @Autowired
     FileBucketMapper fileBucketMapper;
+
+    @Autowired
+    DocAccessLogMapper docAccessLogMapper;
 
     @PostMapping("register")
     public ResponseData register(@RequestBody Map<String, Object> params) {
@@ -187,17 +195,42 @@ public class UserController {
 
     @PostMapping("currentUserBoard")
     public ResponseData currentUserBoard() {
-        // 文集数量 文档数量 文件数量 阅读数量
+        // 文集数量 文档数量 文件数量 阅读数量 我阅读数量
         Integer collectedCount = docCollectedMapper.selectCount(new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getCreateUserId, CurrentUserManager.getUser().getId()));
         Integer docCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()));
         Integer cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, CurrentUserManager.getUser().getId()));
-        Integer readCount = 0;
+        Integer readCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getOwnerUserId, CurrentUserManager.getUser().getId()));
+        Integer iReadCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getCreateUserId, CurrentUserManager.getUser().getId()));
+
+        // 近7天 文集数量 文档数量 文件数量 阅读数量
+        List<Map> statisData = new ArrayList<>();
+        for (int i = 7; i >= 0; i--) {
+            LocalDate localDate = LocalDate.now();
+            LocalDateTime beginTime = localDate.plusDays(i * -1).atStartOfDay();
+            LocalDateTime endTime = localDate.plusDays((i - 1) * -1).atStartOfDay();
+
+            Map map = new HashMap<>();
+            Integer _collectedCount = docCollectedMapper.selectCount(new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocCollected::getCreateTime, beginTime).lt(DocCollected::getCreateTime, endTime));
+            Integer _docCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocLite::getCreateTime, beginTime).lt(DocLite::getCreateTime, endTime));
+            Integer _docUpdateCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocLite::getUpdateTime, beginTime).lt(DocLite::getUpdateTime, endTime));
+            Integer _cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, CurrentUserManager.getUser().getId()).ge(FileCursor::getCreateTime, beginTime).lt(FileCursor::getCreateTime, endTime));
+            Integer _readCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getOwnerUserId, CurrentUserManager.getUser().getId()).ge(DocAccessLog::getCreateTime, beginTime).lt(DocAccessLog::getCreateTime, endTime));
+            map.put("date", DateTimeFormat.toStr(beginTime, DateTimeFormatPattern.NORMAL_DATE));
+            map.put("collectedCount", _collectedCount);
+            map.put("docCount", _docCount);
+            map.put("docUpdateCount", _docUpdateCount);
+            map.put("cursorCount", _cursorCount);
+            map.put("readCount", _readCount);
+            statisData.add(map);
+        }
 
         ResponseData responseData = ResponseData.ok();
         responseData.putDataMap("collectedCount", collectedCount);
         responseData.putDataMap("docCount", docCount);
         responseData.putDataMap("cursorCount", cursorCount);
         responseData.putDataMap("readCount", readCount);
+        responseData.putDataMap("iReadCount", iReadCount);
+        responseData.putDataMap("statisData", statisData);
         return responseData;
     }
 

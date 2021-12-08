@@ -1,6 +1,7 @@
 package com.yuzhyn.hidoc.app.application.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.*;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
@@ -22,8 +23,10 @@ import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.datetimes.RelativeDateFormat;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +63,9 @@ public class DocController {
 
     @Autowired
     DocAccessLogService docAccessLogService;
+
+    @Autowired
+    DocAccessLogMapper docAccessLogMapper;
 
     @PostMapping("get")
     public ResponseData get(@RequestBody Map<String, Object> params) {
@@ -105,6 +111,24 @@ public class DocController {
                         if (user != null) responseData.putDataMap("user", user);
                     }
                 }
+
+                // 统计信息查看
+                // 总阅读量
+                int readCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getDocId, id));
+                responseData.putDataMap("readCount", readCount);
+                // 近7天阅读量
+                List<Map> statisData = new ArrayList<>();
+                LocalDate localDate = LocalDate.now();
+                for (int i = 7; i >= 0; i--) {
+                    Map map = new HashMap<>();
+                    int count = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>()
+                            .eq(DocAccessLog::getDocId, id).eq(DocAccessLog::getCreateDate, localDate.plusDays(i * -1)));
+                    map.put("date", DateTimeFormat.toStr(localDate.plusDays(i * -1)));
+                    map.put("count", count);
+                    statisData.add(map);
+                }
+                responseData.putDataMap("statisData", statisData);
+
                 return responseData;
             }
         }
