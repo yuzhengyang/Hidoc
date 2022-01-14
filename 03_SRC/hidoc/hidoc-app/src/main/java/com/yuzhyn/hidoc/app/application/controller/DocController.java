@@ -123,7 +123,7 @@ public class DocController {
                     Map map = new HashMap<>();
                     int count = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>()
                             .eq(DocAccessLog::getDocId, id).eq(DocAccessLog::getCreateDate, localDate.plusDays(i * -1)));
-                    map.put("date", DateTimeFormat.toStr(localDate.plusDays(i * -1)));
+                    map.put("date", DateTimeFormat.toStr(LocalDateTime.from(localDate.plusDays(i * -1L))));
                     map.put("count", count);
                     statisData.add(map);
                 }
