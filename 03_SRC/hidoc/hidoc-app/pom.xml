@@ -14,7 +14,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
         <lombok.version>1.18.12</lombok.version>
-        <azylee-core.version>1.0.0</azylee-core.version>
+        <azylee-core.version>1.0.1</azylee-core.version>
         <fastjson.version>1.2.74</fastjson.version>
         <mybatisplus.version>3.4.2</mybatisplus.version>
     </properties>
