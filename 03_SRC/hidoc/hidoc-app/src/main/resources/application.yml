@@ -81,7 +81,7 @@ mybatis-plus:
 
 #日志记录
 logging:
-  config: classpath:config/log4j2.xml
+  config: classpath:config/logging.xml
 #  level:
 #    com.hisense.rop.portal.mapper: debug
 #    com.chz.mapper: debug
