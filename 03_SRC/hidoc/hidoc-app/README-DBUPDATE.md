@@ -40,26 +40,35 @@ ALTER TABLE public.doc_access_log
 
 ## 2022年2月15日
 ```
-DROP TABLE `sys_access_log`;
-CREATE TABLE `sys_access_log` (
-  `id` varchar(20) NOT NULL,
-  `ip` varchar(50) DEFAULT NULL,
-  `begin_time` datetime DEFAULT NULL,
-  `end_time` datetime DEFAULT NULL,
-  `uri` varchar(1024) DEFAULT NULL,
-  `method` varchar(20) DEFAULT NULL,
-  `elapsed_time` bigint DEFAULT NULL,
-  `user_id` varchar(20) DEFAULT NULL,
-  `step` varchar(200) DEFAULT NULL,
-  `begin_max_memory` bigint DEFAULT NULL,
-  `begin_total_memory` bigint DEFAULT NULL,
-  `begin_free_memory` bigint DEFAULT NULL,
-  `end_max_memory` bigint DEFAULT NULL,
-  `end_total_memory` bigint DEFAULT NULL,
-  `end_free_memory` bigint DEFAULT NULL,
-  `probably_use_memory` bigint DEFAULT NULL,
-  `thread_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `exception` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+-- Table: public.sys_access_log
+
+-- DROP TABLE public.sys_access_log;
+
+CREATE TABLE IF NOT EXISTS public.sys_access_log
+(
+    id character varying(20) COLLATE pg_catalog."default" NOT NULL,
+    ip character varying(255) COLLATE pg_catalog."default",
+    begin_time timestamp without time zone,
+    end_time timestamp without time zone,
+    uri character varying(1024) COLLATE pg_catalog."default",
+    method character varying(255) COLLATE pg_catalog."default",
+    elapsed_time bigint,
+    user_id character varying(20) COLLATE pg_catalog."default",
+    step character varying(255) COLLATE pg_catalog."default",
+    begin_max_memory bigint,
+    begin_total_memory bigint,
+    begin_free_memory bigint,
+    end_max_memory bigint,
+    end_total_memory bigint,
+    end_free_memory bigint,
+    probably_use_memory bigint,
+    thread_name character(255) COLLATE pg_catalog."default",
+    exception text COLLATE pg_catalog."default",
+    CONSTRAINT sys_access_log_pkey PRIMARY KEY (id,ip,uri,method)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE public.sys_access_log
+    OWNER to postgres;
 ```

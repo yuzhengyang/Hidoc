@@ -77,21 +77,21 @@ public class AppFilter implements Filter {
         servletResponse.setContentLength(responseData.length);
         servletResponse.getOutputStream().write(responseData);
 
-        // 记录请求日志
-        if (method.toUpperCase().equals("POST") || method.toUpperCase().equals("GET")) {
-            SysAccessLog sysAccessLog = new SysAccessLog();
-            sysAccessLog.setId(R.SnowFlake.nexts());
-            sysAccessLog.setIp(CurrentUserManager.ip.get());
-            sysAccessLog.setCreateTime(LocalDateTime.now());
-            sysAccessLog.setUri(uri);
-            sysAccessLog.setMethod(method);
-            sysAccessLog.setElapsedTime(runTime);
-            if (CurrentUserManager.isLogin()) {
-                sysAccessLog.setUserId(CurrentUserManager.getUser().getId());
-            }
-            R.Queue.SysAccessLogQuene.add(sysAccessLog);
-            log.info("* 记录访问日志：" + uri + ", " + method + ", |   " + ObjectTool.optional(sysAccessLog.getUserId(), ""));
-        }
+//        // 记录请求日志
+//        if (method.toUpperCase().equals("POST") || method.toUpperCase().equals("GET")) {
+//            SysAccessLog sysAccessLog = new SysAccessLog();
+//            sysAccessLog.setId(R.SnowFlake.nexts());
+//            sysAccessLog.setIp(CurrentUserManager.ip.get());
+//            sysAccessLog.setCreateTime(LocalDateTime.now());
+//            sysAccessLog.setUri(uri);
+//            sysAccessLog.setMethod(method);
+//            sysAccessLog.setElapsedTime(runTime);
+//            if (CurrentUserManager.isLogin()) {
+//                sysAccessLog.setUserId(CurrentUserManager.getUser().getId());
+//            }
+//            R.Queue.SysAccessLogQuene.add(sysAccessLog);
+//            log.info("* 记录访问日志：" + uri + ", " + method + ", |   " + ObjectTool.optional(sysAccessLog.getUserId(), ""));
+//        }
 
         // 清空LocalThread，防止内存泄露
         CurrentUserManager.clearCurrentUser();
