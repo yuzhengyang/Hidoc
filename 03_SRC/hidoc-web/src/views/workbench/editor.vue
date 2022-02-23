@@ -119,6 +119,7 @@ export default {
                                 case 'ok': {
                                     if (res.meta.doc.isCurrentUserLock) {
                                         console.log('当前用户获取锁，准许编辑');
+                                        document.title = this.title;
                                     } else {
                                         console.log('文档已被其他成员锁定，不能编辑');
 

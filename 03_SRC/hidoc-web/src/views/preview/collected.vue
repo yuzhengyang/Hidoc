@@ -11,12 +11,12 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="24" style="line-height:60px; text-align:center; border-bottom:1px solid #bbb; font-size:20px; font-weight:bold; cursor:pointer;" @click="indexPage">{{this.collected.name}}</el-col>
+                <el-col :span="24" style="line-height:60px; text-align:center; border-bottom:1px solid #bbb; font-size:20px; font-weight:bold; cursor:pointer;" @click="indexPage">{{ this.collected.name }}</el-col>
             </el-row>
             <el-row>
                 <el-col :span="24">
-                    <el-row v-for="item in this.collected.docLites" :key="item.id" :index="item.id" @click="docPage(item.id)" :style="{padding:'5px',cursor:'pointer',fontSize:'16px',marginTop:'2px',backgroundColor:(item.id===this.docId?'#CCC':'#FFF')}">
-                        <el-col :span="24">{{item.title}}</el-col>
+                    <el-row v-for="item in this.collected.docLites" :key="item.id" :index="item.id" @click="docPage(item.id)" :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', backgroundColor: item.id === this.docId ? '#CCC' : '#FFF' }">
+                        <el-col :span="24">{{ item.title }}</el-col>
                     </el-row>
                 </el-col>
             </el-row>
@@ -26,7 +26,7 @@
             <el-main ref="docContainer" id="docContainer">
                 <div v-if="pageMode === 'index'">
                     <el-row>
-                        <el-col :span="24" style="line-height:60px; text-align:center;  font-size:30px; font-weight:bold;">{{this.collected.name}}</el-col>
+                        <el-col :span="24" style="line-height:60px; text-align:center;  font-size:30px; font-weight:bold;">{{ this.collected.name }}</el-col>
                     </el-row>
                     <el-row>
                         <el-col :span="24">
@@ -36,24 +36,19 @@
                     <el-row>
                         <el-col :span="20" :offset="2">
                             <el-tabs v-model="activeName" @tab-click="handleClick">
-                                <el-tab-pane label="简介" name="first">{{this.collected.description}}</el-tab-pane>
+                                <el-tab-pane label="简介" name="first">{{ this.collected.description }}</el-tab-pane>
                                 <el-tab-pane label="目录" name="second">
                                     <el-table :data="this.collected.docLites" style="width: 100%">
-                                        <el-table-column prop="title" label="" width="500">
-                                        </el-table-column>
-                                        <el-table-column prop="updateTime" label="" align="right">
-                                        </el-table-column>
+                                        <el-table-column prop="title" label="" width="500"></el-table-column>
+                                        <el-table-column prop="updateTime" label="" align="right"></el-table-column>
                                     </el-table>
                                 </el-tab-pane>
                                 <el-tab-pane label="最近文档" name="third">最近更新的文档列表</el-tab-pane>
                                 <el-tab-pane label="权限及成员" name="fourth">
                                     <el-table :data="this.collected.sysUserLites" style="width: 100%">
-                                        <el-table-column prop="realName" label="姓名" width="180">
-                                        </el-table-column>
-                                        <el-table-column prop="email" label="邮箱">
-                                        </el-table-column>
-                                        <el-table-column prop="memberDesc" label="成员角色">
-                                        </el-table-column>
+                                        <el-table-column prop="realName" label="姓名" width="180"></el-table-column>
+                                        <el-table-column prop="email" label="邮箱"></el-table-column>
+                                        <el-table-column prop="memberDesc" label="成员角色"></el-table-column>
                                         <!-- <el-table-column prop="allowEdit" label="编辑">
                                         </el-table-column>
                                         <el-table-column prop="date" label="日期" width="180">
@@ -65,11 +60,10 @@
                     </el-row>
                 </div>
                 <div v-else>
-
                     <div>
                         <el-row>
                             <el-col :span="23" style="line-height:60px; text-align:center;  font-size:30px; font-weight:bold;">
-                                {{this.doc.title}}
+                                {{ this.doc.title }}
                                 <span v-if="this.$store.state.user.token != undefined && this.$store.state.user.token != ''" style="cursor:pointer; font-size:15px" @click="docFocus()">🔍</span>
                             </el-col>
                             <el-col :span="1"></el-col>
@@ -79,9 +73,9 @@
                         <el-row>
                             <el-col :span="23" style="text-align:center;">
                                 <span v-for="ctor in contributors" :key="ctor" style="padding-right:8px">
-                                    <el-tag size="mini" effect="dark">{{ctor.realName}}</el-tag>
+                                    <el-tag size="mini" effect="dark">{{ ctor.realName }}</el-tag>
                                 </span>
-                                <span>　</span>
+                                <span></span>
                             </el-col>
                             <el-col :span="1"></el-col>
                         </el-row>
@@ -197,21 +191,51 @@ export default {
                     this.pageMode = 'detail';
 
                     this.$nextTick(() => {
+                        // 界面处理-1：预览中设置标题层级导航栏
                         const anchors = this.$refs.editor.$el.querySelectorAll('.v-md-editor-preview h1,h2,h3,h4,h5,h6');
                         const titles = Array.from(anchors).filter(title => !!title.innerText.trim());
-
                         if (!titles.length) {
                             this.titles = [];
-                            return;
+                            // return;
+                        } else {
+                            const hTags = Array.from(new Set(titles.map(title => title.tagName))).sort();
+                            this.titles = titles.map(el => ({
+                                title: el.innerText,
+                                lineIndex: el.getAttribute('data-v-md-line'),
+                                indent: hTags.indexOf(el.tagName)
+                            }));
                         }
 
-                        const hTags = Array.from(new Set(titles.map(title => title.tagName))).sort();
-
-                        this.titles = titles.map(el => ({
-                            title: el.innerText,
-                            lineIndex: el.getAttribute('data-v-md-line'),
-                            indent: hTags.indexOf(el.tagName)
-                        }));
+                        // 界面处理-2：锚点定位（定位可能失败，增加异常处理）
+                        // 支持两种锚点：
+                        // 1、段落标题定位，中文名称定位，重复名称会定位错误
+                        // 2、常规锚点定位，使用元素ID来定位，需要使用html元素标签设置ID值
+                        try {
+                            let hash = document.location.hash.replaceAll('#', '');
+                            if (hash != '') {
+                                if (hash.indexOf('$') >= 0) {
+                                    // 文档小标题定位
+                                    let title = decodeURI(hash.replaceAll('$', ''));
+                                    for (var i = 0; i < this.titles.length; i++) {
+                                        let titleItem = this.titles[i];
+                                        if (titleItem.title === title) {
+                                            this.handleAnchorClick(titleItem);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    // 常规锚点定位
+                                    console.log('存在锚点，需要定位：' + hash);
+                                    document.getElementById(hash).scrollIntoView(true);
+                                    console.log('锚点定位完成，已到达指定位置');
+                                }
+                            }
+                        } catch (err) {
+                            // catchCode - 捕获错误的代码块
+                            console.log('锚点定位失败，可能是锚点不存在');
+                        } finally {
+                            // finallyCode - 无论 try / catch 结果如何都会执行的代码块
+                        }
                     });
                 }
             });
@@ -223,7 +247,7 @@ export default {
             document.getElementById('docContainer').scrollTop = 0;
         },
         handleAnchorClick(anchor) {
-            console.log('handleAnchorClick');
+            console.log('handleAnchorClick: ' + anchor);
             const { editor } = this.$refs;
             const { lineIndex } = anchor;
 
