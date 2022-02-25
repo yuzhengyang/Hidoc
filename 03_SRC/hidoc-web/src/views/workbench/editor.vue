@@ -15,7 +15,7 @@
             </el-row>
         </el-header>
         <el-main>
-            <v-md-editor ref="editor" v-model="content" height="100%" :include-level="[1, 2, 3, 4]" :disabled-menus="[]" left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code" :before-preview-change="beforePreviewChange" @upload-image="handleUploadImage" @change="textChange"></v-md-editor>
+            <v-md-editor ref="editor" v-model="content" height="100%" :include-level="[1, 2, 3, 4]" :disabled-menus="[]" left-toolbar="undo redo clear | h bold italic strikethrough quote | ul ol table hr | link image code | ilink" :before-preview-change="beforePreviewChange" @upload-image="handleUploadImage" @change="textChange" :toolbar="toolbar"></v-md-editor>
         </el-main>
         <!-- <el-footer>
             <el-row>
@@ -38,6 +38,35 @@ import { mdFormat } from '../../utils/mdtools';
 export default {
     name: 'editor',
     data() {
+        this.toolbar = {
+            ilink: {
+                title: 'mermaid示例',
+                icon: 'v-md-icon-tip',
+                action(editor) {
+                    editor.insert(function(selected) {
+                        const prefix = '```mermaid\n';
+                        const suffix = '```';
+                        const placeholder = "sequenceDiagram\n"+
+                                    "    participant Alice\n"+
+                                    "    participant Bob\n"+
+                                    "    Alice->>John: Hello John, how are you?\n"+
+                                    "    loop Healthcheck\n"+
+                                    "        John->>John: Fight against hypochondria\n"+
+                                    "    end\n"+
+                                    "    Note right of John: Rational thoughts <br/>prevail!\n"+
+                                    "    John-->>Alice: Great!\n"+
+                                    "    John->>Bob: How about you?\n"+
+                                    "    Bob-->>John: Jolly good!\n";
+                        const content = selected || placeholder;
+
+                        return {
+                            text: `${prefix}${content}${suffix}`,
+                            selected: content
+                        };
+                    });
+                }
+            }
+        };
         return {
             dynamicTags: ['标签一', '标签二', '标签三'],
             inputVisible: false,
@@ -205,8 +234,8 @@ export default {
             // 预览前对文本进行处理，然后再渲染预览
             if (this.loadStatus == 'active') {
                 next(mdFormat(text));
-            }else{
-                  next(text);
+            } else {
+                next(text);
             }
         },
         textChange(text, html) {

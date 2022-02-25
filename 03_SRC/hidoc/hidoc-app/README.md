@@ -29,3 +29,37 @@ UPDATE doc_history SET content = REPLACE(content, 'http://10.16.13.183:24001/f/d
 2、文件路径修复（windows和linux路径不同）
 UPDATE sys_file SET content = REPLACE(path, '\', '/');
 ```
+
+
+```sql
+查询温度信息
+SELECT t.create_time,
+MAX(temperature) max_tp,MIN(temperature) min_tp,ROUND(AVG(temperature),2) avg_tp,
+MAX(humidity) max_hd,MIN(humidity) min_hd,ROUND(AVG(humidity),2) avg_hd
+FROM (
+	SELECT 
+	to_char(create_time , 'YYYY-MM-DD HH24') create_time,
+	(data->>'temperature')::int4 AS temperature ,
+	(data->>'humidity')::int4 AS humidity 
+	FROM data_coll 
+	WHERE sender_id = 'qd-220223' AND (data->>'version') = 'v4' AND (data->>'temperature')::int4 > -20
+	ORDER BY create_time 
+) t GROUP BY create_time 
+
+SELECT t.create_time,
+MAX(temperature) max_tp,MIN(temperature) min_tp,ROUND(AVG(temperature),2) avg_tp,
+MAX(humidity) max_hd,MIN(humidity) min_hd,ROUND(AVG(humidity),2) avg_hd
+FROM (
+	SELECT 
+	to_char(create_time , 'HH24:SS') create_time ,
+	(data->>'temperature')::int4 AS temperature ,
+	(data->>'humidity')::int4 AS humidity 
+	FROM data_coll 
+	WHERE 
+		sender_id = 'qd-220223' AND 
+		(data->>'version') = 'v4' AND 
+		(data->>'temperature')::int4 > -20 AND 
+		create_time::date = CURRENT_DATE
+	ORDER BY create_time 
+) t GROUP BY create_time 
+```

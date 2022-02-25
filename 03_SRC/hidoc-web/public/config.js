@@ -18,5 +18,5 @@ var config = {
     baseServer: 'http://192.168.14.61:24001/',
     imageServer: 'http://192.168.14.155:24001/f/d/u/',
     hdImageFlag: '#hd.image->',
-    hdQuoteFlag: '#hd.quote->'
+    hdIlinkFlag: '#hd.ilink->'
 };

@@ -14,9 +14,9 @@ export function mdFormat(text) {
 
     // ====== 处理站内文章链接 ======
     {
-        let quotes = getQuotes(newText);
+        let quotes = getIlinks(newText);
         for (let i = 0; i < quotes.length; i++) {
-            newText = newText.replaceAll(quotes[i], psQuotes(quotes[i]));
+            newText = newText.replaceAll(quotes[i], psIlinks(quotes[i]));
         }
     }
 
@@ -39,8 +39,8 @@ function psImages(str) {
     return str.replaceAll('(#hd.image->', '(' + imageUrl);
 }
 
-function getQuotes(str) {
-    var reg = /\[(.+?)]\(#hd.quote->(.+?)\)/g;
+function getIlinks(str) {
+    var reg = /\[(.+?)]\(#hd.ilink->(.+?)\)/g;
     var list = [];
     var result = null;
     do {
@@ -49,8 +49,8 @@ function getQuotes(str) {
     } while (result);
     return list;
 }
-function psQuotes(str) {
-    let quoteUrl = window.location.protocol + '//' + window.location.host + '/collected/';
-    console.log(quoteUrl);
-    return str.replaceAll('(#hd.quote->', '(' + quoteUrl);
+function psIlinks(str) {
+    let linkUrl = window.location.protocol + '//' + window.location.host + '/collected/';
+    console.log(linkUrl);
+    return str.replaceAll('(#hd.ilink->', '(' + linkUrl);
 }

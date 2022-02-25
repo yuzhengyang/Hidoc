@@ -215,17 +215,19 @@ export default {
                             if (hash != '') {
                                 if (hash.indexOf('$') >= 0) {
                                     // 文档小标题定位
+                                    console.log('存在标题描述，需要定位：' + hash);
                                     let title = decodeURI(hash.replaceAll('$', ''));
                                     for (var i = 0; i < this.titles.length; i++) {
                                         let titleItem = this.titles[i];
                                         if (titleItem.title === title) {
                                             this.handleAnchorClick(titleItem);
+                                            console.log('锚点定位完成，已到达指定位置');
                                             break;
                                         }
                                     }
                                 } else {
                                     // 常规锚点定位
-                                    console.log('存在锚点，需要定位：' + hash);
+                                    console.log('存在常规锚点，需要定位：' + hash);
                                     document.getElementById(hash).scrollIntoView(true);
                                     console.log('锚点定位完成，已到达指定位置');
                                 }
