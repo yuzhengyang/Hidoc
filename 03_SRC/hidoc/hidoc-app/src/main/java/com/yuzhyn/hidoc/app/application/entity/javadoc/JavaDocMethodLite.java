@@ -50,4 +50,5 @@ public class JavaDocMethodLite {
     @TableField(exist = false)
     private JSONObject javaDocClassLite;
 
+    private Boolean isStruct;
 }

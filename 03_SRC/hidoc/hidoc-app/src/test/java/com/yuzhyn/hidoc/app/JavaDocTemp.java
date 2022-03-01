@@ -34,7 +34,7 @@ package com.yuzhyn.hidoc.app;
  *
  * <div javadoc="log" javadoc-cn="修改日志">
  * 版本         修改时间       修改人         修改内容
- * 7.0.0.1     2021-02-24    fanxueping     CMPS-1891配货池增加selectByIdFUdp
+ * 7.0.0.1     2021-02-24    zhangsan       CMPS-1891配货池增加selectByIdFUdp
  * </div>
  */
 

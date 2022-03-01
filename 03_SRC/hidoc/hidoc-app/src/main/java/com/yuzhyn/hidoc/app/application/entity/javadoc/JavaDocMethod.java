@@ -52,4 +52,6 @@ public class JavaDocMethod {
     @TableField(exist = false)
     private JSONObject javaDocClassLite;
 
+    private Boolean isStruct;
+
 }

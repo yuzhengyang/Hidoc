@@ -72,3 +72,9 @@ TABLESPACE pg_default;
 ALTER TABLE public.sys_access_log
     OWNER to postgres;
 ```
+
+
+## 2022-03-01
+ALTER TABLE public.java_doc_class ADD is_struct bool NULL;
+
+ALTER TABLE public.java_doc_method ADD is_struct bool NULL;

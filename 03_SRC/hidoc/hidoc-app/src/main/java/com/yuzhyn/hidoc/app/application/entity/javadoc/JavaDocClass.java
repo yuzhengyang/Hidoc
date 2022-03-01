@@ -51,4 +51,6 @@ public class JavaDocClass {
     private List<JavaDocMethod> javaDocMethodList;
 
     private String originalDocument;
+
+    private Boolean isStruct;
 }

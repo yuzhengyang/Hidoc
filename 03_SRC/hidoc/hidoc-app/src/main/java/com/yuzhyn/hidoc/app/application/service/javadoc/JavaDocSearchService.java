@@ -91,7 +91,7 @@ public class JavaDocSearchService {
             if (mode.equals("class") || mode.equals("all")) {
 
                 LambdaQueryWrapper<JavaDocClassLite> classWrapper = new LambdaQueryWrapper<JavaDocClassLite>();
-                classWrapper = classWrapper.and(p -> p.in(JavaDocClassLite::getVersion, projectVersionList));
+                classWrapper = classWrapper.and(p -> p.in(JavaDocClassLite::getVersion, projectVersionList)).and(q -> q.eq(JavaDocClassLite::getIsStruct, true));
                 if (ListTool.ok(nameArray)) {
                     classWrapper = classWrapper.and(p -> {
                         for (String key : nameArray) {
@@ -127,21 +127,22 @@ public class JavaDocSearchService {
                 IPage<JavaDocClassLite> classPage = javaDocClassLiteMapper.selectPage(new Page<JavaDocClassLite>(1, selectClassPageSize), classWrapper);
                 classList = classPage.getRecords();
                 // 后端关键字高亮
-                if (ListTool.ok(classList)) {
-                    for (JavaDocClassLite classItem : classList) {
-                        classItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentInfo()), text, begTag, endTag));
-                        classItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentScene()), text, begTag, endTag));
-                        classItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentLimit()), text, begTag, endTag));
-//                        classItem.setCommentExample(HtmlStringTool.keywordsHightLight(classItem.getCommentExample(), text, begTag, endTag));
-//                        classItem.setCommentLog(HtmlStringTool.keywordsHightLight(classItem.getCommentLog(), text, begTag, endTag));
-                        classItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(classItem.getCommentKeywords(), text, begTag, endTag));
-                    }
-                }
+                // bug：导致内容被抹除
+//                if (ListTool.ok(classList)) {
+//                    for (JavaDocClassLite classItem : classList) {
+//                        classItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentInfo()), text, begTag, endTag));
+//                        classItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentScene()), text, begTag, endTag));
+//                        classItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentLimit()), text, begTag, endTag));
+////                        classItem.setCommentExample(HtmlStringTool.keywordsHightLight(classItem.getCommentExample(), text, begTag, endTag));
+////                        classItem.setCommentLog(HtmlStringTool.keywordsHightLight(classItem.getCommentLog(), text, begTag, endTag));
+//                        classItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(classItem.getCommentKeywords(), text, begTag, endTag));
+//                    }
+//                }
             }
             if (mode.equals("method") || mode.equals("all")) {
 
                 LambdaQueryWrapper<JavaDocMethodLite> methodWrapper = new LambdaQueryWrapper<JavaDocMethodLite>();
-                methodWrapper = methodWrapper.and(p -> p.in(JavaDocMethodLite::getVersion, projectVersionList));
+                methodWrapper = methodWrapper.and(p -> p.in(JavaDocMethodLite::getVersion, projectVersionList)).and(q -> q.eq(JavaDocMethodLite::getIsStruct, true));
                 if (ListTool.ok(nameArray)) {
                     methodWrapper = methodWrapper.and(p -> {
                         for (String key : nameArray) {
@@ -180,16 +181,17 @@ public class JavaDocSearchService {
 
                 methodList = methodPage.getRecords();
                 // 后端关键字高亮
-                if (ListTool.ok(methodList)) {
-                    for (JavaDocMethodLite methodItem : methodList) {
-                        methodItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentInfo()), text, begTag, endTag));
-                        methodItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentScene()), text, begTag, endTag));
-                        methodItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentLimit()), text, begTag, endTag));
-//                        methodItem.setCommentExample(HtmlStringTool.keywordsHightLight(methodItem.getCommentExample(), text, begTag, endTag));
-//                        methodItem.setCommentLog(HtmlStringTool.keywordsHightLight(methodItem.getCommentLog(), text, begTag, endTag));
-                        methodItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(methodItem.getCommentKeywords(), text, begTag, endTag));
-                    }
-                }
+                // bug：导致内容被抹除
+//                if (ListTool.ok(methodList)) {
+//                    for (JavaDocMethodLite methodItem : methodList) {
+//                        methodItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentInfo()), text, begTag, endTag));
+//                        methodItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentScene()), text, begTag, endTag));
+//                        methodItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentLimit()), text, begTag, endTag));
+////                        methodItem.setCommentExample(HtmlStringTool.keywordsHightLight(methodItem.getCommentExample(), text, begTag, endTag));
+////                        methodItem.setCommentLog(HtmlStringTool.keywordsHightLight(methodItem.getCommentLog(), text, begTag, endTag));
+//                        methodItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(methodItem.getCommentKeywords(), text, begTag, endTag));
+//                    }
+//                }
                 // 补充类信息
                 if (ListTool.ok(methodList)) {
                     List<String> methodClassIdList = methodList.stream().map(JavaDocMethodLite::getClassId).distinct().collect(toList());

@@ -43,29 +43,37 @@
 
     <!-- 详细信息弹框 -->
     <!-- 示例说明 -->
-    <el-dialog v-model="commentExampleDialog" title="示例说明" width="90%">
-        <div>
-            <v-md-editor v-model="this.dataObj.commentExample" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
-        </div>
+    <el-dialog v-model="commentExampleDialog" title="示例说明" width="90%" center fullscreen>
+        <el-container>
+            <el-main>
+                <v-md-editor v-model="this.dataObj.commentExample" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+            </el-main>
+        </el-container>
         <template #footer>
             <span class="dialog-footer">
-                <el-button type="primary" @click="commentExampleDialog = false">我知道了</el-button>
+                <el-affix position="bottom" :offset="20">
+                    <el-button type="primary" @click="commentExampleDialog = false">我知道了</el-button>
+                </el-affix>
             </span>
         </template>
     </el-dialog>
     <!-- 修改记录 -->
-    <el-dialog v-model="commentLogDialog" title="修改记录" width="90%">
-        <div>
-            <el-table :data="data.commentLogJson" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
-                <el-table-column prop="version" label="版本" sortable width="180" />
-                <el-table-column prop="time" label="修改时间" sortable width="180" />
-                <el-table-column prop="author" label="修改人" width="180" />
-                <el-table-column prop="content" label="修改内容" />
-            </el-table>
-        </div>
+    <el-dialog v-model="commentLogDialog" title="修改记录" width="90%" center fullscreen>
+        <el-container>
+            <el-main>
+                <el-table :data="data.commentLogJson" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
+                    <el-table-column prop="version" label="版本" sortable width="180" />
+                    <el-table-column prop="time" label="修改时间" sortable width="180" />
+                    <el-table-column prop="author" label="修改人" width="180" />
+                    <el-table-column prop="content" label="修改内容" />
+                </el-table>
+            </el-main>
+        </el-container>
         <template #footer>
             <span class="dialog-footer">
-                <el-button type="primary" @click="commentLogDialog = false">我知道了</el-button>
+                <el-affix position="bottom" :offset="20">
+                    <el-button type="primary" @click="commentLogDialog = false">我知道了</el-button>
+                </el-affix>
             </span>
         </template>
     </el-dialog>

@@ -46,4 +46,6 @@ public class JavaDocClassLite {
 
     @TableField(exist = false)
     private List<JavaDocMethod> javaDocMethodList;
+
+    private Boolean isStruct;
 }

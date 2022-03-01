@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -179,6 +181,7 @@ public class JavaDocCreateService {
                 javaDocClass.setCreateTime(LocalDateTime.now());
                 javaDocClass.setName(typeItem.getNameAsString());
                 javaDocClass.setOriginalDocument(cu.toString());
+                javaDocClass.setIsStruct(false);
 
                 if (typeItem.hasParentNode() && typeItem.getParentNode().isPresent() && typeItem.getParentNode().get().findCompilationUnit().isPresent()) {
                     CompilationUnit parentNode = typeItem.getParentNode().get().findCompilationUnit().get();
@@ -232,6 +235,12 @@ public class JavaDocCreateService {
                         javaDocClass.setCommentKeywords(commentArrays[5]);
 
                         javaDocClass.setCommentLogJson(parseCommentLog(commentArrays[4]));
+
+                        if (StringTool.ok(javaDocClass.getCommentScene()) ||
+                                StringTool.ok(javaDocClass.getCommentLimit()) ||
+                                StringTool.ok(javaDocClass.getCommentKeywords())) {
+                            javaDocClass.setIsStruct(true);
+                        }
                     }
                 }
                 javaDocClassList.add(javaDocClass);
@@ -252,6 +261,7 @@ public class JavaDocCreateService {
                             javaDocMethod.setCreateTime(LocalDateTime.now());
                             javaDocMethod.setName(methodItem.getNameAsString());
                             javaDocMethod.setSourceCode(methodItem.toString());
+                            javaDocMethod.setIsStruct(false);
                             // 填充修饰词
                             if (ListTool.ok(methodItem.getModifiers())) {
                                 StringBuilder stringBuilder = new StringBuilder();
@@ -288,7 +298,14 @@ public class JavaDocCreateService {
                                 javaDocMethod.setCommentKeywords(commentArrays[5] + " , " + javaDocClass.getCommentKeywords());
 
                                 javaDocMethod.setCommentLogJson(parseCommentLog(commentArrays[4]));
+
+                                if (StringTool.ok(javaDocMethod.getCommentScene()) ||
+                                        StringTool.ok(javaDocMethod.getCommentLimit()) ||
+                                        StringTool.ok(javaDocMethod.getCommentKeywords())) {
+                                    javaDocMethod.setIsStruct(true);
+                                }
                             }
+                            if (!javaDocClass.getIsStruct()) javaDocMethod.setIsStruct(false);
                             javaDocMethodList.add(javaDocMethod);
                         }
                     }
@@ -302,6 +319,100 @@ public class JavaDocCreateService {
 
         if (StringTool.ok(s)) {
             String lines[] = s.split("\\r?\\n");
+            String curblock = "info";
+//            String planBTxt = ""; // 如果没有按照模板书写注释，则按照常规解析内容（普通文本，排除@标志行）
+            for (String line : lines) {
+                String trimline = line.trim(); // 去掉前后空格的内容
+                String txtline = trimline;
+                if (txtline.equals("* <p>")) txtline = ""; // 清空掉 "* <p>" 的行
+                if (txtline.startsWith("*")) txtline = txtline.substring(1); // 去掉 " *" 的内容
+                if (txtline.startsWith(" ")) txtline = txtline.substring(1); // 去掉第一个空格 " " 的内容
+                if (txtline.startsWith("@")) continue; // 跳过@修饰的标记内容
+
+                // 分析当前所在区块（>开始，<结束），区块包括：info、scene、limit、example、log、keywords
+                Tuple2<String, String> signRs = parseCommentBlockSign(txtline, curblock);
+                curblock = signRs.getT1();
+                txtline = signRs.getT2();
+                int blockid = -1;
+                if (curblock.equals("info")) blockid = 0;
+                if (curblock.equals("scene")) blockid = 1;
+                if (curblock.equals("limit")) blockid = 2;
+                if (curblock.equals("example")) blockid = 3;
+                if (curblock.equals("log")) blockid = 4;
+                if (curblock.equals("keywords")) blockid = 5;
+
+                // 对planB进行赋值（不在区块中，不是@标志开始的内容）
+//                if (curblock.equals("") && (!txtline.trim().startsWith("@") || txtline.trim().toLowerCase().startsWith("@description"))) {
+//                    if (txtline.trim().toLowerCase().startsWith("@description")) {
+//                        txtline = txtline.trim().substring("@description".length());
+//                    }
+//                    if (txtline.trim().startsWith(":") || txtline.trim().startsWith("：")) {
+//                        txtline = txtline.trim().substring(":".length());
+//                    }
+//
+//                    planBTxt += txtline;
+//                    planBTxt += StringConst.NEWLINE;
+//                }
+
+                if (blockid >= 0 && blockid < result.length) {
+                    result[blockid] += txtline;
+                    result[blockid] += StringConst.NEWLINE;
+                }
+            }
+
+            // 最后整理一下文本内容，缩进一下距离等
+            for (int i = 0; i < result.length; i++) {
+                result[i] = StringTool.retractSpaceArrayAuto(result[i]);
+            }
+
+            // 对planB进行返回（在info内容为空时，返回planB）
+//            if (!StringTool.ok(result[0])) result[0] = planBTxt;
+        }
+
+        return result;
+    }
+
+    private Tuple2<String, String> parseCommentBlockSign(String txtline, String curblock) {
+        String result = "";
+        if (txtline.startsWith("#场景：") || txtline.startsWith("#场景:")) {
+            result = "scene";
+            txtline = txtline.substring(4);
+        }
+        if (txtline.startsWith("#限制：") || txtline.startsWith("#限制:")) {
+            result = "limit";
+            txtline = txtline.substring(4);
+        }
+        if (txtline.startsWith("#关键字：") || txtline.startsWith("#关键字:")) {
+            result = "keywords";
+            txtline = txtline.substring(5);
+        }
+        if (txtline.startsWith("<pre>{@code 示例说明")) {
+            result = "example>";
+        }
+        if (txtline.startsWith("<pre>{@code 修改记录")) {
+            result = "log>";
+        }
+        if (txtline.startsWith("}</pre>")) {
+            result = "<";
+        }
+
+        // 对上次标记进行处理，去除开始和结束标记，可以正式获取文本信息
+        if (StringTool.ok(curblock) && curblock.endsWith(">")) {
+            curblock = curblock.replaceAll(">", "");
+        }
+
+        // 如果当前在某部分中，但是本次未解析到内容，则使用上次的信息
+        if (StringTool.ok(curblock) && !StringTool.ok(result)) {
+            return Tuples.of(curblock, txtline);
+        }
+        return Tuples.of(result, txtline);
+    }
+
+    private String[] parseCommentOld(String s) {
+        String[] result = new String[]{"", "", "", "", "", ""};
+
+        if (StringTool.ok(s)) {
+            String lines[] = s.split("\\r?\\n");
             String curblock = "";
             String planBTxt = ""; // 如果没有按照模板书写注释，则按照常规解析内容（普通文本，排除@标志行）
             for (String line : lines) {
@@ -311,7 +422,7 @@ public class JavaDocCreateService {
                 if (txtline.startsWith("*")) txtline = txtline.substring(1); // 去掉 " *" 的内容
 
                 // 分析当前所在区块（>开始，<结束），区块包括：info、scene、limit、example、log、keywords
-                curblock = parseCommentBlockSign(txtline, curblock);
+                curblock = parseCommentBlockSignOld(txtline, curblock);
                 int blockid = -1;
                 if (curblock.equals("info")) blockid = 0;
                 if (curblock.equals("scene")) blockid = 1;
@@ -351,7 +462,7 @@ public class JavaDocCreateService {
         return result;
     }
 
-    private String parseCommentBlockSign(String txtline, String curblock) {
+    private String parseCommentBlockSignOld(String txtline, String curblock) {
         String result = "";
         if (txtline.contains("<div")) {
             if (txtline.contains("javadoc=\"info\"") || txtline.contains("javadoc='info'")) {
