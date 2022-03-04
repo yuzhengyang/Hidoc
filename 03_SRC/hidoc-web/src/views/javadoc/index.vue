@@ -6,6 +6,7 @@
                     <el-col :span="8">
                         <el-button-group>
                             <el-button type="primary" plain @click="pageMode = 'search'">搜索模式</el-button>
+                            <el-button type="primary" plain @click="pageMode = 'file'">文档模式</el-button>
                             <el-button type="primary" plain @click="pageMode = 'view'">浏览模式</el-button>
                         </el-button-group>
                     </el-col>
@@ -17,6 +18,7 @@
         <!-- 内容区域 -->
         <el-container style="height:95%">
             <java-doc-search-page v-if="pageMode == 'search'" />
+            <java-doc-file-page v-else-if="pageMode == 'file'" />
             <java-doc-view-page v-else />
         </el-container>
     </el-container>
@@ -27,6 +29,7 @@ import { ElMessageBox, ElMessage } from 'element-plus';
 import { Search, Share, Guide } from '@element-plus/icons';
 import JavaDocViewPage from './components/JavaDocViewPage';
 import JavaDocSearchPage from './components/JavaDocSearchPage';
+import JavaDocFilePage from './components/JavaDocFilePage';
 import request from '../../utils/request.js';
 export default {
     data() {
@@ -34,7 +37,7 @@ export default {
             pageMode: 'search'
         };
     },
-    components: { JavaDocSearchPage, JavaDocViewPage },
+    components: { JavaDocSearchPage, JavaDocViewPage, JavaDocFilePage },
     mounted() {
         document.title = 'Hidoc-JavaDoc';
     },

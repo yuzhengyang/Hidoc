@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.model;
+package com.yuzhyn.hidoc.app.application.model.sys;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

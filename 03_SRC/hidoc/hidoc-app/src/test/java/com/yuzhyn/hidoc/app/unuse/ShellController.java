@@ -1,6 +1,6 @@
 package com.yuzhyn.hidoc.app.unuse;
 
-import com.yuzhyn.hidoc.app.application.model.StreamGobbler;
+import com.yuzhyn.hidoc.app.application.model.sys.StreamGobbler;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.utils.LinuxFirewallTool;
 import lombok.extern.slf4j.Slf4j;

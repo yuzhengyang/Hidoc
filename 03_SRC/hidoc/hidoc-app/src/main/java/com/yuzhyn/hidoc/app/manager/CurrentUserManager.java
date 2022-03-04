@@ -2,7 +2,7 @@ package com.yuzhyn.hidoc.app.manager;
 
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
-import com.yuzhyn.hidoc.app.application.model.UserInfo;
+import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.azylee.core.logs.Alog;
 
 /**

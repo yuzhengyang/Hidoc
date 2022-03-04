@@ -51,4 +51,6 @@ public class JavaDocMethodLite {
     private JSONObject javaDocClassLite;
 
     private Boolean isStruct;
+
+    private String commentMenu;
 }

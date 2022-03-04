@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.model;
+package com.yuzhyn.hidoc.app.application.model.sys;
 
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;

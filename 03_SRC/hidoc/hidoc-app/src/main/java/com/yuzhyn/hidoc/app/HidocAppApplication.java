@@ -3,7 +3,7 @@ package com.yuzhyn.hidoc.app;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
-import com.yuzhyn.hidoc.app.application.model.UserInfo;
+import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;

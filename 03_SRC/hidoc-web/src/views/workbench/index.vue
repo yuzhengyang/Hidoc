@@ -37,6 +37,10 @@
                             <i class="el-icon-box"></i>
                             <template #title>数据收集器</template>
                         </el-menu-item>
+                        <el-menu-item index="8010" @click="changeMenu(8010)">
+                            <i class="el-icon-box"></i>
+                            <template #title>剂量控制器</template>
+                        </el-menu-item>
                         <el-menu-item index="9000" @click="changeMenu(9000)">
                             <i class="el-icon-user"></i>
                             <template #title>个人信息</template>
@@ -55,6 +59,7 @@
                     <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
                     <java-doc v-if="this.currentMenuIndex == 7000"></java-doc>
                     <data-collector v-if="this.currentMenuIndex == 8000"></data-collector>
+                    <dose-controller v-if="this.currentMenuIndex == 8010"></dose-controller>
                     <user-info v-if="this.currentMenuIndex == 9000"></user-info>
                     <laboratory v-if="this.currentMenuIndex == 9999"></laboratory>
                 </el-col>
@@ -74,8 +79,9 @@ import UserInfo from './components/UserInfo';
 import MaterialLibrary from './components/MaterialLibrary';
 import Laboratory from './components/Laboratory';
 import DataCollector from './components/DataCollector';
-import RecycleBin from './components/RecycleBin'
+import RecycleBin from './components/RecycleBin';
 import JavaDoc from './components/JavaDoc';
+import DoseController from './components/DoseController';
 // import { Delete } from '@element-plus/icons';
 export default {
     data() {
@@ -109,7 +115,7 @@ export default {
         // console.log('name: ' + name);
         // this.loadCollected();
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector,RecycleBin,JavaDoc },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);

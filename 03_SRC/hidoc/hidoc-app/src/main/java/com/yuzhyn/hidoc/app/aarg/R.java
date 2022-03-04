@@ -4,7 +4,7 @@ import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
-import com.yuzhyn.hidoc.app.application.model.UserInfo;
+import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import org.ehcache.CacheManager;
 import com.yuzhyn.azylee.core.datas.ids.SnowFlake;
 import com.yuzhyn.azylee.core.ios.dirs.DirTool;

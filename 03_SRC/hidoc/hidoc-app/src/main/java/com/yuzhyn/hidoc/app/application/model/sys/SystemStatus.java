@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.model;
+package com.yuzhyn.hidoc.app.application.model.sys;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;

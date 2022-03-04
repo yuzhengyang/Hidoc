@@ -48,4 +48,6 @@ public class JavaDocClassLite {
     private List<JavaDocMethod> javaDocMethodList;
 
     private Boolean isStruct;
+
+    private String commentMenu;
 }

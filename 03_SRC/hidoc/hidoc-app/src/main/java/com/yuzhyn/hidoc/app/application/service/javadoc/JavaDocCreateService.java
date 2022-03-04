@@ -233,11 +233,13 @@ public class JavaDocCreateService {
                         javaDocClass.setCommentExample(commentArrays[3]);
                         javaDocClass.setCommentLog(commentArrays[4]);
                         javaDocClass.setCommentKeywords(commentArrays[5]);
+                        javaDocClass.setCommentMenu(commentArrays[6]);
 
                         javaDocClass.setCommentLogJson(parseCommentLog(commentArrays[4]));
 
                         if (StringTool.ok(javaDocClass.getCommentScene()) ||
                                 StringTool.ok(javaDocClass.getCommentLimit()) ||
+                                StringTool.ok(javaDocClass.getCommentMenu()) ||
                                 StringTool.ok(javaDocClass.getCommentKeywords())) {
                             javaDocClass.setIsStruct(true);
                         }
@@ -296,11 +298,13 @@ public class JavaDocCreateService {
                                 javaDocMethod.setCommentExample(commentArrays[3]);
                                 javaDocMethod.setCommentLog(commentArrays[4]);
                                 javaDocMethod.setCommentKeywords(commentArrays[5] + " , " + javaDocClass.getCommentKeywords());
+                                javaDocMethod.setCommentMenu(commentArrays[6]);
 
                                 javaDocMethod.setCommentLogJson(parseCommentLog(commentArrays[4]));
 
                                 if (StringTool.ok(javaDocMethod.getCommentScene()) ||
                                         StringTool.ok(javaDocMethod.getCommentLimit()) ||
+                                        StringTool.ok(javaDocMethod.getCommentMenu()) ||
                                         StringTool.ok(javaDocMethod.getCommentKeywords())) {
                                     javaDocMethod.setIsStruct(true);
                                 }
@@ -315,7 +319,7 @@ public class JavaDocCreateService {
     }
 
     private String[] parseComment(String s) {
-        String[] result = new String[]{"", "", "", "", "", ""};
+        String[] result = new String[]{"", "", "", "", "", "", ""};
 
         if (StringTool.ok(s)) {
             String lines[] = s.split("\\r?\\n");
@@ -340,6 +344,7 @@ public class JavaDocCreateService {
                 if (curblock.equals("example")) blockid = 3;
                 if (curblock.equals("log")) blockid = 4;
                 if (curblock.equals("keywords")) blockid = 5;
+                if (curblock.equals("menu")) blockid = 6;
 
                 // 对planB进行赋值（不在区块中，不是@标志开始的内容）
 //                if (curblock.equals("") && (!txtline.trim().startsWith("@") || txtline.trim().toLowerCase().startsWith("@description"))) {
@@ -385,6 +390,10 @@ public class JavaDocCreateService {
         if (txtline.startsWith("#关键字：") || txtline.startsWith("#关键字:")) {
             result = "keywords";
             txtline = txtline.substring(5);
+        }
+        if (txtline.startsWith("#目录：") || txtline.startsWith("#目录:")) {
+            result = "menu";
+            txtline = txtline.substring(4);
         }
         if (txtline.startsWith("<pre>{@code 示例说明")) {
             result = "example>";

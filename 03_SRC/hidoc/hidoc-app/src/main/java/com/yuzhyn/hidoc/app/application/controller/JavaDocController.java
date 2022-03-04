@@ -6,6 +6,7 @@ import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
+import com.yuzhyn.azylee.core.datas.objects.ObjectTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.ios.dirs.DirTool;
 import com.yuzhyn.azylee.core.ios.files.FileFindTool;
@@ -210,6 +211,36 @@ public class JavaDocController {
         List<String> packageList = Arrays.asList(packages.toArray(new String[0]));
         Collections.sort(packageList);
         responseData.putData(packageList);
+        return responseData;
+    }
+
+    /**
+     * 项目中所有目录列表
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("packageList")
+    public ResponseData menuList(@RequestBody Map<String, Object> params) {
+        String projectId = MapTool.get(params, "projectId", "").toString();
+        String version = MapTool.get(params, "version", "").toString();
+        String projectName = MapTool.get(params, "projectName", "").toString();
+
+        Set<String> menus = new HashSet<>();
+        if (StringTool.ok(projectId)) {
+            List<JavaDocClass> classList = javaDocClassMapper.selectList(new LambdaQueryWrapper<JavaDocClass>()
+                    .eq(JavaDocClass::getProjectId, projectId)
+                    .eq(JavaDocClass::getVersion, version));
+            if (ListTool.ok(classList)) {
+                for (JavaDocClass classItem : classList) {
+                    menus.add(ObjectTool.optional(classItem.getCommentMenu(), ""));
+                }
+            }
+        }
+        ResponseData responseData = ResponseData.ok();
+        List<String> menuList = Arrays.asList(menus.toArray(new String[0]));
+        Collections.sort(menuList);
+        responseData.putData(menuList);
         return responseData;
     }
 

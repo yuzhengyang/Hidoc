@@ -54,4 +54,6 @@ public class JavaDocMethod {
 
     private Boolean isStruct;
 
+    private String commentMenu;
+
 }

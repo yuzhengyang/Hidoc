@@ -78,3 +78,9 @@ ALTER TABLE public.sys_access_log
 ALTER TABLE public.java_doc_class ADD is_struct bool NULL;
 
 ALTER TABLE public.java_doc_method ADD is_struct bool NULL;
+
+## 2022-03-02
+ALTER TABLE public.java_doc_class ADD comment_menu text NULL;
+
+ALTER TABLE public.java_doc_method ADD comment_menu text NULL;
+

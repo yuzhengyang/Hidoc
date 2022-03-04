@@ -53,4 +53,6 @@ public class JavaDocClass {
     private String originalDocument;
 
     private Boolean isStruct;
+
+    private String commentMenu;
 }
