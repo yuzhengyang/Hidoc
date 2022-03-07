@@ -77,7 +77,9 @@ public class JavaDocTemp2 {
      * }</pre>
      *
      * @param posSalePluList 商品列表
+     *                       传入参数不能为空
      * @return 拆包后的商品列表
+     * 列表可能为空，需要注意判断
      */
     public List<String> pluGroupSplit(List<String> posSalePluList) {
         List<String> posSalePluSplitedList = new ArrayList<>();

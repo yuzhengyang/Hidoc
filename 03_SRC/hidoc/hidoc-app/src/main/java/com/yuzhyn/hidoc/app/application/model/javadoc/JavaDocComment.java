@@ -10,19 +10,9 @@ import java.util.List;
 
 public class JavaDocComment {
 
-    class CommentStruct {
-        String type;
-        String txt;
-
-        CommentStruct(String _type, String _txt) {
-            this.type = _type;
-            this.txt = _txt;
-        }
-    }
-
     private String comment;
 
-    private List<CommentStruct> structList;
+    private List<JavaDocCommentStruct> structList;
 
     private JavaDocComment() {
     }
@@ -33,7 +23,15 @@ public class JavaDocComment {
     }
 
     public String[] parseComment() {
+        parseCommentType();
+
+
+        for (JavaDocCommentStruct item : structList) {
+            System.out.println(item.type + " -> " + item.txt);
+        }
+        return null;
     }
+
 
     /**
      * 按行解析注释类型
@@ -48,7 +46,7 @@ public class JavaDocComment {
                 if (txtline.equals("* <p>")) txtline = ""; // 清空掉 "* <p>" 的行
                 if (txtline.startsWith("*")) txtline = txtline.substring(1); // 去掉 " *" 的内容
                 if (txtline.startsWith(" ")) txtline = txtline.substring(1); // 去掉第一个空格 " " 的内容
-                if (txtline.startsWith("@")) continue; // 跳过@修饰的标记内容
+//                if (txtline.startsWith("@")) continue; // 跳过@修饰的标记内容
 
 
                 if (txtline.startsWith("#场景：") || txtline.startsWith("#场景:")) {
@@ -69,11 +67,22 @@ public class JavaDocComment {
                     curblock = "log>";
                 } else if (txtline.startsWith("}</pre>")) {
                     curblock = "";
-                } else if (txtline.startsWith("@")) {
-                    curblock = "";
+                } else if (txtline.startsWith("@param")) {
+                    curblock = "@param";
+                    txtline = txtline.substring(6);
+                } else if (txtline.startsWith("@return")) {
+                    curblock = "@return";
+                    txtline = txtline.substring(7);
                 } else {
-                    structList.add(new CommentStruct(curblock, txtline));
+                    // 对其他内容进行分析
+                    // 对进入块后进行处理
+                    if (curblock.equals("example>")) {
+                        curblock = "example";
+                    } else if (curblock.equals("log>")) {
+                        curblock = "log";
+                    }
                 }
+                structList.add(new JavaDocCommentStruct(curblock, txtline));
 
             }
 //

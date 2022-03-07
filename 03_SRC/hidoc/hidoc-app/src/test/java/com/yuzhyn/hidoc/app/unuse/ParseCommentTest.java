@@ -1,10 +1,15 @@
 package com.yuzhyn.hidoc.app.unuse;
 
+import com.yuzhyn.hidoc.app.application.model.javadoc.JavaDocComment;
+
 public class ParseCommentTest {
-    String comment = "\n" +
+   static String comment = "\n" +
             "     * 商品包拆包\n" +
-            "     * #场景：数据查询时，使用平台需要写大量SQL语句执行，但是对于普通增删改查，可使用基本方法工具，省去了手写SQL\n" +
-            "     * #限制：工具提供动态修改表名的方法，并发时会影响Spring注入的全局对象\n" +
+            "     * #场景：数据查询时，使用平台需要写大量SQL语句执行，但是对于普通增删改查\n" +
+            "     * 可使用基本方法工具\n" +
+            "     * 省去了手写SQL\n" +
+            "     * #限制：工具提供动态修改表名的方法\n" +
+            "     * 并发时会影响Spring注入的全局对象\n" +
             "     * #关键字：流水，组合商品、拆包\n" +
             "     *\n" +
             "     * <pre>{@code 示例说明\n" +
@@ -28,5 +33,9 @@ public class ParseCommentTest {
             "     * @return 拆包后的商品列表\n" +
             "     ";
 
+    public static void main(String[] args) {
+        JavaDocComment jdc = new JavaDocComment(comment);
+        jdc.parseComment();
+    }
 
 }
