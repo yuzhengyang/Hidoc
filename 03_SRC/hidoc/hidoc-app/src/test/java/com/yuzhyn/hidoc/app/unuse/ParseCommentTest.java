@@ -30,6 +30,7 @@ public class ParseCommentTest {
             "     * }</pre>\n" +
             "     *\n" +
             "     * @param posSalePluList 商品列表\n" +
+            "     *                       传入参数不能为空\n" +
             "     * @return 拆包后的商品列表\n" +
             "     ";
 
