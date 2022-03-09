@@ -24,10 +24,8 @@ public class ParseCommentTest {
             "     *      }\n" +
             "     *      ```\n" +
             "     * }</pre>\n" +
-            "     * <pre>{@code 修改记录\n" +
             "     * 版本         修改时间       修改人         修改内容\n" +
             "     * 7.0.0.1     2021-02-24    zhangsan       CMPS-1891配货池增加selectByIdFUdp\n" +
-            "     * }</pre>\n" +
             "     *\n" +
             "     * @param posSalePluList 商品列表\n" +
             "     *                       传入参数不能为空\n" +

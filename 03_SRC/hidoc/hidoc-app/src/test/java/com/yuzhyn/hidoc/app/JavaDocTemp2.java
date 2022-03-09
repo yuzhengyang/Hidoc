@@ -58,6 +58,7 @@ public class JavaDocTemp2 {
      * #场景：数据查询时，使用平台需要写大量SQL语句执行，但是对于普通增删改查，可使用基本方法工具，省去了手写SQL
      * #限制：工具提供动态修改表名的方法，并发时会影响Spring注入的全局对象
      * #关键字：流水，组合商品、拆包
+     * #目录：流水处理
      *
      * <pre>{@code 示例说明
      *      ** 说明 **
@@ -82,6 +83,20 @@ public class JavaDocTemp2 {
      * 列表可能为空，需要注意判断
      */
     public List<String> pluGroupSplit(List<String> posSalePluList) {
+        List<String> posSalePluSplitedList = new ArrayList<>();
+        return posSalePluSplitedList;
+    }
+
+
+    /**
+     * 商品包拆包
+     * #场景：数据查询时，使用平台需要写大量SQL语句执行，但是对于普通增删改查，可使用基本方法工具，省去了手写SQL
+     *
+     * @param posSalePluList 商品列表
+     *                       传入参数不能为空
+     * @return 拆包后的商品列表
+     */
+    public List<String> pluGroupSplit2(List<String> posSalePluList) {
         List<String> posSalePluSplitedList = new ArrayList<>();
         return posSalePluSplitedList;
     }

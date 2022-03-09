@@ -38,7 +38,7 @@
                             <template #title>数据收集器</template>
                         </el-menu-item>
                         <el-menu-item index="8010" @click="changeMenu(8010)">
-                            <i class="el-icon-box"></i>
+                            <i class="el-icon-odometer"></i>
                             <template #title>剂量控制器</template>
                         </el-menu-item>
                         <el-menu-item index="9000" @click="changeMenu(9000)">

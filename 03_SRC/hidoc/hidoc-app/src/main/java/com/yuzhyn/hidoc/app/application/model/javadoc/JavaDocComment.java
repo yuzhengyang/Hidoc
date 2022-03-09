@@ -1,12 +1,16 @@
 package com.yuzhyn.hidoc.app.application.model.javadoc;
 
 import com.github.javaparser.ast.comments.JavadocComment;
+import com.yuzhyn.azylee.core.datas.collections.ListTool;
+import com.yuzhyn.azylee.core.datas.objects.ObjectTool;
 import com.yuzhyn.azylee.core.datas.strings.StringConst;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JavaDocComment {
 
@@ -14,24 +18,21 @@ public class JavaDocComment {
 
     private List<JavaDocCommentStruct> structList;
 
+    private Map<String, String> commentResult;
+
     private JavaDocComment() {
     }
 
     public JavaDocComment(String _comment) {
         this.comment = _comment;
         this.structList = new ArrayList<>();
+        this.commentResult = new HashMap<>();
     }
 
-    public String[] parseComment() {
+    public void parseComment() {
         parseCommentType();
-
-
-        for (JavaDocCommentStruct item : structList) {
-            System.out.println(item.type + " -> " + item.txt);
-        }
-        return null;
+        formatComment();
     }
-
 
     /**
      * 按行解析注释类型
@@ -65,11 +66,24 @@ public class JavaDocComment {
                     curblock = "example>";
                 } else if (txtline.startsWith("<pre>{@code 修改记录")) {
                     curblock = "log>";
+                } else if (StringTool.has(txtline, "版本", "修改时间", "修改人", "修改内容")) {
+                    curblock = "log>";
                 } else if (txtline.startsWith("}</pre>")) {
-                    curblock = "";
+                    if (curblock.startsWith("example")) {
+                        curblock = "example<";
+                    } else {
+                        curblock = "";
+                    }
                 } else if (txtline.startsWith("@param")) {
                     curblock = "@param";
                     txtline = txtline.substring(6);
+
+                    String[] params = StringTool.splitLine(txtline.trim(), " ", 2, "", true);
+                    if (StringTool.ok(params[0], params[1])) {
+                        curblock += " " + params[0];
+                        txtline = params[1];
+                    }
+
                 } else if (txtline.startsWith("@return")) {
                     curblock = "@return";
                     txtline = txtline.substring(7);
@@ -83,16 +97,70 @@ public class JavaDocComment {
                     }
                 }
                 structList.add(new JavaDocCommentStruct(curblock, txtline));
-
             }
+        }
+    }
+
+    private void formatComment() {
+        if (ListTool.ok(structList)) {
+            for (JavaDocCommentStruct structItem : structList) {
+                String s = ObjectTool.optional(commentResult.get(structItem.getType()), "");
+                String txt = structItem.getTxt();
+                // 合并预处理
+                if (structItem.getType().startsWith("@param")) {
+                    txt = txt.trim();
+                }
+
+                if (StringTool.ok(s)) {
+                    s += StringConst.NEWLINE;
+                }
+                s += txt;
+                commentResult.put(structItem.getType(), s);
+            }
+        }
+
+        System.out.println("原始内容");
+        for (JavaDocCommentStruct item : structList) {
+            System.out.println(item.getType() + " : " + item.getTxt());
+        }
+
+        System.out.println("解析内容");
+        for (String item : commentResult.keySet()) {
+            System.out.println(item + " : " + commentResult.get(item));
+        }
+
+        for (String item : commentResult.keySet()) {
+            commentResult.put(item, StringTool.retractSpaceArrayAuto(commentResult.get(item)));
+        }
+
+        System.out.println("最后整理内容");
+        for (String item : commentResult.keySet()) {
+            System.out.println(item + " : " + commentResult.get(item));
+        }
 //
 //            // 最后整理一下文本内容，缩进一下距离等
 //            for (int i = 0; i < result.length; i++) {
 //                result[i] = StringTool.retractSpaceArrayAuto(result[i]);
 //            }
-
-            // 对planB进行返回（在info内容为空时，返回planB）
-//            if (!StringTool.ok(result[0])) result[0] = planBTxt;
-        }
     }
+//
+//    public String getInfo() {
+//        return "";
+//    }
+//
+//    public String getInfo() {
+//        return "";
+//    }
+//
+//    public String getInfo() {
+//        return "";
+//    }
+//
+//    public String getInfo() {
+//        return "";
+//    }
+//
+//    public String getInfo() {
+//        return "";
+//    }
 }

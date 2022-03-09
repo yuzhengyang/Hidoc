@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class JavaDocCommentStruct {
-    String type;
-    String txt;
+    private String type;
+    private String txt;
 
     public JavaDocCommentStruct(String _type, String _txt) {
         this.type = _type;

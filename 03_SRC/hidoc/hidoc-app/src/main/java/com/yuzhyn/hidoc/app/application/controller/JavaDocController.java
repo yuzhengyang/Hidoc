@@ -220,7 +220,7 @@ public class JavaDocController {
      * @param params
      * @return
      */
-    @PostMapping("packageList")
+    @PostMapping("menuList")
     public ResponseData menuList(@RequestBody Map<String, Object> params) {
         String projectId = MapTool.get(params, "projectId", "").toString();
         String version = MapTool.get(params, "version", "").toString();
