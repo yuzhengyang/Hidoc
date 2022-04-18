@@ -13,6 +13,7 @@ public class CurrentUserManager {
     private static ThreadLocal<Boolean> login = ThreadLocal.withInitial(() -> false);
     private static ThreadLocal<String> token = ThreadLocal.withInitial(() -> null);
     private static ThreadLocal<SysUser> user = ThreadLocal.withInitial(() -> null);
+    private static ThreadLocal<SysUser> openUser = ThreadLocal.withInitial(() -> null);
     private static ThreadLocal<SysUserFileConf> fileConfig = ThreadLocal.withInitial(() -> null);
     private static ThreadLocal<String> requestMethod = ThreadLocal.withInitial(() -> null);
 
@@ -28,6 +29,23 @@ public class CurrentUserManager {
 
     public static SysUser getUser() {
         return user.get();
+    }
+
+    /**
+     * 开放接口时，自动预制开放用户，没有用户信息，获取一个通用开放的用户信息
+     *
+     * @return
+     */
+    public static void createOpenUser() {
+        SysUser user = new SysUser();
+        user.setId("open-user");
+        user.setName("OpenUser");
+        user.setRealName("开放用户");
+        openUser.set(user);
+    }
+
+    public static SysUser getOpenUser() {
+        return openUser.get();
     }
 
     public static SysUserFileConf getFileConfig() {
@@ -60,5 +78,9 @@ public class CurrentUserManager {
         CurrentUserManager.fileConfig.remove();
         CurrentUserManager.ip.remove();
         CurrentUserManager.requestMethod.remove();
+        CurrentUserManager.openUser.remove();
+    }
+    public static void cleanOpenUser(){
+        CurrentUserManager.openUser.remove();
     }
 }

@@ -14,7 +14,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
         <lombok.version>1.18.12</lombok.version>
-        <azylee-core.version>1.0.2</azylee-core.version>
+        <azylee.version>1.0.3</azylee.version>
         <fastjson.version>1.2.74</fastjson.version>
         <mybatisplus.version>3.4.2</mybatisplus.version>
     </properties>
@@ -71,7 +71,13 @@
         <dependency>
             <groupId>top.yuzhyn</groupId>
             <artifactId>azylee-core</artifactId>
-            <version>${azylee-core.version}</version>
+            <version>${azylee.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>top.yuzhyn</groupId>
+            <artifactId>azylee-ext-web</artifactId>
+            <version>${azylee.version}</version>
         </dependency>
 
         <dependency>

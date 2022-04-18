@@ -6,6 +6,7 @@ import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
 import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
 import com.yuzhyn.azylee.core.datas.encrypts.MixdeTool;
+import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
 import com.yuzhyn.azylee.core.datas.regexs.RegexPattern;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
@@ -25,18 +26,25 @@ import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserMapper;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
+import com.yuzhyn.hidoc.app.application.service.sys.AuthCodeService;
+import com.yuzhyn.hidoc.app.application.service.sys.EmailService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.xmlbeans.impl.xb.ltgfmt.Code;
 import org.ehcache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
+import reactor.util.function.Tuple2;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping({"user", "u"})
 public class UserController {
@@ -65,20 +73,38 @@ public class UserController {
     @Autowired
     DocAccessLogMapper docAccessLogMapper;
 
+    @Autowired
+    AuthCodeService authCodeService;
+
+    @Autowired
+    EmailService emailService;
+
     @PostMapping("register")
     public ResponseData register(@RequestBody Map<String, Object> params) {
-        if (MapTool.ok(params, "username", "email", "password", "realname")) {
+        if (MapTool.ok(params, "username", "email", "password", "realname", "authCode", "uid")) {
             String avatar = MapTool.get(params, "avatar", "").toString();
             String name = MapTool.get(params, "username", "").toString();
             String email = MapTool.get(params, "email", "").toString();
             String password = MapTool.get(params, "password", "").toString();
             String realname = MapTool.getString(params, "realname", "");
+            String authCode = MapTool.getString(params, "authCode", "");
+            String uid = MapTool.getString(params, "uid", "");
 
             if (name.length() < R.MinPasswordLength || !RegexPattern.GENERAL.isMatch(name)) {
                 return ResponseData.error("账号不符合规则，仅支持6位及以上字母数字下划线组合");
             }
             if (password.length() < R.MinPasswordLength || !RegexPattern.GENERAL.isMatch(password)) {
                 return ResponseData.error("密码不符合规则，仅支持6位及以上字母数字下划线组合");
+            }
+            if (!StringTool.ok(uid)) {
+                return ResponseData.error("请获取验证码，验证邮箱可用");
+            }
+            if (!StringTool.ok(authCode)) {
+                return ResponseData.error("请输入验证码");
+            }
+            Tuple2<Boolean, String> checkFlag = authCodeService.checkCode(email, uid, authCode);
+            if (!checkFlag.getT1()) {
+                return ResponseData.error(checkFlag.getT2());
             }
 
             SysUser user = new SysUser();
@@ -89,7 +115,7 @@ public class UserController {
             user.setEmail(email);
             user.setPassword(MixdeTool.md5Mix(user.getName(), password));
             user.setCreateTime(LocalDateTime.now());
-            user.setIsFrozen(true); // 注册之后，默认是冻结状态
+            user.setIsFrozen(false);
             int flag = sysUserMapper.insert(user);
             if (flag > 0) {
 
@@ -113,6 +139,29 @@ public class UserController {
             }
         }
         return ResponseData.error("注册失败，请完善信息");
+    }
+
+
+    @PostMapping("getAuthCode")
+    public ResponseData getAuthCode(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "email")) {
+            String email = MapTool.get(params, "email", "").toString();
+
+            if (!StringTool.ok(email)) {
+                return ResponseData.error("请输入邮箱");
+            }
+
+            try {
+                Tuple2<String, String> codeInfo = authCodeService.createCode(email);
+                emailService.sendAuthCode(email, codeInfo.getT2());
+                return ResponseData.okData("uid", codeInfo.getT1());
+
+            } catch (Exception ex) {
+                log.error(ExceptionTool.getStackTrace(ex));
+                return ResponseData.error("获取验证码异常：" + ex.getMessage());
+            }
+        }
+        return ResponseData.error("请输入邮箱");
     }
 
     @PostMapping("login")
@@ -199,12 +248,19 @@ public class UserController {
         Integer collectedCount = docCollectedMapper.selectCount(new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getCreateUserId, CurrentUserManager.getUser().getId()));
         Integer docCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()));
         Integer cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, CurrentUserManager.getUser().getId()));
-        Integer readCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getOwnerUserId, CurrentUserManager.getUser().getId()));
-        Integer iReadCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getCreateUserId, CurrentUserManager.getUser().getId()));
+        Integer readCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getOwnerUserId, CurrentUserManager.getUser().getId()).ne(DocAccessLog::getUserId, CurrentUserManager.getUser().getId()));
+//        Integer iReadCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getCreateUserId, CurrentUserManager.getUser().getId()));
 
-        // 近7天 文集数量 文档数量 文件数量 阅读数量
+        // 近14天 文集数量 文档数量 文件数量 阅读数量
         List<Map> statisData = new ArrayList<>();
-        for (int i = 7; i >= 0; i--) {
+
+        List<String> dateList = new ArrayList<>();
+        List<Integer> collectedCountList = new ArrayList<>();
+        List<Integer> docCountList = new ArrayList<>();
+        List<Integer> docUpdateCountList = new ArrayList<>();
+        List<Integer> cursorCountList = new ArrayList<>();
+        List<Integer> readCountList = new ArrayList<>();
+        for (int i = 30; i >= 0; i--) {
             LocalDate localDate = LocalDate.now();
             LocalDateTime beginTime = localDate.plusDays(i * -1).atStartOfDay();
             LocalDateTime endTime = localDate.plusDays((i - 1) * -1).atStartOfDay();
@@ -214,7 +270,7 @@ public class UserController {
             Integer _docCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocLite::getCreateTime, beginTime).lt(DocLite::getCreateTime, endTime));
             Integer _docUpdateCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocLite::getUpdateTime, beginTime).lt(DocLite::getUpdateTime, endTime));
             Integer _cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, CurrentUserManager.getUser().getId()).ge(FileCursor::getCreateTime, beginTime).lt(FileCursor::getCreateTime, endTime));
-            Integer _readCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getOwnerUserId, CurrentUserManager.getUser().getId()).ge(DocAccessLog::getCreateTime, beginTime).lt(DocAccessLog::getCreateTime, endTime));
+            Integer _readCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getOwnerUserId, CurrentUserManager.getUser().getId()).ne(DocAccessLog::getUserId, CurrentUserManager.getUser().getId()).ge(DocAccessLog::getCreateTime, beginTime).lt(DocAccessLog::getCreateTime, endTime));
             map.put("date", DateTimeFormat.toStr(beginTime, DateTimeFormatPattern.NORMAL_DATE));
             map.put("collectedCount", _collectedCount);
             map.put("docCount", _docCount);
@@ -222,6 +278,13 @@ public class UserController {
             map.put("cursorCount", _cursorCount);
             map.put("readCount", _readCount);
             statisData.add(map);
+
+            dateList.add(DateTimeFormat.toStr(beginTime, DateTimeFormatPattern.NORMAL_DATE));
+            collectedCountList.add(_collectedCount);
+            docCountList.add(_docCount);
+            docUpdateCountList.add(_docUpdateCount);
+            cursorCountList.add(_cursorCount);
+            readCountList.add(_readCount);
         }
 
         ResponseData responseData = ResponseData.ok();
@@ -229,8 +292,18 @@ public class UserController {
         responseData.putDataMap("docCount", docCount);
         responseData.putDataMap("cursorCount", cursorCount);
         responseData.putDataMap("readCount", readCount);
-        responseData.putDataMap("iReadCount", iReadCount);
+//        responseData.putDataMap("iReadCount", iReadCount);
         responseData.putDataMap("statisData", statisData);
+
+        Map<String, Object> trendChartData = new HashMap<>();
+        trendChartData.put("dateList", dateList);
+        trendChartData.put("collectedCountList", collectedCountList);
+        trendChartData.put("docCountList", docCountList);
+        trendChartData.put("cursorCountList", cursorCountList);
+        trendChartData.put("readCountList", readCountList);
+        trendChartData.put("docUpdateCountList", docUpdateCountList);
+        responseData.putDataMap("trendChartData", trendChartData);
+
         return responseData;
     }
 

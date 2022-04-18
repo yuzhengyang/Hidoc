@@ -63,3 +63,11 @@ FROM (
 	ORDER BY create_time 
 ) t GROUP BY create_time 
 ```
+
+
+sh
+```shell script
+
+nohup java -Dfile.encoding=utf-8 -jar -server -Xmx128m -XX:+UseG1GC hidoc-app-0.0.1-SNAPSHOT.jar --spring.config.location=application.yml> ./nohup_output &
+
+```

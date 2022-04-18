@@ -35,9 +35,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -67,6 +65,11 @@ public class JavaDocSearchService {
         String text = MapTool.get(params, "text", "").toString();
         String[] nameArray = StringTool.split(name, " ", true, true);
         String[] textArray = StringTool.split(text, " ", true, true);
+
+        Set<String> highlightKey = new HashSet<>();
+        if (nameArray != null) highlightKey.addAll(Arrays.asList(nameArray));
+        if (textArray != null) highlightKey.addAll(Arrays.asList(textArray));
+
 //        String textLike = "%" + text.replace(' ', '%') + "%"; // 替换空格为通配符有局限性，比如有强制的前后顺序
         String begTag = "<span style='color:red;'>";
         String endTag = "</span>";
@@ -84,14 +87,13 @@ public class JavaDocSearchService {
         List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);
 
         if (ListTool.ok(projectList)) {
-            List<String> projectVersionList = projectList.stream().map(JavaDocProject::getVersion).distinct().collect(toList());
             List<JavaDocClassLite> classList = null;
             List<JavaDocMethodLite> methodList = null;
 
             if (mode.equals("class") || mode.equals("all")) {
 
                 LambdaQueryWrapper<JavaDocClassLite> classWrapper = new LambdaQueryWrapper<JavaDocClassLite>();
-                classWrapper = classWrapper.and(p -> p.in(JavaDocClassLite::getVersion, projectVersionList)).and(q -> q.eq(JavaDocClassLite::getIsStruct, true));
+                classWrapper = classWrapper.and(q -> q.eq(JavaDocClassLite::getIsStruct, true));
                 if (ListTool.ok(nameArray)) {
                     classWrapper = classWrapper.and(p -> {
                         for (String key : nameArray) {
@@ -128,21 +130,22 @@ public class JavaDocSearchService {
                 classList = classPage.getRecords();
                 // 后端关键字高亮
                 // bug：导致内容被抹除
-//                if (ListTool.ok(classList)) {
-//                    for (JavaDocClassLite classItem : classList) {
+                if (ListTool.ok(classList)) {
+                    for (JavaDocClassLite classItem : classList) {
+                        classItem.set_highlightKeys(highlightKey.toArray(new String[0]));
 //                        classItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentInfo()), text, begTag, endTag));
 //                        classItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentScene()), text, begTag, endTag));
 //                        classItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentLimit()), text, begTag, endTag));
 ////                        classItem.setCommentExample(HtmlStringTool.keywordsHightLight(classItem.getCommentExample(), text, begTag, endTag));
 ////                        classItem.setCommentLog(HtmlStringTool.keywordsHightLight(classItem.getCommentLog(), text, begTag, endTag));
 //                        classItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(classItem.getCommentKeywords(), text, begTag, endTag));
-//                    }
-//                }
+                    }
+                }
             }
             if (mode.equals("method") || mode.equals("all")) {
 
                 LambdaQueryWrapper<JavaDocMethodLite> methodWrapper = new LambdaQueryWrapper<JavaDocMethodLite>();
-                methodWrapper = methodWrapper.and(p -> p.in(JavaDocMethodLite::getVersion, projectVersionList)).and(q -> q.eq(JavaDocMethodLite::getIsStruct, true));
+                methodWrapper = methodWrapper.and(q -> q.eq(JavaDocMethodLite::getIsStruct, true));
                 if (ListTool.ok(nameArray)) {
                     methodWrapper = methodWrapper.and(p -> {
                         for (String key : nameArray) {
@@ -198,6 +201,8 @@ public class JavaDocSearchService {
                     List<JavaDocClassLite> methodClassList = javaDocClassLiteMapper.selectBatchIds(methodClassIdList);
 
                     for (JavaDocMethodLite methodItem : methodList) {
+                        methodItem.set_highlightKeys(highlightKey.toArray(new String[0]));
+
                         for (JavaDocClassLite classItem : methodClassList) {
                             if (methodItem.getClassId().equals(classItem.getId())) {
                                 methodItem.setJavaDocClassLite(JSONObject.parseObject(JSONObject.toJSONString(classItem)));

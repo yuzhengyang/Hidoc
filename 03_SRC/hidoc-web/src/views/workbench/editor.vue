@@ -1,12 +1,14 @@
 <template>
     <el-container>
         <el-header>
-            <el-row>
-                <el-col :span="8">{{ this.collected.name }}</el-col>
+            <el-row style="line-height:56px;">
+                <el-col :span="8" style="text-align:right;padding-right:20px;">{{ this.collected.name  + "：" + this.parentDocPath }}</el-col>
                 <el-col :span="8">
                     <el-input v-model="title" placeholder="请输入文档标题"></el-input>
                 </el-col>
-                <el-col :span="8">
+                <el-col :span="2">
+                </el-col>
+                <el-col :span="6">
                     <el-button-group>
                         <el-button v-if="this.operationStatus" round type="success" @click="save">保存文档</el-button>
                         <el-button round type="danger" @click="close">关闭</el-button>
@@ -43,20 +45,10 @@ export default {
                 title: 'mermaid示例',
                 icon: 'v-md-icon-tip',
                 action(editor) {
-                    editor.insert(function(selected) {
+                    editor.insert(function (selected) {
                         const prefix = '```mermaid\n';
                         const suffix = '```';
-                        const placeholder = "sequenceDiagram\n"+
-                                    "    participant Alice\n"+
-                                    "    participant Bob\n"+
-                                    "    Alice->>John: Hello John, how are you?\n"+
-                                    "    loop Healthcheck\n"+
-                                    "        John->>John: Fight against hypochondria\n"+
-                                    "    end\n"+
-                                    "    Note right of John: Rational thoughts <br/>prevail!\n"+
-                                    "    John-->>Alice: Great!\n"+
-                                    "    John->>Bob: How about you?\n"+
-                                    "    Bob-->>John: Jolly good!\n";
+                        const placeholder = 'sequenceDiagram\n' + '    participant Alice\n' + '    participant Bob\n' + '    Alice->>John: Hello John, how are you?\n' + '    loop Healthcheck\n' + '        John->>John: Fight against hypochondria\n' + '    end\n' + '    Note right of John: Rational thoughts <br/>prevail!\n' + '    John-->>Alice: Great!\n' + '    John->>Bob: How about you?\n' + '    Bob-->>John: Jolly good!\n';
                         const content = selected || placeholder;
 
                         return {
@@ -84,6 +76,8 @@ export default {
             contentHtml: '',
             title: '',
             docId: '',
+            parentDocId: '',
+            parentDocPath: '',
             mode: '',
             operationStatus: true,
             loadStatus: 'create'
@@ -96,7 +90,7 @@ export default {
 
         // ========== ========== 关闭标签页时提示 ========== ==========
         window.isCloseHint = true;
-        window.addEventListener('beforeunload', function(e) {
+        window.addEventListener('beforeunload', function (e) {
             if (window.isCloseHint) {
                 var confirmationMessage = '您所作的更改可能未保存，确认离开吗？';
                 (e || window.event).returnValue = confirmationMessage; // 兼容 Gecko + IE
@@ -110,12 +104,36 @@ export default {
         let token = this.$store.state.user.token;
         console.log('token: ' + token);
 
-        console.log(this.$route.params.collectedId);
+        console.log('route params, docId:' + this.$route.params.docId);
+        console.log('route params, collectedId:' + this.$route.params.collectedId);
+        console.log('route params, parentDocId:' + this.$route.params.parentDocId);
 
-        let collectedId = this.$route.params.collectedId;
         let docId = this.$route.params.docId;
+        let collectedId = this.$route.params.collectedId;
+        this.parentDocId = this.$route.params.parentDocId;
+
+        // 如果附文档参数为_blank，则视为无父级的文档，直属文集，需要清空_blank
+        if (this.parentDocId == '_blank') this.parentDocId = '';
+        console.log('this.parentDocId:' + this.parentDocId);
 
         console.log('collectedId:' + collectedId + ' docId:' + docId);
+
+        // 如果附文档ID存在，则查询文档层级路径
+        if (this.parentDocId != '') {
+            request({
+                url: '/doc/getPath',
+                method: 'post',
+                data: {
+                    parentDocId: this.parentDocId
+                }
+            }).then(res => {
+                if (res.code == 0 && res.meta.path) {
+                    console.log('层级路径为：' + res.meta.path);
+                    this.parentDocPath = res.meta.path;
+                }
+            });
+        }
+
         // 查询文集信息
         request({
             url: '/collected/get',
@@ -256,7 +274,8 @@ export default {
                     content: this.content,
                     tag: 'tag',
                     mode: this.mode,
-                    id: this.docId
+                    id: this.docId,
+                    parentDocId: this.parentDocId
                 }
             }).then(res => {
                 if (res.code == 0) {

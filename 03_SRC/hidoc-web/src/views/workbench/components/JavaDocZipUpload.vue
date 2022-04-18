@@ -28,7 +28,7 @@ export default {
     },
     mounted() {
         console.log('mount begin');
-        this.fileUploadUrl = config().baseServer + '/javadoc/uploadZip';
+        this.fileUploadUrl = config().baseServer + 'javadoc/uploadZip';
         this.headers['Access-Token'] = getToken();
 
         //  debugger;

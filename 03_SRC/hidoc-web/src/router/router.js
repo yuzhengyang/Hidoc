@@ -45,7 +45,7 @@ const router = createRouter({
         },
         {
             name: 'workbench_editor',
-            path: '/workbench/editor/:collectedId/:docId',
+            path: '/workbench/editor/:collectedId/:docId/:parentDocId',
             component: () => import('@/views/workbench/editor')
         },
         {

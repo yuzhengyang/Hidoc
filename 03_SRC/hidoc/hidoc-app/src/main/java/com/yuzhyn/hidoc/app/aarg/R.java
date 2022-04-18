@@ -9,8 +9,12 @@ import org.ehcache.CacheManager;
 import com.yuzhyn.azylee.core.datas.ids.SnowFlake;
 import com.yuzhyn.azylee.core.ios.dirs.DirTool;
 import com.yuzhyn.azylee.core.systems.commons.SystemPropertyTool;
+import org.postgresql.core.Tuple;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuple3;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public final class R {
@@ -40,9 +44,17 @@ public final class R {
         public static org.ehcache.Cache<String, File> SysFile;
     }
 
-    public static class Queue{
+    public static class Queue {
         public static ConcurrentLinkedQueue<SysAccessLog> SysAccessLogQuene = new ConcurrentLinkedQueue<>();
         public static ConcurrentLinkedQueue<DocAccessLog> DocAccessLogQuene = new ConcurrentLinkedQueue<>();
+    }
+
+    public static class Map {
+        /**
+         * 验证码
+         * 邮箱：{唯一ID，验证码，生成时间}
+         */
+        public static ConcurrentHashMap<String, Tuple3<String,String,Long>> AuthCode = new ConcurrentHashMap<>();
     }
 
     public static class Paths {

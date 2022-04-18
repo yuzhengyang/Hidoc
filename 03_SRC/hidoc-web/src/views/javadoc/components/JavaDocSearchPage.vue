@@ -1,6 +1,7 @@
 <template>
     <!-- 内容区域 -->
-    <div style="position:fixed; z-index: 99999; top:70px; right:30px;">
+    <div style="position:fixed; top:70px; right:30px;">
+        <!-- z-index: 99999; 取消z轴最顶端设置 -->
         <el-row style="text-align:right;background-color:#FFF;border-radius: 4px;">
             <el-col :span="4">
                 <el-select v-model="searchMode" placeholder="全部">
@@ -66,11 +67,11 @@ export default {
             }
         };
     },
-    components: { JavaDocItemCard ,Search},
+    components: { JavaDocItemCard, Search },
     mounted() {
-        document.title = 'Hidoc-JavaDoc-搜索模式';
+        document.title = 'Hidoc-JavaDoc-搜索';
         this.getProjectList();
-        this.search();
+        // this.search();
     },
     methods: {
         searchEnter(e) {
@@ -81,7 +82,7 @@ export default {
         search() {
             console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
             request({
-                url: '/javadoc/search',
+                url: '/openapi/javadoc/search',
                 method: 'post',
                 data: {
                     mode: this.searchMode,
@@ -117,7 +118,7 @@ export default {
         },
         getProjectList() {
             request({
-                url: '/javadoc/projectList',
+                url: '/openapi/javadoc/projectList',
                 method: 'post',
                 data: { p: 'n' }
             }).then(res => {
@@ -130,7 +131,7 @@ export default {
             this.viewData.currentProjectId = projectId;
             this.viewData.currentVersion = version;
             request({
-                url: '/javadoc/packageList',
+                url: '/openapi/javadoc/packageList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -145,7 +146,7 @@ export default {
         getClassList(packageName) {
             this.viewData.currentPackageName = packageName;
             request({
-                url: '/javadoc/classList',
+                url: '/openapi/javadoc/classList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -161,7 +162,7 @@ export default {
         getMethodList(classId) {
             this.viewData.currentClassId = classId;
             request({
-                url: '/javadoc/methodList',
+                url: '/openapi/javadoc/methodList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,

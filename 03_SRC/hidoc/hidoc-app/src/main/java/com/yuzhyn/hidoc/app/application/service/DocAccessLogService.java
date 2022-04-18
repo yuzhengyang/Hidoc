@@ -22,6 +22,8 @@ public class DocAccessLogService {
         log.setIp(CurrentUserManager.ip.get());
         if (CurrentUserManager.isLogin()) {
             log.setUserId(CurrentUserManager.getUser().getId());
+        } else {
+            log.setUserId("");
         }
         log.setCollectedId(doc.getCollectedId());
         log.setDocId(doc.getId());

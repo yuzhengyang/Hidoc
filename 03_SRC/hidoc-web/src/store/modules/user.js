@@ -31,9 +31,9 @@ const mutations = {
 
 const actions = {
     register({ commit }, userInfo) {
-        const { avatar, username, email, password, realname } = userInfo;
+        const { avatar, username, email, password, realname, uid, authCode } = userInfo;
         return new Promise((resolve, reject) => {
-            register({ avatar: avatar, username: username.trim(), email: email.trim(), password: password, realname: realname })
+            register({ avatar: avatar, username: username.trim(), email: email.trim(), password: password, realname: realname, uid: uid, authCode: authCode })
                 .then(response => {
                     // const { data } = response;
                     commit('SET_TOKEN', response.token);

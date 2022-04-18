@@ -16,9 +16,9 @@
         <!-- 月度文章发布统计图
         发布动态 -->
     </el-row>
-    <el-row>
+    <el-row style="margin-top:20px; margin-bottom:20px;">
         <el-col :span="24">
-            <div id="myChart" :style="{ width: '300px', height: '300px' }"></div>
+            <div id="myChart" :style="{ width: '100%', height: '300px' }"></div>
         </el-col>
     </el-row>
 </template>
@@ -32,7 +32,15 @@ export default {
             collectedCount: 0,
             docCount: 0,
             cursorCount: 0,
-            readCount: 0
+            readCount: 0,
+            trendChartData: {
+                dateList: [],
+                collectedCountList: [],
+                cursorCountList: [],
+                docCountList: [],
+                docUpdateCountList: [],
+                readCountList: []
+            }
         };
     },
     mounted() {
@@ -40,23 +48,6 @@ export default {
         this.initChart();
         //this.$root => app
         console.log(this.echarts);
-        let myChart = this.$echarts.init(document.getElementById('myChart'));
-        // 绘制图表
-        myChart.setOption({
-            title: { text: '总用户量' },
-            tooltip: {},
-            xAxis: {
-                data: ['12-3', '12-4', '12-5', '12-6', '12-7', '12-8']
-            },
-            yAxis: {},
-            series: [
-                {
-                    name: '用户量',
-                    type: 'line',
-                    data: [5, 20, 36, 10, 10, 20]
-                }
-            ]
-        });
     },
     methods: {
         loadUserBoard() {
@@ -69,10 +60,52 @@ export default {
                     this.docCount = res.meta.docCount;
                     this.cursorCount = res.meta.cursorCount;
                     this.readCount = res.meta.readCount;
+                    this.trendChartData = res.meta.trendChartData;
+
+                    this.initChart();
                 }
             });
         },
-        initChart() {}
+        initChart() {
+            let myChart = this.$echarts.init(document.getElementById('myChart'));
+            // 绘制图表
+            myChart.setOption({
+                title: { text: '趋势' },
+                tooltip: {},
+                legend: {},
+                xAxis: {
+                    data: this.trendChartData.dateList
+                },
+                yAxis: {},
+                series: [
+                    {
+                        name: '文集数量',
+                        type: 'line',
+                        data: this.trendChartData.collectedCountList
+                    },
+                    {
+                        name: '文档数量',
+                        type: 'line',
+                        data: this.trendChartData.docCountList
+                    },
+                    {
+                        name: '文档编辑',
+                        type: 'line',
+                        data: this.trendChartData.docUpdateCountList
+                    },
+                    {
+                        name: '文件数量',
+                        type: 'line',
+                        data: this.trendChartData.cursorCountList
+                    },
+                    {
+                        name: '阅读数量',
+                        type: 'line',
+                        data: this.trendChartData.readCountList
+                    }
+                ]
+            });
+        }
     }
 };
 </script>

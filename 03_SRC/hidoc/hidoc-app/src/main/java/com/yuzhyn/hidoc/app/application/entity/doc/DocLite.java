@@ -8,6 +8,7 @@ import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author inc
@@ -39,6 +40,7 @@ public class DocLite {
     private String lockUserId;
     private String ownerUserId;
     private Boolean isDelete;
+    private String parentDocId;
 
     @TableField(exist = false)
     private SysUserLite ownerUser;
@@ -55,4 +57,9 @@ public class DocLite {
     @TableField(exist = false)
     private String collectedName;
 
+    @TableField(exist = false)
+    private String label;
+
+    @TableField(exist = false)
+    private List<DocLite> children;
 }

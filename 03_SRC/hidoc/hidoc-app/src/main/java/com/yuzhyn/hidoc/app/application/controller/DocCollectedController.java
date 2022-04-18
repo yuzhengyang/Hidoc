@@ -17,6 +17,7 @@ import com.yuzhyn.hidoc.app.application.mapper.doc.DocCollectedMemberMapper;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocMapper;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
+import com.yuzhyn.hidoc.app.application.service.doc.DocParseService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.common.model.ServiceException;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
@@ -65,12 +66,16 @@ public class DocCollectedController {
     @Autowired
     SysUserLiteMapper sysUserLiteMapper;
 
+    @Autowired
+    DocParseService docParseService;
+
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "name", "token")) {
             String name = MapTool.get(params, "name", "").toString();
             String description = MapTool.get(params, "description", "").toString();
             Boolean isOpen = MapTool.getBoolean(params, "isOpen", false);
+            Boolean isLoginAccess = MapTool.getBoolean(params, "isLoginAccess", false);
             String token = MapTool.get(params, "token", "").toString();
 
             if (StringTool.ok(name, token)) {
@@ -84,6 +89,7 @@ public class DocCollectedController {
                 docCollected.setName(name);
                 docCollected.setDescription(description);
                 docCollected.setIsOpen(isOpen);
+                docCollected.setIsLoginAccess(isLoginAccess);
                 docCollected.setIsDelete(false);
                 int flag = docCollectedMapper.insert(docCollected);
                 if (flag > 0) {
@@ -101,6 +107,7 @@ public class DocCollectedController {
             String name = MapTool.get(params, "name", "").toString();
             String description = MapTool.get(params, "description", "").toString();
             Boolean isOpen = MapTool.getBoolean(params, "isOpen", false);
+            Boolean isLoginAccess = MapTool.getBoolean(params, "isLoginAccess", false);
             String token = MapTool.get(params, "token", "").toString();
 
             if (StringTool.ok(id, name, token)) {
@@ -114,6 +121,7 @@ public class DocCollectedController {
                     record.setName(name);
                     record.setDescription(description);
                     record.setIsOpen(isOpen);
+                    record.setIsLoginAccess(isLoginAccess);
                     int flag = docCollectedMapper.updateById(record);
                     if (flag > 0) {
                         return ResponseData.okData("docCollected", record);
@@ -241,7 +249,7 @@ public class DocCollectedController {
                     }
                 }
                 List<DocLite> docLiteList = docLiteMapper.selectList(wrapper);
-                collected.setDocLites(docLiteList);
+                collected.setDocLites(docParseService.docLite2Tree(docLiteList));
 
                 // 查询文集成员
                 List<SysUserLite> sysUserLites = new ArrayList<>();

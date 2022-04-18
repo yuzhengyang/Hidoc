@@ -3,21 +3,21 @@
         <el-main>
             <el-row class="login-main">
                 <el-col :span="9">
-                    <div class="grid-content" style="text-align: right;cursor:pointer" @click="home"><img alt="Vue logo" src="../../assets/logo.png">
+                    <div class="grid-content" style="text-align: right;cursor:pointer" @click="home">
+                        <img alt="Vue logo" src="../../assets/logo.png" />
                         <div style="height:150px;"></div>
                     </div>
                 </el-col>
-                <el-col :span="1">
-                </el-col>
+                <el-col :span="1"></el-col>
                 <el-col :span="8">
                     <div style="text-align:center;margin-bottom:20px;">
                         <el-popover placement="bottom" trigger="manual" :width="400" v-model:visible="selectAvatarPanelVisible">
                             <template #reference>
                                 <div v-if="form.avatar == undefined || form.avatar == ''">
-                                    <el-avatar :size="100" style="cursor:pointer;" @click="openSelectAvatar()"> 头像 </el-avatar>
+                                    <el-avatar :size="100" style="cursor:pointer;" @click="openSelectAvatar()">头像</el-avatar>
                                 </div>
                                 <div v-else>
-                                    <el-avatar :size="100" style="cursor:pointer;" @click="openSelectAvatar()" :src="currentAvatar()"> 头像 </el-avatar>
+                                    <el-avatar :size="100" style="cursor:pointer;" @click="openSelectAvatar()" :src="currentAvatar()">头像</el-avatar>
                                 </div>
                             </template>
                             <el-row>
@@ -49,23 +49,32 @@
                         </el-form-item>
                         <el-form-item label="邮箱" prop="email">
                             <el-input v-model="form.email" maxlength="64"></el-input>
+                            <el-button type="text" @click="getAuthCode">
+                                获取验证码
+                            </el-button>
+                        </el-form-item>
+                        <el-form-item label="验证码" prop="authCode">
+                            <el-input v-model="form.authCode" maxlength="64"></el-input>
                         </el-form-item>
                         <el-form-item>
                             <el-button type="primary" @click="onSubmit('form')">注册</el-button>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="text" @click="back"><i class="el-icon-back"></i> 返回</el-button>
+                            <el-button type="text" @click="back">
+                                <i class="el-icon-back"></i>
+                                返回
+                            </el-button>
                         </el-form-item>
                     </el-form>
                 </el-col>
-                <el-col :span="6">
-                </el-col>
+                <el-col :span="6"></el-col>
             </el-row>
         </el-main>
     </el-container>
 </template>
 
 <script>
+import request from '../../utils/request.js';
 export default {
     data() {
         return {
@@ -75,7 +84,9 @@ export default {
                 realname: '',
                 password: '',
                 passwordConfirm: '',
-                email: ''
+                email: '',
+                authCode: '',
+                uid: ''
             },
             rules: {
                 username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
@@ -113,6 +124,20 @@ export default {
         },
         currentAvatar() {
             return require('../../assets/avatar/' + this.form.avatar.replace('$system$', ''));
+        },
+        getAuthCode() {
+            request({
+                url: '/user/getAuthCode',
+                method: 'post',
+                data: {
+                    email: this.form.email,
+                    token: ''
+                }
+            }).then(res => {
+                if (res.code == 0) {
+                    this.form.uid = res.meta.uid;
+                }
+            });
         },
         onSubmit(formName) {
             console.log('submit!');

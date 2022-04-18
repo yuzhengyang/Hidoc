@@ -22,7 +22,6 @@ public class JavaDocClassLite {
     private String projectId;
     private String projectName;
 
-    private String version;
     private String createUserId;
     private LocalDateTime createTime;
 
@@ -43,6 +42,9 @@ public class JavaDocClassLite {
 
     @TableField(exist = false)
     private String _class = "JavaDocClass";
+
+    @TableField(exist = false)
+    private String[] _highlightKeys = null;
 
     @TableField(exist = false)
     private List<JavaDocMethod> javaDocMethodList;

@@ -17,7 +17,8 @@ public class JavaDocProject {
     private String name;
     private String description;
 
-    private String version;
+    private String token;
+
     private String createUserId;
     private String updateUserId;
     private LocalDateTime createTime;

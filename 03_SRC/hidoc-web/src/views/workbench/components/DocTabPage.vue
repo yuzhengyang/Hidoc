@@ -1,7 +1,6 @@
 <template>
-    <el-container>
-        <!-- 内容区域 -->
-        <el-main>
+    <el-container style="height:100%">
+        <el-header>
             <el-row>
                 <el-button-group>
                     <el-button round type="success" @click="openCreateCollected">创建文集</el-button>
@@ -9,94 +8,103 @@
                     <el-button round v-if="createDocVisible" type="primary" @click="openMemberList">协作成员</el-button>
                     <el-button round v-if="createDocVisible" type="danger" @click="deleteCollected">删除文集</el-button>
                 </el-button-group>
-                <span style="width:50px"></span>
+                <span style="width:200px"></span>
                 <el-button-group>
                     <el-button round v-if="createDocVisible" type="success" @click="createDoc">创建文档</el-button>
+                    <el-button round v-if="createDocVisible" type="primary" @click="refreshDocList">刷新</el-button>
                 </el-button-group>
-
-
-
             </el-row>
-            <el-row>
-                <el-col :span="5">
+        </el-header>
+        <el-main style="height:100%">
+            <el-row style="height:100%">
+                <el-col :span="5" style="height:100%;overflow:hidden;overflow:auto;">
                     <el-menu default-active="2" @open="handleOpen" @close="handleClose">
                         <el-sub-menu index="1">
                             <template #title>
-                                <span style="font-size:14px;font-weight:bold;border-bottom:1px solid black"> 个人知识库 </span>
+                                <span style="font-size:14px;font-weight:bold;border-bottom:1px solid black">个人知识库</span>
                             </template>
-                            <el-menu-item v-for="item in mineList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{item.name}} <el-tag v-show="item.isOpen" size="mini">公开</el-tag>
+                            <el-menu-item v-for="item in mineList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
+                                {{ item.name }}
+                                <el-tag v-show="item.isOpen" size="mini">公开</el-tag>
                                 <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag>
                             </el-menu-item>
                         </el-sub-menu>
                         <el-sub-menu index="2">
                             <template #title>
-                                <span style="font-size:14px;font-weight:bold;border-bottom:1px solid black"> 团队协作 </span>
+                                <span style="font-size:14px;font-weight:bold;border-bottom:1px solid black">团队协作</span>
                             </template>
-                            <el-menu-item v-for="item in coopList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{item.name}}</el-menu-item>
+                            <el-menu-item v-for="item in coopList" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{ item.name }}</el-menu-item>
                         </el-sub-menu>
                     </el-menu>
                 </el-col>
-                <el-col :span="19">
-                    <el-table :data="tableData" style="width: 100%">
-                        <el-table-column prop="title" label="标题">
-                        </el-table-column>
-                        <el-table-column prop="ownerUser.realName" label="拥有者" width="100">
-                        </el-table-column>
-                        <el-table-column label="最近更新" width="100">
-                            <template #default="scope">
-                                <el-popover effect="light" trigger="hover" placement="top">
-                                    <template #default>
-                                        <p>{{ scope.row.updateTime }}</p>
-                                    </template>
-                                    <template #reference>
-                                        <div class="name-wrapper">
-                                            {{ scope.row.relativeUpdateTime }}
+                <el-col :span="19" style="height:100%;overflow:hidden;overflow:auto;">
+                    <el-row style="font-weight:bold;color:grey;">
+                        <el-col :span="10"><span style="padding-left:20px;">标题</span></el-col>
+                        <el-col :span="2"><span style="padding-left:5px;">拥有者</span></el-col>
+                        <el-col :span="2"><span style="padding-left:5px;">最近更新</span></el-col>
+                        <el-col :span="2"><span style="padding-left:5px;">锁(编辑中)</span></el-col>
+                        <el-col :span="4"><span style="padding-left:5px;">排序</span></el-col>
+                        <el-col :span="4"><span style="padding-left:5px;">操作</span></el-col>
+                    </el-row>
+                    <el-row style="width:100%">
+                        <el-col :span="24" style="padding:10px;border-bottom:1px solid lightgrey;"></el-col>
+                    </el-row>
+                    <el-tree :data="tableData" node-key="id" default-expand-all :expand-on-click-node="false">
+                        <template #default="{ data }">
+                            <el-row style="width:100%;">
+                                <el-col :span="10">
+                                    <el-button @click="previewDoc(data)" type="text" size="small">{{ data.title }}</el-button>
+                                </el-col>
+                                <el-col :span="2">{{ data.ownerUser.realName }}</el-col>
+                                <el-col :span="2">
+                                    <el-popover effect="light" trigger="hover" placement="top">
+                                        <template #default>
+                                            <p>{{ data.updateTime }}</p>
+                                        </template>
+                                        <template #reference>
+                                            <div class="name-wrapper">
+                                                {{ data.relativeUpdateTime }}
+                                            </div>
+                                        </template>
+                                    </el-popover>
+                                </el-col>
+                                <el-col :span="2">
+                                    <div class="name-wrapper">
+                                        <div v-if="data.isCurrentUserLock">
+                                            <el-tag v-if="data.lockUser" size="medium">我</el-tag>
                                         </div>
-                                    </template>
-                                </el-popover>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="锁(谁在编辑)" width="100">
-                            <template #default="scope">
-                                <div class="name-wrapper">
-                                    <div v-if="scope.row.isCurrentUserLock">
-                                        <el-tag v-if="scope.row.lockUser" size="medium">我</el-tag>
-                                    </div>
-                                    <div v-else>
-                                        <div v-if="scope.row.lockUserId != ''">
-                                            <el-tag v-if="scope.row.lockUser" size="medium" type="warning">{{ scope.row.lockUser.realName }}</el-tag>
-                                            <el-tag v-else size="medium" type="danger">未知</el-tag>
+                                        <div v-else>
+                                            <div v-if="data.lockUserId != ''">
+                                                <el-tag v-if="data.lockUser" size="medium" type="warning">{{ data.lockUser.realName }}</el-tag>
+                                                <el-tag v-else size="medium" type="danger">未知</el-tag>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </template>
-                        </el-table-column>
-                        <el-table-column fixed="right" label="排序" width="160">
-                            <template #default="scope">
-                                <el-button @click="setOrder(scope.row, 0)" type="text" size="small">顶部</el-button>
-                                <el-button @click="setOrder(scope.row, 1)" type="text" size="small">上移</el-button>
-                                <el-button @click="setOrder(scope.row, 2)" type="text" size="small">下移</el-button>
-                                <el-button @click="setOrder(scope.row, 3)" type="text" size="small">底部</el-button>
-                            </template>
-                        </el-table-column>
-                        <el-table-column fixed="right" label="操作" width="200">
-                            <template #default="scope">
-                                <el-button @click="previewDoc(scope.row)" type="text" size="small">查看</el-button>
-                                <el-button @click="docEdit(scope.row)" type="text" size="small">编辑</el-button>
-                                <el-button @click="docUnlock(scope.row)" type="text" size="small">解锁</el-button>
+                                </el-col>
+                                <el-col :span="4">
+                                    <el-button @click="setOrder(data, 0)" type="text" size="small">顶部</el-button>
+                                    <el-button @click="setOrder(data, 1)" type="text" size="small">上移</el-button>
+                                    <el-button @click="setOrder(data, 2)" type="text" size="small">下移</el-button>
+                                    <el-button @click="setOrder(data, 3)" type="text" size="small">底部</el-button>
+                                </el-col>
+                                <el-col :span="4">
+                                    <el-button @click="createChildDoc(data.id)" type="text" size="small">创建子文档</el-button>
+                                    <el-button @click="docEdit(data)" type="text" size="small">编辑</el-button>
+                                    <el-button @click="docUnlock(data)" type="text" size="small">解锁</el-button>
 
-                                <el-popover placement="top-start" :width="200" trigger="click">
-                                    <p>删除操作不可撤回，确定删除吗？</p>
-                                    <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="docDelete(scope.row)">确定删除</el-button>
-                                    </div>
-                                    <template #reference>
-                                        <el-button type="text" size="small">删除</el-button>
-                                    </template>
-                                </el-popover>
-                            </template>
-                        </el-table-column>
-                    </el-table>
+                                    <el-popover placement="top-start" :width="200" trigger="click">
+                                        <p>删除操作不可撤回，确定删除吗？</p>
+                                        <div style="text-align: right; margin: 0">
+                                            <el-button type="danger" size="mini" @click="docDelete(data)">确定删除</el-button>
+                                        </div>
+                                        <template #reference>
+                                            <el-button type="text" size="small">删除</el-button>
+                                        </template>
+                                    </el-popover>
+                                </el-col>
+                            </el-row>
+                        </template>
+                    </el-tree>
                 </el-col>
             </el-row>
         </el-main>
@@ -104,18 +112,19 @@
     <el-backtop></el-backtop>
 
     <!-- Form -->
-    <el-dialog :title="this.dialogFormMode=='create'?'创建文集':'编辑文集'" v-model="dialogFormVisible">
+    <el-dialog :title="this.dialogFormMode == 'create' ? '创建文集' : '编辑文集'" v-model="dialogFormVisible">
         <el-form :model="collectedForm">
             <el-form-item label="名称" :label-width="formLabelWidth">
                 <el-input v-model="collectedForm.name" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="描述" :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="collectedForm.description">
-                </el-input>
+                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="collectedForm.description"></el-input>
             </el-form-item>
             <el-form-item label="公开" :label-width="formLabelWidth">
-                <el-switch v-model="collectedForm.isOpen" active-color="#13ce66" inactive-color="#ff4949">
-                </el-switch>
+                <el-switch v-model="collectedForm.isOpen" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+            </el-form-item>
+            <el-form-item label="需登录查看" :label-width="formLabelWidth">
+                <el-switch v-model="collectedForm.isLoginAccess" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
             </el-form-item>
         </el-form>
         <template #footer>
@@ -155,7 +164,6 @@
             </el-col>
         </el-row>
     </el-dialog>
-
 </template>
 
 <script>
@@ -249,6 +257,19 @@ export default {
                 }
             });
         },
+        refreshDocList() {
+            request({
+                url: '/doc/list',
+                method: 'post',
+                data: {
+                    collectedId: this.currentCollected.id
+                }
+            }).then(res => {
+                if (res.code == 0) {
+                    this.tableData = res.data;
+                }
+            });
+        },
         openCreateCollected() {
             console.log('创建文集');
             this.dialogFormMode = 'create';
@@ -306,7 +327,8 @@ export default {
                         name: this.collectedForm.name,
                         description: this.collectedForm.description,
                         token: this.$store.state.user.token,
-                        isOpen: this.collectedForm.isOpen
+                        isOpen: this.collectedForm.isOpen,
+                        isLoginAccess: this.collectedForm.isLoginAccess
                     }
                 }).then(res => {
                     if (res.code == 0) {
@@ -324,7 +346,8 @@ export default {
                         name: this.collectedForm.name,
                         description: this.collectedForm.description,
                         token: this.$store.state.user.token,
-                        isOpen: this.collectedForm.isOpen
+                        isOpen: this.collectedForm.isOpen,
+                        isLoginAccess: this.collectedForm.isLoginAccess
                     }
                 }).then(res => {
                     if (res.code == 0) {
@@ -360,7 +383,18 @@ export default {
 
             let routeData = this.$router.resolve({
                 name: 'workbench_editor',
-                params: { collectedId: this.currentCollected.id, docId: '_create' }
+                params: { collectedId: this.currentCollected.id, docId: '_create', parentDocId: '_blank' }
+            });
+            window.open(routeData.path, '_blank');
+        },
+        createChildDoc(parentDocId) {
+            console.log('创建子文档');
+
+            // this.$router.push({ name: 'workbench_editor', params: { status: 'create', collectedId: this.currentCollected.id } });
+
+            let routeData = this.$router.resolve({
+                name: 'workbench_editor',
+                params: { collectedId: this.currentCollected.id, docId: '_create', parentDocId: parentDocId }
             });
             window.open(routeData.path, '_blank');
         },
@@ -380,10 +414,12 @@ export default {
         docEdit(row) {
             console.log('编辑');
             console.log(row);
+            let parentDocId = '_blank';
+            if (row.parentDocId != '') parentDocId = row.parentDocId;
 
             let routeData = this.$router.resolve({
                 name: 'workbench_editor',
-                params: { collectedId: this.currentCollected.id, docId: row.id }
+                params: { collectedId: this.currentCollected.id, docId: row.id, parentDocId: parentDocId }
             });
             window.open(routeData.path, '_blank');
         },
@@ -475,5 +511,13 @@ export default {
 }
 .el-card {
     margin: 10px;
+}
+
+/** 树自定义样式 */
+.el-tree-node__content {
+    height: 50px;
+    font-size: 12px;
+    line-height: 50px;
+    border-bottom: 1px dashed lightgrey;
 }
 </style>

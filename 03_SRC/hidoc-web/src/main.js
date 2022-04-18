@@ -62,10 +62,10 @@ VMdPreview.use(vuepressTheme, {
 
 // 插件
 // 公式
-import createKatexPlugin from '@kangc/v-md-editor/lib/plugins/katex/cdn';
+import createKatexPlugin from '@kangc/v-md-editor/lib/plugins/katex/npm';
 VMdEditor.use(createKatexPlugin());
 // 流程图
-import createMermaidPlugin from '@kangc/v-md-editor/lib/plugins/mermaid/cdn';
+import createMermaidPlugin from '@kangc/v-md-editor/lib/plugins/mermaid/npm';
 import '@kangc/v-md-editor/lib/plugins/mermaid/mermaid.css';
 VMdEditor.use(createMermaidPlugin());
 // TodoList
@@ -86,7 +86,7 @@ VMdEditor.use(createCopyCodePlugin());
 // 内容定位
 import createAlignPlugin from '@kangc/v-md-editor/lib/plugins/align';
 VMdEditor.use(createAlignPlugin());
-// 自定义解析测试（暂不继续了，从入门到放弃）
+// 自定义解析测试（暂不继续了，从入门到放弃，使用预览前预处理来实现想要的功能了）
 // import createMdFilePlugin from './plugin/md-file';
 // VMdEditor.use(createMdFilePlugin());
 

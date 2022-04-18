@@ -1,9 +1,9 @@
 <template>
-    <el-container>
+    <el-container style="height:100%">
         <!-- 内容区域 -->
-        <el-main>
-            <el-row>
-                <el-col :span="3">
+        <el-main style="height:100%">
+            <el-row style="height:100%">
+                <el-col :span="3" style="height:100%">
                     <el-menu default-active="1000" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
                         <el-menu-item index="1000" @click="changeMenu(1000)">
                             <i class="el-icon-data-analysis"></i>
@@ -51,7 +51,7 @@
                         </el-menu-item> -->
                     </el-menu>
                 </el-col>
-                <el-col :span="21">
+                <el-col :span="21" style="height:100%">
                     <dash-board v-if="this.currentMenuIndex == 1000"></dash-board>
                     <doc-tab-page v-if="this.currentMenuIndex == 2000"></doc-tab-page>
                     <recycle-bin v-if="this.currentMenuIndex == 2010"></recycle-bin>
@@ -144,5 +144,20 @@ export default {
 }
 .el-card {
     margin: 10px;
+}
+
+/* 滚动槽 */
+::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+    background-color: #d8d8d8;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #bfc1c4;
 }
 </style>

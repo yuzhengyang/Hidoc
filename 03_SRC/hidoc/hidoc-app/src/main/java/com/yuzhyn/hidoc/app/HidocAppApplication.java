@@ -4,15 +4,25 @@ import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
+import com.yuzhyn.hidoc.app.manager.CurrentEnvironmentManager;
 import lombok.extern.slf4j.Slf4j;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.embedded.TomcatWebServerFactoryCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
 import com.yuzhyn.azylee.core.systems.commons.SystemPropertyTool;
 import com.yuzhyn.azylee.core.systems.commons.SystemTypeTool;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
+
+import java.util.HashMap;
 
 @Slf4j
 @EnableCaching
@@ -29,24 +39,29 @@ public class HidocAppApplication {
         R.Cache.SysFileCursor = R.Cache.CacheManager.createCache("SysFileCursor",
                 CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, FileCursor.class, ResourcePoolsBuilder.heap(1024)));
 
+        System.out.println("~");
+        SpringApplication app = new SpringApplication(HidocAppApplication.class);
+        app.run(args);
 
-        log.info("~");
-        SpringApplication.run(HidocAppApplication.class, args);
-        log.info("/");
+        // 获取当前环境和配置信息
+        CurrentEnvironmentManager.add("log.level", (log.isTraceEnabled() ? "trace," : "") +
+                (log.isDebugEnabled() ? "debug," : "") + (log.isInfoEnabled() ? "info," : "") +
+                (log.isWarnEnabled() ? "warn," : "") + (log.isErrorEnabled() ? "error" : ""));
+        CurrentEnvironmentManager.add("system", SystemTypeTool.getOSname());
+        CurrentEnvironmentManager.add("user.dir",SystemPropertyTool.userDir());
+
         log.info("/");
         log.info("============================================================");
         log.info("============================================================");
-        log.info("***HidocDeployer***::CODE::LaunchedSuccessfully--留念");
+        log.info("");
+        log.info("***HidocDeployer***::CODE::LaunchedSuccessfully");
         log.info("hidoc 服务启动成功");
         log.info("");
-        log.info("操作系统：" + SystemTypeTool.getOSname().toString());
-        if (!SystemTypeTool.isLinux()) {
-            log.info("环境异常：由于大部分功能仅支持Linux系统，Windows系统运行时部分功能将不可用");
-        }
-        log.info("运行路径：" + SystemPropertyTool.userDir());
         log.info("============================================================");
         log.info("============================================================");
         log.info("/");
         log.info("/");
+
+        CurrentEnvironmentManager.print();
     }
 }

@@ -25,6 +25,15 @@ public class DocCollected {
     private LocalDateTime createTime;
     private Boolean isDelete;
 
+    /**
+     * 需登录准入
+     */
+    private Boolean isLoginAccess;
+    /**
+     * 需密码准入
+     */
+    private String passwordAccess;
+
     @TableField(exist = false)
     private List<DocLite> docLites;
 

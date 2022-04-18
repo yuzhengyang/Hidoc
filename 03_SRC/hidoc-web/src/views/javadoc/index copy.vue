@@ -186,7 +186,7 @@ export default {
         search() {
             console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
             request({
-                url: '/javadoc/search',
+                url: '/openapi/javadoc/search',
                 method: 'post',
                 data: {
                     mode: this.searchMode,
@@ -222,7 +222,7 @@ export default {
         },
         getProjectList() {
             request({
-                url: '/javadoc/projectList',
+                url: '/openapi/javadoc/projectList',
                 method: 'post',
                 data: { p: 'n' }
             }).then(res => {
@@ -235,7 +235,7 @@ export default {
             this.viewData.currentProjectId = projectId;
             this.viewData.currentVersion = version;
             request({
-                url: '/javadoc/packageList',
+                url: '/openapi/javadoc/packageList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -250,7 +250,7 @@ export default {
         getClassList(packageName) {
             this.viewData.currentPackageName = packageName;
             request({
-                url: '/javadoc/classList',
+                url: '/openapi/javadoc/classList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -266,7 +266,7 @@ export default {
         getMethodList(classId) {
             this.viewData.currentClassId = classId;
             request({
-                url: '/javadoc/methodList',
+                url: '/openapi/javadoc/methodList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,

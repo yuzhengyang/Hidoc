@@ -23,16 +23,20 @@ public class JavaDocMethod {
     private String projectId;
     private String projectName;
 
-    private String version;
     private String createUserId;
     private LocalDateTime createTime;
 
     private String name;
     private String qualifier;
     private String returnType;
+    private String returnDesc;
     private String params;
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONArray paramsJson;
+
+    private String throwses;
+    @TableField(typeHandler = JsonbTypeHandler.class)
+    private JSONArray throwsesJson;
 
     private String commentInfo;
     private String commentScene;

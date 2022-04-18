@@ -9,6 +9,7 @@ import com.yuzhyn.hidoc.app.application.mapper.doc.*;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineStatusLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.service.DocAccessLogService;
+import com.yuzhyn.hidoc.app.application.service.doc.DocParseService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +68,15 @@ public class DocController {
     @Autowired
     DocAccessLogMapper docAccessLogMapper;
 
+    @Autowired
+    DocParseService docParseService;
+
+    @Autowired
+    DocThumbMapper docThumbMapper;
+
+    @Autowired
+    DocCommentMapper docCommentMapper;
+
     @PostMapping("get")
     public ResponseData get(@RequestBody Map<String, Object> params) {
         R.AccessTimes++;
@@ -80,6 +90,22 @@ public class DocController {
 
                 ResponseData responseData = ResponseData.ok();
                 DocCollected collected = docCollectedMapper.selectById(doc.getCollectedId());
+
+                // 判断文集的访问控制
+                if (collected != null) {
+                    // 条件：已配置登录准入控制，并且设置登录可访问，但是用户未登录
+                    // 结果：返回失败，提示需要登录才能访问
+                    if (collected.getIsLoginAccess() != null && collected.getIsLoginAccess() && !CurrentUserManager.isLogin()) {
+                        return ResponseData.error("本文集内容需登录后访问");
+                    }
+
+                    // 条件：已配置开放控制，但是设置为私有
+                    // 结果：返回失败，提示私有文档不能访问
+                    if (collected.getIsOpen() != null && !collected.getIsOpen()) {
+                        return ResponseData.error("私有文档不能访问");
+                    }
+                }
+
                 responseData.putDataMap("collected", collected);
                 responseData.putDataMap("doc", doc);
                 // 查询文章贡献者
@@ -129,10 +155,49 @@ public class DocController {
                 }
                 responseData.putDataMap("statisData", statisData);
 
+                // 点赞情况查询
+                int thumbCount = docThumbMapper.selectCount(new LambdaQueryWrapper<DocThumb>()
+                        .eq(DocThumb::getTableName, "doc")
+                        .eq(DocThumb::getDataId, id)
+                        .eq(DocThumb::getIsSupporter, true));
+                responseData.putDataMap("thumbCount", thumbCount);
+
+                if (CurrentUserManager.isLogin()) {
+                    String thumbsId = DocThumb.genId("doc", id, CurrentUserManager.getUser().getId());
+                    DocThumb myThumb = docThumbMapper.selectById(thumbsId);
+                    if (myThumb == null) myThumb = new DocThumb();
+                    responseData.putDataMap("myThumb", myThumb);
+                }
+                // 评论数量查询
+                int commentCount = docCommentMapper.selectCount(new LambdaQueryWrapper<DocComment>()
+                        .eq(DocComment::getIsDelete, false)
+                        .eq(DocComment::getDocId, id));
+                responseData.putDataMap("commentCount", commentCount);
+
                 return responseData;
             }
         }
         return ResponseData.error();
+    }
+
+    @PostMapping("getPath")
+    public ResponseData getPath(@RequestBody Map<String, Object> params) {
+        String path = "";
+        if (MapTool.ok(params, "parentDocId")) {
+            String parentDocId = MapTool.get(params, "parentDocId", "").toString();
+            if (StringTool.ok(parentDocId)) {
+                DocLite pDoc = docLiteMapper.selectById(parentDocId);
+                // 向上查询父级文档，为保证性能，最多查询10层
+                for (int i = 0; i < 10; i++) {
+                    if (pDoc != null) {
+                        path = pDoc.getTitle() + "/" + path;
+                    }
+                    pDoc = docLiteMapper.selectById(pDoc.getParentDocId());
+                    if (pDoc == null) break;
+                }
+            }
+        }
+        return ResponseData.okData("path", path);
     }
 
     @PostMapping("getForEdit")
@@ -187,6 +252,7 @@ public class DocController {
             String content = MapTool.get(params, "content", "").toString();
             String tag = MapTool.get(params, "tag", "").toString();
             String collectedId = MapTool.getString(params, "collectedId", "");
+            String parentDocId = MapTool.getString(params, "parentDocId", "");
             String mode = MapTool.getString(params, "mode", "");
             String id = MapTool.getString(params, "id", "");
 
@@ -209,6 +275,7 @@ public class DocController {
                         doc.setLockUserId("");
                         doc.setOwnerUserId(CurrentUserManager.getUser().getId());
                         doc.setIsDelete(false);
+                        doc.setParentDocId(parentDocId);
                         int flag = docMapper.insert(doc);
                         if (flag > 0) {
                             return ResponseData.ok();
@@ -351,7 +418,7 @@ public class DocController {
                         doc.setIsCurrentUserLock(true);
                 }
             }
-            responseData.putData(list);
+            responseData.putData(docParseService.docLite2Tree(list));
         }
         return responseData;
     }

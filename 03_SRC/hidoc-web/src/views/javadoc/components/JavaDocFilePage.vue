@@ -5,22 +5,24 @@
             <div style="height:120px;overflow:hidden;overflow:scroll;">
                 <el-row>
                     <el-col :span="24">
-                        <el-row v-for="item in this.projectList" :key="item.id" :index="item.id" @click="getPackageList(item.id, item.version)" :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', backgroundColor: item.id === this.viewData.currentProjectId ? '#CCC' : '#FFF' }">
-                            <el-col style="font-size:14px;" :span="24">{{ item.name }}</el-col>
+                        <el-row v-for="item in this.projectList" :key="item.id" :index="item.id" @click="getMenuList(item.id, item.version)" :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', color: item.id === this.viewData.currentProjectId ? '#409eff' : '#606266', fontWeight: item.id === this.viewData.currentProjectId ? '900' : 'normal' }">
+                            <el-col style="font-size:16px;" :span="24">{{ item.name }}</el-col>
                         </el-row>
                     </el-col>
                 </el-row>
             </div>
-            <div style="text-align:center;">包</div>
+            <div style="text-align:center;">目录</div>
             <div style="height:300px;overflow:hidden;overflow:scroll;">
                 <el-row>
-                    <el-col v-if="this.viewData.packageList.length > 0" :span="24">
-                        <el-row v-for="item in this.viewData.packageList" :key="item" :index="item" @click="getClassList(item)" :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', backgroundColor: item === this.viewData.currentPackageName ? '#CCC' : '#FFF' }">
-                            <el-col style="font-size:14px;" :span="24">{{ item }}</el-col>
-                        </el-row>
+                    <el-col v-if="this.viewData.menuList.length > 0" :span="24">
+                        <el-tree :data="this.viewData.menuList" @node-click="menuNodeClick" :expand-on-click-node="false" default-expand-all>
+                            <template #default="{ data }">
+                                <span :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', fontWeight: data.label === this.viewData.currentMenuName ? '900' : 'normal', width: '260px', color: data.label === this.viewData.currentMenuName ? '#409eff' : '#606266' }">{{ data.label }}</span>
+                            </template>
+                        </el-tree>
                     </el-col>
                     <el-col v-else>
-                        <el-skeleton :rows="5" animated />
+                        <el-empty description=""></el-empty>
                     </el-col>
                 </el-row>
             </div>
@@ -28,12 +30,12 @@
             <div style="height:260px;overflow:hidden;overflow:scroll;">
                 <el-row>
                     <el-col v-if="this.viewData.classList.length > 0" :span="24">
-                        <el-row v-for="item in this.viewData.classList" :key="item.id" :index="item.id" @click="getMethodList(item.id)" :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', backgroundColor: item.id === this.viewData.currentClassId ? '#CCC' : '#FFF' }">
-                            <el-col style="font-size:14px;" :span="24">{{ item.name }}</el-col>
+                        <el-row v-for="item in this.viewData.classList" :key="item.id" :index="item.id" @click="getClassDetail(item.id)" :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', color: item.id === this.viewData.currentClassId ? '#409eff' : '#606266', fontWeight: item.id === this.viewData.currentClassId ? '900' : 'normal' }">
+                            <el-col style="font-size:16px;" :span="24">{{ item.commentInfo }}</el-col>
                         </el-row>
                     </el-col>
                     <el-col v-else>
-                        <el-skeleton :rows="5" animated />
+                        <el-empty description=""></el-empty>
                     </el-col>
                 </el-row>
             </div>
@@ -72,9 +74,9 @@ export default {
             viewData: {
                 currentProjectId: '',
                 currentVersion: '',
-                currentPackageName: '',
+                currentMenuName: '',
                 currentClassId: '',
-                packageList: [],
+                menuList: [],
                 classList: [],
                 methodList: []
             }
@@ -82,7 +84,7 @@ export default {
     },
     components: { JavaDocItemCard },
     mounted() {
-        document.title = 'Hidoc-JavaDoc-浏览模式';
+        document.title = 'Hidoc-JavaDoc-文档';
         this.getProjectList();
     },
     methods: {
@@ -94,7 +96,7 @@ export default {
         search() {
             console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
             request({
-                url: '/javadoc/search',
+                url: '/openapi/javadoc/search',
                 method: 'post',
                 data: {
                     mode: this.searchMode,
@@ -130,23 +132,23 @@ export default {
         },
         getProjectList() {
             request({
-                url: '/javadoc/projectList',
+                url: '/openapi/javadoc/projectList',
                 method: 'post',
-                data: { p: 'n' }
+                data: { p: 'n', existMenu: true }
             }).then(res => {
                 if (res.code == 0) {
                     this.projectList = res.data;
                 }
             });
         },
-        getPackageList(projectId, version) {
-            this.viewData.packageList =[];
-            this.viewData.classList =[];
+        getMenuList(projectId, version) {
+            this.viewData.menuList = [];
+            this.viewData.classList = [];
 
             this.viewData.currentProjectId = projectId;
             this.viewData.currentVersion = version;
             request({
-                url: '/javadoc/packageList',
+                url: '/openapi/javadoc/menuList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -154,21 +156,24 @@ export default {
                 }
             }).then(res => {
                 if (res.code == 0) {
-                    this.viewData.packageList = res.data;
+                    this.viewData.menuList = res.data;
                 }
             });
         },
-        getClassList(packageName) {
-            this.viewData.classList =[];
+        menuNodeClick(treeNode, prop, event) {
+            this.getClassList(treeNode);
+        },
+        getClassList(currentMenu) {
+            this.viewData.classList = [];
 
-            this.viewData.currentPackageName = packageName;
+            this.viewData.currentMenuName = currentMenu.menu;
             request({
-                url: '/javadoc/classList',
+                url: '/openapi/javadoc/classList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
                     version: this.viewData.currentVersion,
-                    packageName: this.viewData.currentPackageName
+                    menuPath: currentMenu.menuPath
                 }
             }).then(res => {
                 if (res.code == 0) {
@@ -176,10 +181,10 @@ export default {
                 }
             });
         },
-        getMethodList(classId) {
+        getClassDetail(classId) {
             this.viewData.currentClassId = classId;
             request({
-                url: '/javadoc/methodList',
+                url: '/openapi/javadoc/classDetail',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -188,7 +193,9 @@ export default {
                 }
             }).then(res => {
                 if (res.code == 0) {
-                    this.viewData.methodList = res.data;
+                    this.viewData.methodList = [];
+                    this.viewData.methodList.push(res.meta.classInfo);
+                    this.viewData.methodList.push(...res.meta.methodList);
                 }
             });
         }
@@ -219,5 +226,15 @@ export default {
 
 ::-webkit-scrollbar-thumb {
     background-color: #bfc1c4;
+}
+
+/** 树自定义样式 */
+.el-tree-node__content {
+    width: 280px;
+    height: 40px;
+    font-size: 14px;
+    border-bottom: 1px dashed lightgrey;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>

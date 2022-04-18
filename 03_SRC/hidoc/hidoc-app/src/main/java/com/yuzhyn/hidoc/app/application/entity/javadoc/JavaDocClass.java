@@ -23,7 +23,6 @@ public class JavaDocClass {
     private String projectId;
     private String projectName;
 
-    private String version;
     private String createUserId;
     private LocalDateTime createTime;
 

@@ -12,18 +12,18 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.type.ReferenceType;
+import com.yuzhyn.azylee.core.datas.collections.ArrayTool;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
+import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.azylee.core.datas.strings.StringConst;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.ios.txts.TxtTool;
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocClass;
-import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocMethod;
-import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocProject;
+import com.yuzhyn.hidoc.app.application.entity.javadoc.*;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
-import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocClassMapper;
-import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocMethodMapper;
-import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocProjectMapper;
+import com.yuzhyn.hidoc.app.application.mapper.javadoc.*;
+import com.yuzhyn.hidoc.app.application.model.javadoc.JavaDocComment;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +39,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -55,57 +54,95 @@ public class JavaDocCreateService {
     @Autowired
     JavaDocMethodMapper javaDocMethodMapper;
 
-    @Transactional
-    public ResponseData uploadZip(String projectName, List<String> fileList) {
+    @Autowired
+    JavaDocMenuMapper javaDocMenuMapper;
 
+    @Autowired
+    JavaDocClassLiteMapper javaDocClassLiteMapper;
+
+    @Autowired
+    JavaDocMethodLiteMapper javaDocMethodLiteMapper;
+
+    @Transactional
+    public ResponseData uploadZip(String projectName, List<String> fileList, List<String> step) {
+
+        step.add("获取修改用户信息");
         SysUser curUser = CurrentUserManager.getUser();
+        if (curUser == null) {
+            curUser = CurrentUserManager.getOpenUser();
+        }
 
         boolean isCreateProject = false;
-        // 查询项目，如果没有则新建项目，如果有则更新版本、时间等信息
+        step.add("查询项目，如果没有则新建项目，如果有则更新版本、时间等信息");
         JavaDocProject javaDocProject = javaDocProjectMapper.selectOne(new LambdaQueryWrapper<JavaDocProject>().eq(JavaDocProject::getName, projectName));
         if (javaDocProject == null) {
             isCreateProject = true;
             javaDocProject = new JavaDocProject();
-            javaDocProject.setId(R.SnowFlake.nexts());
+            javaDocProject.setId("[id:" + projectName + "]");
+            javaDocProject.setId(javaDocProject.getId().replace(" ", ""));
             javaDocProject.setName(projectName);
+            javaDocProject.setToken(UUIDTool.get());
             javaDocProject.setDescription(projectName);
             javaDocProject.setCreateUserId(curUser.getId());
             javaDocProject.setCreateTime(LocalDateTime.now());
         }
         javaDocProject.setUpdateUserId(curUser.getId());
         javaDocProject.setUpdateTime(LocalDateTime.now());
-        javaDocProject.setVersion(String.valueOf(System.currentTimeMillis()));
 
-        // 准备解析后的数据列表
+        step.add("准备解析后的数据列表");
         List<JavaDocClass> javaDocClassList = new ArrayList<>();
         List<JavaDocMethod> javaDocMethodList = new ArrayList<>();
+        List<JavaDocMenu> javaDocMenuList = new ArrayList<>();
 
-        // 准备数据开始分解存储
+        step.add("准备数据开始分解存储");
+        step.add("解析项目、类、方法");
         for (String fileItem : fileList) {
             try {
                 // parse() 参数可以是 String, File, InputStream等
                 parseJavaDoc(fileItem, javaDocProject, javaDocClassList, javaDocMethodList);
             } catch (IOException ex) {
+                step.add("解析项目、类、方法异常");
             }
         }
 
-        // 最终汇总数据
+        try {
+            parseJavaDocMenu(javaDocProject, javaDocClassList, javaDocMenuList);
+            step.add("解析菜单成功");
+        } catch (Exception ex) {
+            step.add("解析菜单异常");
+        }
+
+        step.add("最终汇总数据，如果有异常，则直接退出，不做任何数据落库");
         if (javaDocProject != null && javaDocClassList != null && javaDocMethodList != null) {
+
+            step.add("清理数据库数据");
+            cleanJavaDocData(projectName);
+
+            step.add("更新或保存项目信息");
             if (isCreateProject) {
                 javaDocProjectMapper.insert(javaDocProject);
             } else {
                 javaDocProjectMapper.updateById(javaDocProject);
             }
 
+            step.add("保存类信息");
             if (ListTool.ok(javaDocClassList)) {
                 for (JavaDocClass item : javaDocClassList) {
                     javaDocClassMapper.insert(item);
                 }
             }
 
+            step.add("保存方法信息");
             if (ListTool.ok(javaDocMethodList)) {
                 for (JavaDocMethod item : javaDocMethodList) {
                     javaDocMethodMapper.insert(item);
+                }
+            }
+
+            step.add("保存菜单信息");
+            if (ListTool.ok(javaDocMenuList)) {
+                for (JavaDocMenu item : javaDocMenuList) {
+                    javaDocMenuMapper.insert(item);
                 }
             }
             return ResponseData.ok("JavaDoc创建完成");
@@ -113,81 +150,67 @@ public class JavaDocCreateService {
         return ResponseData.error("没有发现要创建的内容");
     }
 
-//    @Transactional
-//    public ResponseData upload(String projectId, MultipartFile[] files) {
-//
-//        // 参数判断检查
-//        if (!ListTool.ok(files)) return ResponseData.error("请选择文件");
-//
-//        JavaDocProject javaDocProject = javaDocProjectMapper.selectById(projectId);
-//        if (javaDocProject == null) return ResponseData.error("JavaDoc项目不存在");
-//
-//        SysUser curUser = CurrentUserManager.getUser();
-//
-//        // 更新项目信息
-//        javaDocProject.setUpdateUserId(curUser.getId());
-//        javaDocProject.setUpdateTime(LocalDateTime.now());
-//        javaDocProject.setVersion(String.valueOf(System.currentTimeMillis()));
-//        List<JavaDocClass> javaDocClassList = new ArrayList<>();
-//        List<JavaDocMethod> javaDocMethodList = new ArrayList<>();
-//
-//        // 准备数据开始分解存储
-//        for (MultipartFile file : files) {
-//            try {
-//                parseJavaDoc(cu, javaDocProject, javaDocClassList, javaDocMethodList);
-//            } catch (IOException ex) {
-//            }
-//        }
-//
-//        // 最终汇总数据
-//        if (javaDocProject != null && javaDocClassList != null && javaDocMethodList != null) {
-//            javaDocProjectMapper.updateById(javaDocProject);
-//
-//            if (ListTool.ok(javaDocClassList)) {
-//                for (JavaDocClass item : javaDocClassList) {
-//                    javaDocClassMapper.insert(item);
-//                }
-//            }
-//
-//            if (ListTool.ok(javaDocMethodList)) {
-//                for (JavaDocMethod item : javaDocMethodList) {
-//                    javaDocMethodMapper.insert(item);
-//                }
-//            }
-//            return ResponseData.ok("JavaDoc创建完成");
-//        }
-//        return ResponseData.error("没有发现要创建的内容");
-//    }
+    public void cleanJavaDocData(String projectName) {
+        JavaDocProject project = javaDocProjectMapper.selectOne(new LambdaQueryWrapper<JavaDocProject>()
+                .eq(JavaDocProject::getName, projectName));
+        if (project != null) {
+            int classFlag = javaDocClassLiteMapper.delete(new LambdaQueryWrapper<JavaDocClassLite>()
+                    .eq(JavaDocClassLite::getProjectId, project.getId()));
+
+
+            int methodFlag = javaDocMethodLiteMapper.delete(new LambdaQueryWrapper<JavaDocMethodLite>()
+                    .eq(JavaDocMethodLite::getProjectId, project.getId()));
+
+
+            int menuFlag = javaDocMenuMapper.delete(new LambdaQueryWrapper<JavaDocMenu>()
+                    .eq(JavaDocMenu::getProjectId, project.getId()));
+
+            log.info("删除历史信息：class：" + classFlag + "，method：" + methodFlag + "，menu：" + menuFlag + "。");
+        }
+
+    }
 
     private void parseJavaDoc(String filepath, JavaDocProject javaDocProject, List<JavaDocClass> javaDocClassList, List<JavaDocMethod> javaDocMethodList) throws FileNotFoundException {
         SysUser curUser = CurrentUserManager.getUser();
+        if (curUser == null) {
+            curUser = CurrentUserManager.getOpenUser();
+        }
         List<String> oriDocTextList = TxtTool.readLine(filepath);
         String oriDocText = String.join(StringConst.NEWLINE, oriDocTextList);
 
         // parse() 参数可以是 String, File, InputStream等
         CompilationUnit cu = StaticJavaParser.parse(new File(filepath));
         List<TypeDeclaration> typeList = cu.findAll(TypeDeclaration.class);
+        // 文件主类名（一个类中，可能存在多个类，如果同包下，有多个重复类，会报主键冲突，导致无法插入数据库）
+        // 具体冲突场景如：
+        // com.zhangsan 包 Student 类 Bag 子类
+        // com.zhangsan 包 Teacher 类 Bag 子类
+        // 以上将导致 Bag 子类解析的ID重复，都是同包-同Bag类名的主键
+        // 这里增加了主类的名称，作为ID的一部分，避免了上述情况的冲突
+        // 极端情况下，不同文件，相同类名还是会用此情况
+        // 后续可以考虑从文件名方面入手（需要修改：java解析部分和sh自动化部分）
+        String mainClassName = "";
 
         // 遍历类信息
         if (ListTool.ok(typeList)) {
             for (TypeDeclaration typeItem : typeList) {
                 // 创建类信息
                 JavaDocClass javaDocClass = new JavaDocClass();
-                javaDocClass.setId(R.SnowFlake.nexts());
                 javaDocClass.setProjectId(javaDocProject.getId());
                 javaDocClass.setProjectName(javaDocProject.getName());
-                javaDocClass.setVersion(javaDocProject.getVersion());
                 javaDocClass.setCreateUserId(curUser.getId());
                 javaDocClass.setCreateTime(LocalDateTime.now());
                 javaDocClass.setName(typeItem.getNameAsString());
                 javaDocClass.setOriginalDocument(cu.toString());
                 javaDocClass.setIsStruct(false);
+                if (!StringTool.ok(mainClassName)) mainClassName = typeItem.getNameAsString();
 
                 if (typeItem.hasParentNode() && typeItem.getParentNode().isPresent() && typeItem.getParentNode().get().findCompilationUnit().isPresent()) {
                     CompilationUnit parentNode = typeItem.getParentNode().get().findCompilationUnit().get();
                     // 填充包信息
                     if (parentNode.getPackageDeclaration().isPresent()) {
                         javaDocClass.setPackageInfo(parentNode.getPackageDeclaration().get().getNameAsString());
+                        if (javaDocClass.getPackageInfo() == null) javaDocClass.setPackageInfo("");
                     }
                     // 填充引用信息
                     if (ListTool.ok(parentNode.getImports())) {
@@ -226,25 +249,22 @@ public class JavaDocCreateService {
                         }
                     }
                     if (stringBuilder.length() > 0) {
-                        String[] commentArrays = parseComment(stringBuilder.toString());
-                        javaDocClass.setCommentInfo(commentArrays[0]);
-                        javaDocClass.setCommentScene(commentArrays[1]);
-                        javaDocClass.setCommentLimit(commentArrays[2]);
-                        javaDocClass.setCommentExample(commentArrays[3]);
-                        javaDocClass.setCommentLog(commentArrays[4]);
-                        javaDocClass.setCommentKeywords(commentArrays[5]);
-                        javaDocClass.setCommentMenu(commentArrays[6]);
 
-                        javaDocClass.setCommentLogJson(parseCommentLog(commentArrays[4]));
-
-                        if (StringTool.ok(javaDocClass.getCommentScene()) ||
-                                StringTool.ok(javaDocClass.getCommentLimit()) ||
-                                StringTool.ok(javaDocClass.getCommentMenu()) ||
-                                StringTool.ok(javaDocClass.getCommentKeywords())) {
-                            javaDocClass.setIsStruct(true);
-                        }
+                        JavaDocComment javaDocComment = new JavaDocComment(stringBuilder.toString());
+                        javaDocComment.parseComment();
+                        javaDocClass.setIsStruct(javaDocComment.isStruct());
+                        javaDocClass.setCommentInfo(javaDocComment.getInfo());
+                        javaDocClass.setCommentScene(javaDocComment.getScene());
+                        javaDocClass.setCommentLimit(javaDocComment.getLimit());
+                        javaDocClass.setCommentExample(javaDocComment.getExample());
+                        javaDocClass.setCommentLog(javaDocComment.getLog());
+                        javaDocClass.setCommentLogJson(javaDocComment.getLogJson());
+                        javaDocClass.setCommentKeywords(javaDocComment.getKeywords());
+                        javaDocClass.setCommentMenu(javaDocComment.getMenu());
                     }
                 }
+                javaDocClass.setId("[id:" + javaDocProject.getId() + "-" + javaDocClass.getPackageInfo() + "-" + javaDocClass.getQualifier() + "-" + mainClassName + "-" + javaDocClass.getName() + "]");
+                javaDocClass.setId(javaDocClass.getId().replace(" ", ""));
                 javaDocClassList.add(javaDocClass);
 
                 // 创建方法信息
@@ -253,17 +273,15 @@ public class JavaDocCreateService {
                         if (nodeItem.getClass().equals(MethodDeclaration.class)) {
                             MethodDeclaration methodItem = (MethodDeclaration) nodeItem;
                             JavaDocMethod javaDocMethod = new JavaDocMethod();
-                            javaDocMethod.setId(R.SnowFlake.nexts());
                             javaDocMethod.setClassId(javaDocClass.getId());
                             javaDocMethod.setClassName(javaDocClass.getName());
                             javaDocMethod.setProjectId(javaDocProject.getId());
                             javaDocMethod.setProjectName(javaDocProject.getName());
-                            javaDocMethod.setVersion(javaDocProject.getVersion());
                             javaDocMethod.setCreateUserId(curUser.getId());
                             javaDocMethod.setCreateTime(LocalDateTime.now());
                             javaDocMethod.setName(methodItem.getNameAsString());
                             javaDocMethod.setSourceCode(methodItem.toString());
-                            javaDocMethod.setIsStruct(false);
+                            javaDocMethod.setIsStruct(javaDocClass.getIsStruct());
                             // 填充修饰词
                             if (ListTool.ok(methodItem.getModifiers())) {
                                 StringBuilder stringBuilder = new StringBuilder();
@@ -272,44 +290,68 @@ public class JavaDocCreateService {
                                 }
                                 javaDocMethod.setQualifier(stringBuilder.toString());
                             }
-                            // 填充传入参数
+                            // 填充注释内容
+                            JavaDocComment javaDocComment = null;
+                            if (methodItem.getComment().isPresent()) {
+                                String content = methodItem.getComment().get().getContent();
+                                javaDocComment = new JavaDocComment(content);
+                                javaDocComment.parseComment();
+//                                javaDocMethod.setIsStruct(javaDocComment.isStruct());
+//                                if (!javaDocClass.getIsStruct()) javaDocMethod.setIsStruct(false);
+                                javaDocMethod.setReturnDesc(javaDocComment.getReturn());
+                                javaDocMethod.setCommentInfo(javaDocComment.getInfo());
+                                javaDocMethod.setCommentScene(javaDocComment.getScene());
+                                javaDocMethod.setCommentLimit(javaDocComment.getLimit());
+                                javaDocMethod.setCommentExample(javaDocComment.getExample());
+                                javaDocMethod.setCommentLog(javaDocComment.getLog());
+                                javaDocMethod.setCommentLogJson(javaDocComment.getLogJson());
+                                javaDocMethod.setCommentKeywords(javaDocComment.getKeywords());
+                                javaDocMethod.setCommentMenu(javaDocComment.getMenu());
+                            }
+                            // 返回值类型
                             javaDocMethod.setReturnType(methodItem.getTypeAsString());
+                            // 填充传入参数
                             if (ListTool.ok(methodItem.getParameters())) {
                                 StringBuilder stringBuilder = new StringBuilder();
                                 JSONArray jsonArray = new JSONArray();
                                 for (Parameter parameterItem : methodItem.getParameters()) {
-                                    stringBuilder.append(parameterItem.getTypeAsString());
-                                    stringBuilder.append(parameterItem.getNameAsString());
+                                    stringBuilder.append(parameterItem.getTypeAsString() + " ");
+                                    stringBuilder.append(parameterItem.getNameAsString() + " ");
                                     JSONObject jsonObject = new JSONObject();
                                     jsonObject.put("type", parameterItem.getTypeAsString());
                                     jsonObject.put("name", parameterItem.getNameAsString());
+                                    String desc = "";
+                                    if (javaDocComment != null) {
+                                        desc = javaDocComment.getParam(parameterItem.getNameAsString());
+                                    }
+                                    jsonObject.put("desc", desc);
+                                    stringBuilder.append(desc + " ");
                                     jsonArray.add(jsonObject);
                                 }
                                 javaDocMethod.setParams(stringBuilder.toString());
                                 javaDocMethod.setParamsJson(jsonArray);
                             }
-                            // 填充注释内容
-                            if (methodItem.getComment().isPresent()) {
-                                String content = methodItem.getComment().get().getContent();
-                                String[] commentArrays = parseComment(content);
-                                javaDocMethod.setCommentInfo(commentArrays[0]);
-                                javaDocMethod.setCommentScene(commentArrays[1]);
-                                javaDocMethod.setCommentLimit(commentArrays[2]);
-                                javaDocMethod.setCommentExample(commentArrays[3]);
-                                javaDocMethod.setCommentLog(commentArrays[4]);
-                                javaDocMethod.setCommentKeywords(commentArrays[5] + " , " + javaDocClass.getCommentKeywords());
-                                javaDocMethod.setCommentMenu(commentArrays[6]);
-
-                                javaDocMethod.setCommentLogJson(parseCommentLog(commentArrays[4]));
-
-                                if (StringTool.ok(javaDocMethod.getCommentScene()) ||
-                                        StringTool.ok(javaDocMethod.getCommentLimit()) ||
-                                        StringTool.ok(javaDocMethod.getCommentMenu()) ||
-                                        StringTool.ok(javaDocMethod.getCommentKeywords())) {
-                                    javaDocMethod.setIsStruct(true);
+                            if (ListTool.ok(methodItem.getThrownExceptions())) {
+                                StringBuilder stringBuilder = new StringBuilder();
+                                JSONArray jsonArray = new JSONArray();
+                                for (ReferenceType refItem : methodItem.getThrownExceptions()) {
+                                    stringBuilder.append(refItem.asString() + " ");
+                                    JSONObject jsonObject = new JSONObject();
+                                    jsonObject.put("type", refItem.asString());
+                                    String desc = "";
+                                    if (javaDocComment != null) {
+                                        desc = javaDocComment.getThrows(refItem.asString());
+                                    }
+                                    jsonObject.put("desc", desc);
+                                    stringBuilder.append(desc + " ");
+                                    jsonArray.add(jsonObject);
                                 }
+                                javaDocMethod.setThrowses(stringBuilder.toString());
+                                javaDocMethod.setThrowsesJson(jsonArray);
                             }
-                            if (!javaDocClass.getIsStruct()) javaDocMethod.setIsStruct(false);
+                            if (javaDocMethod.getParams() == null) javaDocMethod.setParams("");
+                            javaDocMethod.setId("[id:" + javaDocClass.getId() + "-" + javaDocMethod.getQualifier() + "-" + javaDocMethod.getName() + "-" + javaDocMethod.getReturnType() + "-" + javaDocMethod.getParams() + "]");
+                            javaDocMethod.setId(javaDocMethod.getId().replace(" ", ""));
                             javaDocMethodList.add(javaDocMethod);
                         }
                     }
@@ -318,218 +360,47 @@ public class JavaDocCreateService {
         }
     }
 
-    private String[] parseComment(String s) {
-        String[] result = new String[]{"", "", "", "", "", "", ""};
+    private void parseJavaDocMenu(JavaDocProject javaDocProject, List<JavaDocClass> javaDocClassList, List<JavaDocMenu> javaDocMenuList) {
+        Map<String, JavaDocMenu> menuMap = new HashMap<>();
+        if (ListTool.ok(javaDocClassList)) {
+            for (JavaDocClass classItem : javaDocClassList) {
+                if (StringTool.ok(classItem.getCommentMenu()) && StringTool.ok(classItem.getCommentMenu().trim())) {
+                    String commentMenu = classItem.getCommentMenu().trim().replace('\\', '/');
+                    String[] menuArray = StringTool.split(commentMenu, "/", true, false);
+                    String fmtCommentMenu = StringTool.combineArray(menuArray, "/");
+                    classItem.setCommentMenu(fmtCommentMenu);
 
-        if (StringTool.ok(s)) {
-            String lines[] = s.split("\\r?\\n");
-            String curblock = "info";
-//            String planBTxt = ""; // 如果没有按照模板书写注释，则按照常规解析内容（普通文本，排除@标志行）
-            for (String line : lines) {
-                String trimline = line.trim(); // 去掉前后空格的内容
-                String txtline = trimline;
-                if (txtline.equals("* <p>")) txtline = ""; // 清空掉 "* <p>" 的行
-                if (txtline.startsWith("*")) txtline = txtline.substring(1); // 去掉 " *" 的内容
-                if (txtline.startsWith(" ")) txtline = txtline.substring(1); // 去掉第一个空格 " " 的内容
-                if (txtline.startsWith("@")) continue; // 跳过@修饰的标记内容
+                    for (int i = 0; i < menuArray.length; i++) {
+                        String[] innerMenuArray = Arrays.copyOf(menuArray, i + 1);
+                        String[] innerParentMenuArray = Arrays.copyOf(menuArray, i);
+                        String innerMenuPath = StringTool.combineArray(innerMenuArray, "/");
+                        String innerParentMenuPath = StringTool.combineArray(innerParentMenuArray, "/");
+                        String parentMenuId = "";
+                        if (menuMap.get(innerParentMenuPath) != null) {
+                            parentMenuId = menuMap.get(innerParentMenuPath).getId();
+                        }
 
-                // 分析当前所在区块（>开始，<结束），区块包括：info、scene、limit、example、log、keywords
-                Tuple2<String, String> signRs = parseCommentBlockSign(txtline, curblock);
-                curblock = signRs.getT1();
-                txtline = signRs.getT2();
-                int blockid = -1;
-                if (curblock.equals("info")) blockid = 0;
-                if (curblock.equals("scene")) blockid = 1;
-                if (curblock.equals("limit")) blockid = 2;
-                if (curblock.equals("example")) blockid = 3;
-                if (curblock.equals("log")) blockid = 4;
-                if (curblock.equals("keywords")) blockid = 5;
-                if (curblock.equals("menu")) blockid = 6;
+                        JavaDocMenu javaDocMenu = menuMap.get(innerMenuPath);
+                        if (javaDocMenu != null) {
 
-                // 对planB进行赋值（不在区块中，不是@标志开始的内容）
-//                if (curblock.equals("") && (!txtline.trim().startsWith("@") || txtline.trim().toLowerCase().startsWith("@description"))) {
-//                    if (txtline.trim().toLowerCase().startsWith("@description")) {
-//                        txtline = txtline.trim().substring("@description".length());
-//                    }
-//                    if (txtline.trim().startsWith(":") || txtline.trim().startsWith("：")) {
-//                        txtline = txtline.trim().substring(":".length());
-//                    }
-//
-//                    planBTxt += txtline;
-//                    planBTxt += StringConst.NEWLINE;
-//                }
-
-                if (blockid >= 0 && blockid < result.length) {
-                    result[blockid] += txtline;
-                    result[blockid] += StringConst.NEWLINE;
-                }
-            }
-
-            // 最后整理一下文本内容，缩进一下距离等
-            for (int i = 0; i < result.length; i++) {
-                result[i] = StringTool.retractSpaceArrayAuto(result[i]);
-            }
-
-            // 对planB进行返回（在info内容为空时，返回planB）
-//            if (!StringTool.ok(result[0])) result[0] = planBTxt;
-        }
-
-        return result;
-    }
-
-    private Tuple2<String, String> parseCommentBlockSign(String txtline, String curblock) {
-        String result = "";
-        if (txtline.startsWith("#场景：") || txtline.startsWith("#场景:")) {
-            result = "scene";
-            txtline = txtline.substring(4);
-        }
-        if (txtline.startsWith("#限制：") || txtline.startsWith("#限制:")) {
-            result = "limit";
-            txtline = txtline.substring(4);
-        }
-        if (txtline.startsWith("#关键字：") || txtline.startsWith("#关键字:")) {
-            result = "keywords";
-            txtline = txtline.substring(5);
-        }
-        if (txtline.startsWith("#目录：") || txtline.startsWith("#目录:")) {
-            result = "menu";
-            txtline = txtline.substring(4);
-        }
-        if (txtline.startsWith("<pre>{@code 示例说明")) {
-            result = "example>";
-        }
-        if (txtline.startsWith("<pre>{@code 修改记录")) {
-            result = "log>";
-        }
-        if (txtline.startsWith("}</pre>")) {
-            result = "<";
-        }
-
-        // 对上次标记进行处理，去除开始和结束标记，可以正式获取文本信息
-        if (StringTool.ok(curblock) && curblock.endsWith(">")) {
-            curblock = curblock.replaceAll(">", "");
-        }
-
-        // 如果当前在某部分中，但是本次未解析到内容，则使用上次的信息
-        if (StringTool.ok(curblock) && !StringTool.ok(result)) {
-            return Tuples.of(curblock, txtline);
-        }
-        return Tuples.of(result, txtline);
-    }
-
-    private String[] parseCommentOld(String s) {
-        String[] result = new String[]{"", "", "", "", "", ""};
-
-        if (StringTool.ok(s)) {
-            String lines[] = s.split("\\r?\\n");
-            String curblock = "";
-            String planBTxt = ""; // 如果没有按照模板书写注释，则按照常规解析内容（普通文本，排除@标志行）
-            for (String line : lines) {
-                String trimline = line.trim(); // 去掉前后空格的内容
-                String txtline = trimline;
-                if (txtline.equals("* <p>")) txtline = ""; // 清空掉 "* <p>" 的行
-                if (txtline.startsWith("*")) txtline = txtline.substring(1); // 去掉 " *" 的内容
-
-                // 分析当前所在区块（>开始，<结束），区块包括：info、scene、limit、example、log、keywords
-                curblock = parseCommentBlockSignOld(txtline, curblock);
-                int blockid = -1;
-                if (curblock.equals("info")) blockid = 0;
-                if (curblock.equals("scene")) blockid = 1;
-                if (curblock.equals("limit")) blockid = 2;
-                if (curblock.equals("example")) blockid = 3;
-                if (curblock.equals("log")) blockid = 4;
-                if (curblock.equals("keywords")) blockid = 5;
-
-                // 对planB进行赋值（不在区块中，不是@标志开始的内容）
-                if (curblock.equals("") && (!txtline.trim().startsWith("@") || txtline.trim().toLowerCase().startsWith("@description"))) {
-                    if (txtline.trim().toLowerCase().startsWith("@description")) {
-                        txtline = txtline.trim().substring("@description".length());
+                        } else {
+                            javaDocMenu = new JavaDocMenu();
+                            javaDocMenu.setId("[id:" + javaDocProject.getId() + "-" + innerMenuPath + "]");
+                            javaDocMenu.setId(javaDocMenu.getId().replace(" ", ""));
+                            javaDocMenu.setMenu(menuArray[i]);
+                            javaDocMenu.setMenuPath(innerMenuPath);
+                            javaDocMenu.setParentId(parentMenuId);
+                            javaDocMenu.setProjectId(javaDocProject.getId());
+                            javaDocMenu.setLevel(i + 1);
+                            menuMap.put(innerMenuPath, javaDocMenu);
+                        }
                     }
-                    if (txtline.trim().startsWith(":") || txtline.trim().startsWith("：")) {
-                        txtline = txtline.trim().substring(":".length());
-                    }
-
-                    planBTxt += txtline;
-                    planBTxt += StringConst.NEWLINE;
-                }
-
-                if (blockid >= 0 && blockid < result.length) {
-                    result[blockid] += txtline;
-                    result[blockid] += StringConst.NEWLINE;
                 }
             }
 
-            // 最后整理一下文本内容，缩进一下距离等
-            for (int i = 0; i < result.length; i++) {
-                result[i] = StringTool.retractSpaceArrayAuto(result[i]);
+            for (JavaDocMenu item : menuMap.values()) {
+                javaDocMenuList.add(item);
             }
-
-            // 对planB进行返回（在info内容为空时，返回planB）
-            if (!StringTool.ok(result[0])) result[0] = planBTxt;
-        }
-
-        return result;
-    }
-
-    private String parseCommentBlockSignOld(String txtline, String curblock) {
-        String result = "";
-        if (txtline.contains("<div")) {
-            if (txtline.contains("javadoc=\"info\"") || txtline.contains("javadoc='info'")) {
-                result = "info>";
-            }
-            if (txtline.contains("javadoc=\"scene\"") || txtline.contains("javadoc='scene'")) {
-                result = "scene>";
-            }
-            if (txtline.contains("javadoc=\"limit\"") || txtline.contains("javadoc='limit'")) {
-                result = "limit>";
-            }
-            if (txtline.contains("javadoc=\"example\"") || txtline.contains("javadoc='example'")) {
-                result = "example>";
-            }
-            if (txtline.contains("javadoc=\"log\"") || txtline.contains("javadoc='log'")) {
-                result = "log>";
-            }
-            if (txtline.contains("javadoc=\"keywords\"") || txtline.contains("javadoc='keywords'")) {
-                result = "keywords>";
-            }
-        }
-        if (txtline.contains("</div>")) {
-            result = "<";
-        }
-
-        // 对上次标记进行处理，去除开始和结束标记，可以正式获取文本信息
-        if (StringTool.ok(curblock) && curblock.endsWith(">")) {
-            curblock = curblock.replaceAll(">", "");
-        }
-
-        if (StringTool.ok(result)) {
-            // 如果是开始或结束标记，则直接返回
-            return result;
-        } else {
-            // 否则按照传入的标记处理（在遇到结束标记时，返回空白，表示不再任何块中）
-            if (curblock.equals("<")) return "";
-            else return curblock;
         }
     }
-
-    private JSONArray parseCommentLog(String s) {
-        JSONArray jsonArray = new JSONArray();
-        String[] lines = StringTool.splitLine(s);
-        for (String line : lines) {
-            if (line.contains("版本") && line.contains("修改时间") && line.contains("修改人") && line.contains("修改内容")) {
-                // 这行肯定是标题啦
-            } else {
-                String[] logs = StringTool.splitLine(line, "  ", 4, " ", true);
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("version", logs[0]);
-                jsonObject.put("time", logs[1]);
-                jsonObject.put("author", logs[2]);
-                jsonObject.put("content", logs[3]);
-                jsonArray.add(jsonObject);
-            }
-        }
-        return jsonArray;
-    }
-
-
 }

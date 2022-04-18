@@ -206,7 +206,7 @@ export default {
         searchData() {
             console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
             // request({
-            //     url: '/javadoc/search',
+            //     url: '/openapi/javadoc/search',
             //     method: 'post',
             //     data: {
             //         mode: this.searchMode,

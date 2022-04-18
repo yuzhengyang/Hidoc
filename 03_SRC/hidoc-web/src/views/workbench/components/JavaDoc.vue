@@ -6,15 +6,17 @@
                 </el-col>
                 <el-col :span="8" style="text-align:right;">
                     <el-button type="primary" round @click="openUploadDialog">上传zip</el-button>
+                    <el-button type="primary" round @click="loadProjectList">刷新</el-button>
                 </el-col>
             </el-row>
         </el-header>
         <el-main>
             <el-row :gutter="12">
-                <el-col :span="6" v-for="item in projectList" :key="item">
+                <el-col :span="8" v-for="item in projectList" :key="item">
                     <el-card shadow="hover">
                         <div>名称：{{item.name}}</div>
                         <div>描述：{{item.description}}</div>
+                        <div>token：{{item.token}}</div>
                         <div>创建：{{item.createTime}}</div>
                         <div>更新：{{item.updateTime}}</div>
                     </el-card>
@@ -75,7 +77,7 @@ export default {
                 // debugger;
                 this.dialogUploadVisible = false;
                 this.$message.success(data.response.msg);
-            }else{
+            } else {
                 this.$message.error(data.response.msg);
             }
             this.loadProjectList();

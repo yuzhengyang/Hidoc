@@ -20,7 +20,7 @@
                         </el-row>
                     </el-col>
                     <el-col v-else>
-                        <el-skeleton :rows="5" animated />
+                        <el-empty description=""></el-empty>
                     </el-col>
                 </el-row>
             </div>
@@ -28,12 +28,12 @@
             <div style="height:260px;overflow:hidden;overflow:scroll;">
                 <el-row>
                     <el-col v-if="this.viewData.classList.length > 0" :span="24">
-                        <el-row v-for="item in this.viewData.classList" :key="item.id" :index="item.id" @click="getMethodList(item.id)" :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', backgroundColor: item.id === this.viewData.currentClassId ? '#CCC' : '#FFF' }">
+                        <el-row v-for="item in this.viewData.classList" :key="item.id" :index="item.id" @click="getClassDetail(item.id)" :style="{ padding: '5px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', backgroundColor: item.id === this.viewData.currentClassId ? '#CCC' : '#FFF' }">
                             <el-col style="font-size:14px;" :span="24">{{ item.name }}</el-col>
                         </el-row>
                     </el-col>
                     <el-col v-else>
-                        <el-skeleton :rows="5" animated />
+                        <el-empty description=""></el-empty>
                     </el-col>
                 </el-row>
             </div>
@@ -82,7 +82,7 @@ export default {
     },
     components: { JavaDocItemCard },
     mounted() {
-        document.title = 'Hidoc-JavaDoc-浏览模式';
+        document.title = 'Hidoc-JavaDoc-浏览';
         this.getProjectList();
     },
     methods: {
@@ -94,7 +94,7 @@ export default {
         search() {
             console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
             request({
-                url: '/javadoc/search',
+                url: '/openapi/javadoc/search',
                 method: 'post',
                 data: {
                     mode: this.searchMode,
@@ -130,7 +130,7 @@ export default {
         },
         getProjectList() {
             request({
-                url: '/javadoc/projectList',
+                url: '/openapi/javadoc/projectList',
                 method: 'post',
                 data: { p: 'n' }
             }).then(res => {
@@ -140,13 +140,13 @@ export default {
             });
         },
         getPackageList(projectId, version) {
-            this.viewData.packageList =[];
-            this.viewData.classList =[];
+            this.viewData.packageList = [];
+            this.viewData.classList = [];
 
             this.viewData.currentProjectId = projectId;
             this.viewData.currentVersion = version;
             request({
-                url: '/javadoc/packageList',
+                url: '/openapi/javadoc/packageList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -159,11 +159,11 @@ export default {
             });
         },
         getClassList(packageName) {
-            this.viewData.classList =[];
+            this.viewData.classList = [];
 
             this.viewData.currentPackageName = packageName;
             request({
-                url: '/javadoc/classList',
+                url: '/openapi/javadoc/classList',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -176,10 +176,10 @@ export default {
                 }
             });
         },
-        getMethodList(classId) {
+        getClassDetail(classId) {
             this.viewData.currentClassId = classId;
             request({
-                url: '/javadoc/methodList',
+                url: '/openapi/javadoc/classDetail',
                 method: 'post',
                 data: {
                     projectId: this.viewData.currentProjectId,
@@ -188,7 +188,9 @@ export default {
                 }
             }).then(res => {
                 if (res.code == 0) {
-                    this.viewData.methodList = res.data;
+                    this.viewData.methodList = [];
+                    this.viewData.methodList.push(res.meta.classInfo);
+                    this.viewData.methodList.push(...res.meta.methodList);
                 }
             });
         }

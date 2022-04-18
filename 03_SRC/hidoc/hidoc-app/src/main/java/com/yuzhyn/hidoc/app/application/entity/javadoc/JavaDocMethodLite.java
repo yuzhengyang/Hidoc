@@ -23,16 +23,20 @@ public class JavaDocMethodLite {
     private String projectId;
     private String projectName;
 
-    private String version;
     private String createUserId;
     private LocalDateTime createTime;
 
     private String name;
     private String qualifier;
     private String returnType;
+    private String returnDesc;
     private String params;
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONArray paramsJson;
+
+    private String throwses;
+    @TableField(typeHandler = JsonbTypeHandler.class)
+    private JSONArray throwsesJson;
 
     private String commentInfo;
     private String commentScene;
@@ -46,6 +50,9 @@ public class JavaDocMethodLite {
 
     @TableField(exist = false)
     private String _class = "JavaDocMethod";
+
+    @TableField(exist = false)
+    private String[] _highlightKeys = null;
 
     @TableField(exist = false)
     private JSONObject javaDocClassLite;
