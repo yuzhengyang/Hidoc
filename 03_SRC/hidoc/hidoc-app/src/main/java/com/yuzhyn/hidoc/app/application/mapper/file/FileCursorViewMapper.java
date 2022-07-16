@@ -40,6 +40,8 @@ public interface FileCursorViewMapper extends BaseMapper<FileCursorView> {
             "        INNER JOIN file_bucket t3 ON t1.bucket_id = t3.\"id\" " +
             "        INNER JOIN sys_user_file_conf t4 ON t1.user_id = t4.user_id  " +
             "        AND t1.file_name = t2.file_name  " +
-            "        AND t1.VERSION = t2.current_version")
+            "        AND t1.VERSION = t2.current_version " +
+            "\tWHERE (t1.is_delete IS NULL OR t1.is_delete = false)\n" +
+            "\tORDER By t1.create_time DESC")
     List<FileCursorView> selectFiles(@Param("bucketId") String bucketId);
 }

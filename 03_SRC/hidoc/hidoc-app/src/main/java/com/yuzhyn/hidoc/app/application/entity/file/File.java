@@ -44,4 +44,18 @@ public class File {
 
     @ExcelProperty("SHA1")
     private String sha1;
+
+    private Boolean isDelete;
+    private String deleteUserId;
+    private LocalDateTime deleteTime;
+    /**
+     * 释放状态
+     * 进入释放流程后，不允许从删除状态还原
+     * 但是如果上传同一指纹的文件，可以从删除状态撤回（状态1和2可以）
+     *
+     * 状态改变间隔时间为：10天
+     * 1-计划释放（可逆），2-进入释放任务（可逆），3-准备执行释放（不可逆），4、释放完成（不可逆）
+     */
+    private Long releaseStatus;
+    private LocalDateTime releaseTime;
 }

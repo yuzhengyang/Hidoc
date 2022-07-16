@@ -15,5 +15,13 @@ CREATE TABLE IF NOT EXISTS public.file_cursor (
 	expiry_time timestamp NULL,
 	collected_id varchar(20) NULL,
 	uname varchar(200) NULL,
+	is_delete bool NULL,
+	delete_user_id varchar(20) NULL,
+	delete_time timestamp NULL,
 	CONSTRAINT sys_file_cursor_pkey PRIMARY KEY (id)
 );
+
+
+SELECT * FROM sysdb_add_column('file_cursor', 'is_delete', 'bool NULL');
+SELECT * FROM sysdb_add_column('file_cursor', 'delete_user_id', 'varchar(20) NULL');
+SELECT * FROM sysdb_add_column('file_cursor', 'delete_time', 'timestamp NULL');

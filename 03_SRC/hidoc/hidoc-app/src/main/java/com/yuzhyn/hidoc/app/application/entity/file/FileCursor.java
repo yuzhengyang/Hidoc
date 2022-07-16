@@ -18,4 +18,7 @@ public class FileCursor {
     private LocalDateTime expiryTime;
     private String collectedId;
     private String uname;
+    private Boolean isDelete;
+    private String deleteUserId;
+    private LocalDateTime deleteTime;
 }

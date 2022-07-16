@@ -1,8 +1,11 @@
 package com.yuzhyn.hidoc.app.application.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
@@ -15,6 +18,7 @@ import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
@@ -90,6 +94,50 @@ public class FileController {
             }
         }
         return ResponseData.error("请选择文件");
+    }
+    //endregion
+
+    /**
+     * 删除文件（后续动作由定时任务执行，删除超期的文件，并释放空间，另外注意上传时，如果有文件指纹相同的已删除文件，要注意处理）
+     *
+     * @param params
+     * @return
+     */
+    @Transactional
+    @PostMapping("delete")
+    public ResponseData delete(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "cursorId", "fileId")) {
+            // 获取指针ID和文件ID
+            String cursorId = MapTool.get(params, "cursorId", "").toString();
+            String fileId = MapTool.get(params, "fileId", "").toString();
+            if (StringTool.ok(cursorId, fileId)) {
+
+                File file = fileMapper.selectById(fileId);
+                FileCursor cursor = fileCursorMapper.selectById(cursorId);
+                Long cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getFileId, fileId).eq(FileCursor::getIsDelete, false));
+
+                if (cursorCount == 1) {
+                    // 如果文件仅有一个指针指向（未删除的），则标记指针和文件都为删除状态
+                    file.setIsDelete(true);
+                    file.setDeleteUserId(CurrentUserManager.getUserId());
+                    file.setDeleteTime(LocalDateTime.now());
+                    fileMapper.updateById(file);
+
+                    cursor.setIsDelete(true);
+                    cursor.setDeleteUserId(CurrentUserManager.getUserId());
+                    cursor.setDeleteTime(LocalDateTime.now());
+                    fileCursorMapper.updateById(cursor);
+                } else {
+                    // 如果文件包含多个指针指向，则只标记指针为删除状态
+                    cursor.setIsDelete(true);
+                    cursor.setDeleteUserId(CurrentUserManager.getUserId());
+                    cursor.setDeleteTime(LocalDateTime.now());
+                    fileCursorMapper.updateById(cursor);
+                }
+
+            }
+        }
+        return ResponseData.ok();
     }
     //endregion
 

@@ -16,7 +16,8 @@
             <el-row>
                 <el-col :span="5">
                     <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
+                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id"
+                            @click="selectBucket(item)">{{ item.name }}</el-menu-item>
                     </el-menu>
                 </el-col>
                 <el-col :span="19">
@@ -33,7 +34,8 @@
                                 <el-popover placement="top-start" :width="200" trigger="click">
                                     <p>删除操作不可撤回，确定删除吗？</p>
                                     <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="fileDelete(scope.row)">确定删除</el-button>
+                                        <el-button type="danger" size="mini" @click="fileDelete(scope.row)">确定删除
+                                        </el-button>
                                     </div>
                                     <template #reference>
                                         <el-button type="text" size="small">删除</el-button>
@@ -230,17 +232,18 @@ export default {
                 }
             });
         },
-        fileHistory() {},
+        fileHistory() { },
         fileDownload(data) {
             window.location.href = config().baseServer + 'f/d/' + data.urlPrefix + '/' + data.bucketName + '/' + data.fileName;
         },
-        fileDelete() {
+        fileDelete(row) {
             console.log('删除');
             return request({
-                url: '/doc/deletessss',
+                url: '/file/delete',
                 method: 'post',
                 data: {
-                    // id: row.id.toString()
+                    cursorId: row.id,
+                    fileId: row.fileId
                 }
             }).then(res => {
                 if (res.code == 0) {
@@ -275,6 +278,7 @@ export default {
     /* color: #333; */
     text-align: left;
 }
+
 .el-card {
     margin: 10px;
 }
