@@ -30,9 +30,9 @@ public interface FileCursorViewMapper extends BaseMapper<FileCursorView> {
             "                MAX ( \"version\" ) current_version, " +
             "                COUNT ( \"version\" ) history_count  " +
             "        FROM " +
-            "                PUBLIC.file_cursor  " +
+            "                file_cursor  " +
             "        WHERE " +
-            "                bucket_id = #{bucketId}  " +
+            "                bucket_id = #{bucketId} AND (is_delete IS NULL OR is_delete = false)" +
             "        GROUP BY " +
             "                bucket_id, " +
             "                file_name  " +
