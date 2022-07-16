@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.EnableCaching;
 public class HidocAppApplication {
 
     public static void main(String[] args) throws Exception {
+        long startTime = System.currentTimeMillis();
         R.Caches.CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
         R.Caches.CacheManager.init();
         R.Caches.UserInfo = R.Caches.CacheManager.createCache("UserInfo",
@@ -57,6 +58,10 @@ public class HidocAppApplication {
 
         CurrentEnvironmentManager.print();
 
+        long finishTime = System.currentTimeMillis();
+        log.info("启动成功，启动共耗时约：" + ((finishTime - startTime) / 1000) + " 秒 （" + (finishTime - startTime) + " 毫秒）");
+        log.info("/");
+        log.info("/");
 
     }
 }

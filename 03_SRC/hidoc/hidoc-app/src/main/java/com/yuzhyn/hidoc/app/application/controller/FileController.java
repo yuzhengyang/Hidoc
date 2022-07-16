@@ -134,7 +134,6 @@ public class FileController {
                     cursor.setDeleteTime(LocalDateTime.now());
                     fileCursorMapper.updateById(cursor);
                 }
-
             }
         }
         return ResponseData.ok();
