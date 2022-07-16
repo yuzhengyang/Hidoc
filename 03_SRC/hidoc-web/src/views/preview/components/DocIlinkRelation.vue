@@ -1,7 +1,7 @@
 <template>
     <el-row style="margin-top: 20px; margin-bottom: 20px">
         <el-col :span="24">
-            <div id="myChart" :style="{ width: '100%', height: '700px' }"></div>
+            <div id="myChart" :style="{ width: '100%', height: '800px' }"></div>
         </el-col>
     </el-row>
 </template>

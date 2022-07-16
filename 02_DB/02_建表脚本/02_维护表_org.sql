@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS "org" (
   "join_quota_limit" int4,
   "join_quota_used" int4,
   "create_user_id" varchar(20) ,
+  "update_user_id" varchar(20) ,
 	CONSTRAINT org_pkey PRIMARY KEY (id)
 )
 ;
@@ -29,3 +30,8 @@ COMMENT ON COLUMN "org"."join_free" IS '自由加入';
 COMMENT ON COLUMN "org"."join_quota_limit" IS '名额限制';
 COMMENT ON COLUMN "org"."join_quota_used" IS '已用名额';
 COMMENT ON COLUMN "org"."create_user_id" IS '创建用户';
+COMMENT ON COLUMN "org"."update_user_id" IS '更新用户';
+
+
+
+SELECT * FROM sysdb_add_column('org', 'update_user_id', 'varchar(20)');
