@@ -129,6 +129,25 @@ CREATE OR REPLACE FUNCTION "sysdb_add_index"(IN in_table_name "varchar", IN in_i
 	RETURN;
 END$BODY$
 	LANGUAGE plpgsql;
+
+
+-- ----------------------------
+-- 创建唯一索引
+-- ----------------------------
+CREATE OR REPLACE FUNCTION "sysdb_add_unique_index"(IN in_table_name "varchar", IN in_index_name "varchar", IN in_index_description "varchar")
+	RETURNS void AS $BODY$
+	DECLARE	
+	  v_exist_index  int2;
+	BEGIN
+
+  SELECT COUNT(1) INTO v_exist_index FROM pg_indexes WHERE tablename = in_table_name AND indexname = in_index_name;
+  IF v_exist_index = 0 THEN
+    EXECUTE 'CREATE UNIQUE INDEX ' || in_index_name || ' ON "' || in_table_name || '" USING btree (' || in_index_description || ');';
+  END IF;
+	
+	RETURN;
+END$BODY$
+	LANGUAGE plpgsql;
 	
 
 -- ----------------------------

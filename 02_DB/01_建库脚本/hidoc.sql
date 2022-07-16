@@ -1,2 +1,1 @@
-CREATE DATABASE "hidoc"
-;
+-- CREATE DATABASE "hidoc";

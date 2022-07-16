@@ -22,5 +22,5 @@ CREATE TABLE IF NOT EXISTS public.sys_user (
 SELECT * FROM sysdb_add_column('sys_user', 'online_time', 'timestamp NULL');
 SELECT * FROM sysdb_add_column('sys_user', 'vip_level', 'int4');
 
-CREATE INDEX name ON public.sys_user USING btree (name);
-COMMENT ON INDEX public."name" IS '用户名唯一索引';
+SELECT * FROM sysdb_add_unique_index('sys_user', 'name', '"name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST');
+
