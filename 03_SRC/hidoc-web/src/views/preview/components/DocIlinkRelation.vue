@@ -32,7 +32,7 @@ export default {
                     var links = res.meta.links;
 
                     var categories = [];
-                    var types = ['未作答', '较好', '一般', '较差'];
+                    var types = ['A', 'B', 'C', 'D'];
 
                     for (var i = 0; i < types.length; i++) {
                         categories[i] = {
