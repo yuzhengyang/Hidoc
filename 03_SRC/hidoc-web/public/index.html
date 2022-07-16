@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+        <title><%= htmlWebpackPlugin.options.title %></title>
+        <script src="/config.js"></script>
+
+        <!-- katex 渲染公式，使用meraid的npm方式引入，还没测试 -->
+        <!-- <link rel="stylesheet" href="./static/katex.min.css" />
+        <script src="./static/katex.min.js"></script> -->
+        <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" />
+        <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script> -->
+
+        <!-- mermaid 渲染流程图，使用meraid的npm方式引入 -->
+        <!-- <script src="./static/mermaid.min.js"></script> -->
+        <!-- <script src="https://cdn.bootcdn.net/ajax/libs/mermaid/8.14.0/mermaid.min.js"></script> -->
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.14.0/mermaid.min.js" integrity="sha512-vLumCjg7NKEQKGM+xAgBYTvQ90DVu6Eo7vS1T/iPf2feNLcrpGxvumuUUmE3CPiCUPgviyKbtpWGDbhnVnmJxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+
+        <!-- <script type="text/javascript" src="./static/mermaid.core.js"></script>
+        <script type="text/javascript" src="./static/mermaid.core.js.map"></script>
+        <script type="text/javascript" src="./static/mermaid.esm.min.mjs"></script>
+        <script type="text/javascript" src="./static/mermaid.js"></script>
+        <script type="text/javascript" src="./static/mermaid.min.js"></script> -->
+
+        <!-- mermaid 原地址访问非常慢 -->
+        <!-- <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script> -->
+
+        <!-- <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script> -->
+
+        <script>
+            console.log('--------------------------------------');
+            console.log('当前host: ' + window.location.host);
+            console.log(configs);
+            var defaultConfig = {}; // 默认配置
+            var currentConfig = {}; // 匹配host的配置
+            for (var i = 0; i < configs.length; i++) {
+                var itemConfig = configs[i];
+
+                if (itemConfig.host === window.location.host) {
+                    currentConfig = itemConfig;
+
+                    console.log('currentConfig:');
+                    console.log(itemConfig);
+                }
+
+                if (itemConfig.host === '*') {
+                    defaultConfig = itemConfig;
+
+                    console.log('defaultConfig:');
+                    console.log(itemConfig);
+                }
+            }
+            if (currentConfig.host != undefined && currentConfig.host != null) {
+                // 如果有符合host的配置，则优先使用
+                localStorage.setItem('config', JSON.stringify(currentConfig));
+                console.log('当前使用配置: currentConfig');
+            } else {
+                // 如果没有匹配host的配置，则使用默认配置*
+                localStorage.setItem('config', JSON.stringify(defaultConfig));
+                console.log('当前使用配置: defaultConfig');
+            }
+            console.log('--------------------------------------');
+            var pointId = localStorage.getItem('pointId');
+            if (pointId == undefined || pointId == null || pointId == '' || pointId.length < 8) {
+                pointId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = (Math.random() * 16) | 0,
+                        v = c == 'x' ? r : (r & 0x3) | 0x8;
+                    return v.toString(16);
+                });
+            }
+            console.log('pointId: ' + pointId);
+            localStorage.setItem('pointId', pointId);
+            console.log('--------------------------------------');
+        </script>
+    </head>
+    <body>
+        <noscript>
+            <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+        </noscript>
+        <div id="app"></div>
+    </body>
+</html>

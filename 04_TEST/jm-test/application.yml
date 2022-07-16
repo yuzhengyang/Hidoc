@@ -1,0 +1,82 @@
+server:
+  port: 24001
+  address: 0.0.0.0
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    #max-connections: 10000 #一瞬间最大支持的并发的连接数
+    accept-count: 200 #等待队列长度
+    threads:
+      max: 400
+      min-spare: 20
+
+spring:
+  application:
+    name: hidoc-app
+
+  # 数据库相关配置
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://127.0.0.1:5432/hidoc
+    username: postgres
+    password: yuzhengyang
+    type: com.alibaba.druid.pool.DruidDataSource
+    # 初始化大小，最小，最大
+    initialSize: 10
+    minIdle: 10
+    maxActive: 20
+    keepAlive: true
+    # 配置获取连接等待超时的时间
+    maxWait: 5000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 30000
+    removeAbandoned: true
+    removeAbandonedTimeout: 120
+    logAbandoned: true
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    #filters: stat,slf4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    timeBetweenLogStatsMillis: 120000
+
+
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  mvc:
+    servlet:
+      load-on-startup: 1
+  cache:
+    jcache:
+      config: classpath:config/ehcache.xml
+
+
+# mybatis-plus 输出 SQL 语句
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #开启sql日志
+
+
+#日志记录
+logging:
+  config: classpath:config/logging.xml
+#  level:
+#    com.hisense.rop.portal.mapper: debug
+#    com.chz.mapper: debug
+#    com.example.demo.dao: debug
+
+
+# 系统发件箱
+email:
+  address: hi_notice@163.com
+  personal: Hidoc-通知邮箱
+  password: BVTFAVZTCAARBXEQ
+  port: 994
+  isSsl: true
+  smtpHost: smtp.163.com

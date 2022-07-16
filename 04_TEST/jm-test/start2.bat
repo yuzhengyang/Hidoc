@@ -1,0 +1,1 @@
+java -jar -Xmx256m hidoc-app-0.0.1-SNAPSHOT.jar
