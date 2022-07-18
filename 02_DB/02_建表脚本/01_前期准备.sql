@@ -72,6 +72,26 @@ CREATE OR REPLACE FUNCTION "sysdb_add_column"(IN in_table_name "varchar", IN in_
 	RETURN;
 END$BODY$
 	LANGUAGE plpgsql;
+	
+	  
+-- ----------------------------
+-- 删除表字段函数
+-- ----------------------------
+CREATE OR REPLACE FUNCTION "sysdb_drop_column"(IN in_table_name "varchar", IN in_column_name "varchar")
+	RETURNS void AS $BODY$
+	DECLARE
+	
+	  v_exist_column  int2;
+	BEGIN
+
+  SELECT COUNT(1) INTO v_exist_column FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = current_schema() AND TABLE_NAME = in_table_name AND COLUMN_NAME = in_column_name;
+  IF v_exist_column = 1 THEN
+    EXECUTE 'ALTER TABLE "' || in_table_name || '" DROP "' || in_column_name || '" ; ';
+  END IF;
+	
+	RETURN;
+END$BODY$
+	LANGUAGE plpgsql;
 
 -- ----------------------------
 -- 修改表字段名称函数
@@ -129,7 +149,7 @@ CREATE OR REPLACE FUNCTION "sysdb_add_index"(IN in_table_name "varchar", IN in_i
 	RETURN;
 END$BODY$
 	LANGUAGE plpgsql;
-
+	
 
 -- ----------------------------
 -- 创建唯一索引
@@ -149,7 +169,6 @@ CREATE OR REPLACE FUNCTION "sysdb_add_unique_index"(IN in_table_name "varchar", 
 END$BODY$
 	LANGUAGE plpgsql;
 	
-
 -- ----------------------------
 -- 复制表
 -- ----------------------------
@@ -194,6 +213,42 @@ END$BODY$
 	LANGUAGE plpgsql;
 
 
+
 -- ----------------------------
--- 修改表字段类型函数（暂不支持，后续扩展）
+-- 删除表
 -- ----------------------------
+CREATE OR REPLACE FUNCTION "sysdb_drop_table"(IN in_table_name "varchar", IN in_drop_param "varchar")
+	RETURNS void AS $BODY$
+	DECLARE	
+		v_exist_table	int2;
+		v_exist_row		int8;
+	BEGIN
+	
+	SELECT COUNT(1) INTO v_exist_table FROM pg_class WHERE relname = in_table_name;
+	RAISE NOTICE '检查表是否存在: [%] （0-不存在，1-存在）',v_exist_table;
+	
+    IF in_drop_param = 'FORCE-DROP-TABLE' THEN
+	
+		RAISE NOTICE '强制删除重建，不会保留已有目标表的数据，可能导致数据丢失: [%]',in_drop_param;
+		EXECUTE 'DROP TABLE IF EXISTS ' || in_table_name;
+		RAISE NOTICE '！目标表删除完成';
+		
+	ELSIF in_drop_param = 'DROP-NULL' THEN
+	
+		RAISE NOTICE '如果目标表为空，则删除重建: [%]',in_drop_param;
+		IF v_exist_table <> 0 THEN
+			EXECUTE 'SELECT COUNT(1) FROM ' || in_table_name || '' INTO v_exist_row;
+			RAISE NOTICE '检查表是否有数据: [%] 行',v_exist_row;
+			IF v_exist_row = 0 THEN
+				EXECUTE 'DROP TABLE IF EXISTS ' || in_table_name;
+				RAISE NOTICE '！目标表删除完成';
+			END IF;
+		END IF;
+	
+	ELSE
+	
+	END IF;
+	
+	RETURN;
+END$BODY$
+	LANGUAGE plpgsql;
