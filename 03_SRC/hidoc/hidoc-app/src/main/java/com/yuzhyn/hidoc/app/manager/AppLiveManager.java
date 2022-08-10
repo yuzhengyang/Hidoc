@@ -55,14 +55,15 @@ public class AppLiveManager {
                 log.info("雪花算法未初始化，准备自动初始化，开始计算数据中心ID和机器ID");
                 // 自动计算数据中心ID和机器ID（排除已有并随即）
                 List<SysMachine> machineList = sysMachineMapper.selectList(null);
+                List<Integer> _dcIds = null, _wkIds = null;
                 if (ListTool.ok(machineList)) {
-                    List<Integer> _dcIds = machineList.stream().map(SysMachine::getDataCenterId).distinct().collect(toList());
-                    List<Integer> _wkIds = machineList.stream().map(SysMachine::getWorkerId).distinct().collect(toList());
-                    int[] snowIdset = SnowFlake.createDataCenterIdAndWorkerId(_dcIds, _wkIds, true);
-                    R.DataCenterId = snowIdset[0];
-                    R.WorkerId = snowIdset[1];
-                    log.info("计算完成，数据中心ID：" + R.DataCenterId + "机器ID：" + R.WorkerId);
+                    _dcIds = machineList.stream().map(SysMachine::getDataCenterId).distinct().collect(toList());
+                    _wkIds = machineList.stream().map(SysMachine::getWorkerId).distinct().collect(toList());
                 }
+                int[] snowIdset = SnowFlake.createDataCenterIdAndWorkerId(_dcIds, _wkIds, true);
+                R.DataCenterId = snowIdset[0];
+                R.WorkerId = snowIdset[1];
+                log.info("计算完成，数据中心ID：" + R.DataCenterId + "机器ID：" + R.WorkerId);
 
                 // 创建信息并插入到数据库
                 sysMachine = new SysMachine();
