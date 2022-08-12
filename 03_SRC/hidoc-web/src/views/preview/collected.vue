@@ -1,6 +1,6 @@
 <template>
     <el-container style="height: 100%">
-        <el-aside width="300px" style="height: 100%">
+        <el-aside width="280px" style="height: 100%">
             <el-row>
                 <el-col :span="24">
                     <el-input placeholder="请输入内容" v-model="keyword" @keydown="searchEnter">
@@ -15,9 +15,9 @@
             </el-row>
             <el-tree :data="this.collected.docLites" node-key="id" default-expand-all :expand-on-click-node="false" @node-click="goDocPage">
                 <template #default="{ data }">
-                    <span v-if="length(data.title) < 30" :style="{ padding: '0px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#606266' }">{{ data.title }}</span>
+                    <span v-if="length(data.title) < 30" :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
                     <el-tooltip v-else effect="dark" :content="data.title" placement="right">
-                        <span :style="{ padding: '0px', cursor: 'pointer', fontSize: '16px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#606266' }">{{ data.title }}</span>
+                        <span :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
                     </el-tooltip>
                 </template>
             </el-tree>
