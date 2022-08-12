@@ -1,8 +1,13 @@
 package com.yuzhyn.hidoc.app;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
+import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemPropertyTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemStatusTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemTypeTool;
+import com.yuzhyn.azylee.ext.web.apis.taobao.TaobaoTime;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
@@ -63,5 +68,16 @@ public class HidocAppApplication {
         log.info("/");
         log.info("/");
 
+        long webTs = TaobaoTime.getTimeStamp();
+        if (webTs > 0) {
+            long span = webTs - System.currentTimeMillis();
+            String desc = "";
+            if (span > 10 * 1000) desc = "（时间差较大（超过10秒），建议同步服务器系统时间）";
+            log.info("时间检查：与网络时间差：" + span + " 毫秒" + desc);
+        } else {
+            log.info("时间检查：获取网络时间错误（值：" + webTs + "）");
+        }
+        log.info("/");
+        log.info("/");
     }
 }
