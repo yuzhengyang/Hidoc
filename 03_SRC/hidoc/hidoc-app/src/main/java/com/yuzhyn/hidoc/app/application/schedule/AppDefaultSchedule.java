@@ -55,7 +55,7 @@ public class AppDefaultSchedule {
     ServerManExeLogMapper serverManExeLogMapper;
 
     @Async
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/5 * * * * ?")
     public void job1() {
         Map<String, List<String>> groupMap = new HashMap<>();
         for (int i = 0; i < 1000; i++) {
