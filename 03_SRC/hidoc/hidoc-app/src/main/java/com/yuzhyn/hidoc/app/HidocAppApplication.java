@@ -79,5 +79,9 @@ public class HidocAppApplication {
         }
         log.info("/");
         log.info("/");
+        log.info(HidocAppApplication.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        log.info(System.getProperty("java.class.path"));
+        log.info("/");
+        log.info("/");
     }
 }
