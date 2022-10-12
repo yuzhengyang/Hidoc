@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class Limits {
+public class LimitDose {
     /**
      * 主键id
      */
@@ -61,14 +61,14 @@ public class Limits {
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONObject forbidAddresses;
     /**
-     * 允许位置
+     * 允许位置（圆形范围）
      * 经度，纬度，范围
      * {longitude 经度-纵向的，latitude 纬度，范围 米}
      */
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONObject allowPositions;
     /**
-     * 禁止位置
+     * 禁止位置（圆形范围）
      * 经度，纬度，范围
      * {longitude 经度-纵向的，latitude 纬度，范围 米}
      */
