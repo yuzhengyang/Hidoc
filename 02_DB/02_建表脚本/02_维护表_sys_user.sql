@@ -22,5 +22,6 @@ CREATE TABLE IF NOT EXISTS public.sys_user (
 SELECT * FROM sysdb_add_column('sys_user', 'online_time', 'timestamp NULL');
 SELECT * FROM sysdb_add_column('sys_user', 'vip_level', 'int4');
 
-SELECT * FROM sysdb_add_unique_index('sys_user', 'name', '"name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST');
+SELECT * FROM sysdb_add_unique_index('sys_user', 'uidx_sys_user_name', '"name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST');
 
+SELECT * FROM sysdb_add_unique_index('sys_user', 'uidx_sys_user_email', '"email" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST');

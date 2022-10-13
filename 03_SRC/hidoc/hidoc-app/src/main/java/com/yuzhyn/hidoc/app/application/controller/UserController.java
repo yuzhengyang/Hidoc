@@ -88,7 +88,7 @@ public class UserController {
             String authCode = MapTool.getString(params, "authCode", "");
             String uid = MapTool.getString(params, "uid", "");
 
-            String limitEmail = MapTool.getString(R.Maps.emailConfig, "limit-email", "");
+            String limitEmail = MapTool.getString(R.Maps.registerConfig, "limit-email", "");
             if (!email.endsWith(limitEmail)) {
                 return ResponseData.error("系统限制仅支持：" + limitEmail + "的邮箱注册账号");
             }

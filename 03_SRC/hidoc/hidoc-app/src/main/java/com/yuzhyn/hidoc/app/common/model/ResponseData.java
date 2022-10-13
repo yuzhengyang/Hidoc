@@ -107,10 +107,6 @@ public class ResponseData {
         this.count = count;
     }
 
-    public static ResponseData rpcResponse(int code, String msg) {
-        return new ResponseData(code, msg);
-    }
-
     public static ResponseData ok() {
         return new ResponseData(0, "Ok");
     }

@@ -2,12 +2,14 @@ package com.yuzhyn.hidoc.app.application.entity.limit;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.yuzhyn.hidoc.app.system.ibatis.handler.JsonbTypeHandler;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@TableName(value = "limit_access", autoResultMap = true)
 public class LimitAccess {
     /**
      * 主键id
@@ -15,7 +17,6 @@ public class LimitAccess {
     private String id;
     /**
      * 接口令牌
-     * 用来对接口信息认证，可修改更新
      */
     private String token;
     /**
@@ -81,6 +82,14 @@ public class LimitAccess {
      */
     private String forbidEmailSuffix;
     /**
+     * 允许版本
+     */
+    private String allowVersions;
+    /**
+     * 禁止版本
+     */
+    private String forbidVersions;
+    /**
      * 允许MAC
      */
     private String allowMacs;
@@ -108,5 +117,9 @@ public class LimitAccess {
      * 更新时间
      */
     private LocalDateTime updateTime;
+    /**
+     * 删除时间
+     */
+    private LocalDateTime deleteTime;
 
 }

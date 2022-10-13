@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
+import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.service.sys.AuthCodeService;
@@ -40,6 +41,11 @@ public class AuthCodeController {
 
             if (!StringTool.ok(email)) {
                 return ResponseData.error("请输入邮箱");
+            }
+
+            String limitEmail = MapTool.getString(R.Maps.registerConfig, "limit-email", "");
+            if (!email.endsWith(limitEmail)) {
+                return ResponseData.error("系统限制仅支持：" + limitEmail + "的邮箱注册账号");
             }
 
             try {
