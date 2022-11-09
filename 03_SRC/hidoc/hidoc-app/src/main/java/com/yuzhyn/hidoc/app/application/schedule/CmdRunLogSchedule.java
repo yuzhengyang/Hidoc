@@ -56,6 +56,10 @@ public class CmdRunLogSchedule {
 
 
 //    @Async // 是否等待上一线程执行完毕再执行，使用是不等待，直接创建执行，会产生并行执行
+
+    /**
+     * 每隔2秒，刷出SH执行日志到文件中保存
+     */
     @Scheduled(cron = "*/2 * * * * ?")
     public void job1() {
         Map<String, List<String>> groupMap = new HashMap<>();

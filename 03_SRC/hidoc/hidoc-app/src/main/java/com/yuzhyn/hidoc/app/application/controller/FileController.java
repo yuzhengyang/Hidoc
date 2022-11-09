@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocCollected;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
@@ -110,30 +112,17 @@ public class FileController {
             // 获取指针ID和文件ID
             String cursorId = MapTool.get(params, "cursorId", "").toString();
             String fileId = MapTool.get(params, "fileId", "").toString();
+            String userId = CurrentUserManager.getUserId();
             if (StringTool.ok(cursorId, fileId)) {
-
-                File file = fileMapper.selectById(fileId);
                 FileCursor cursor = fileCursorMapper.selectById(cursorId);
-                Long cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getFileId, fileId).eq(FileCursor::getIsDelete, false));
+                cursor.setIsDelete(true);
+                cursor.setDeleteUserId(userId);
+                cursor.setDeleteTime(LocalDateTime.now());
+                fileCursorMapper.updateById(cursor);
 
-                if (cursorCount == 1) {
-                    // 如果文件仅有一个指针指向（未删除的），则标记指针和文件都为删除状态
-                    file.setIsDelete(true);
-                    file.setDeleteUserId(CurrentUserManager.getUserId());
-                    file.setDeleteTime(LocalDateTime.now());
-                    fileMapper.updateById(file);
-
-                    cursor.setIsDelete(true);
-                    cursor.setDeleteUserId(CurrentUserManager.getUserId());
-                    cursor.setDeleteTime(LocalDateTime.now());
-                    fileCursorMapper.updateById(cursor);
-                } else {
-                    // 如果文件包含多个指针指向，则只标记指针为删除状态
-                    cursor.setIsDelete(true);
-                    cursor.setDeleteUserId(CurrentUserManager.getUserId());
-                    cursor.setDeleteTime(LocalDateTime.now());
-                    fileCursorMapper.updateById(cursor);
-                }
+                // 归还个人空闲限额
+                File file = fileMapper.selectById(fileId);
+                if (file != null) sysUserFileConfMapper.updateUsedSpace(userId, file.getSize() * -1);
             }
         }
         return ResponseData.ok();
@@ -203,4 +192,37 @@ public class FileController {
         }
     }
     //endregion
+
+
+    @PostMapping("deletedList")
+    public ResponseData deletedList(@RequestBody Map<String, Object> params) {
+        ResponseData responseData = ResponseData.ok();
+        LocalDateTime expireTime = LocalDateTime.now().minusDays(180);
+        List<FileCursor> list = fileCursorMapper.selectList(new LambdaQueryWrapper<FileCursor>()
+                .eq(FileCursor::getUserId, CurrentUserManager.getUser().getId())
+                .eq(FileCursor::getIsDelete, true)
+                .ge(FileCursor::getDeleteTime, expireTime)
+                .orderByDesc(FileCursor::getDeleteTime));
+        responseData.putData(list);
+        return responseData;
+    }
+
+    @PostMapping("restore")
+    public ResponseData restore(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "id")) {
+            String id = MapTool.getString(params, "id", "");
+            FileCursor fileCursor = fileCursorMapper.selectById(id);
+            if (fileCursor != null) {
+                fileCursor.setIsDelete(false);
+                int flag = fileCursorMapper.updateById(fileCursor);
+
+                // 还原需要占用用户文件配额信息
+                File file = fileMapper.selectById(fileCursor.getFileId());
+                if (file != null) sysUserFileConfMapper.updateUsedSpace(CurrentUserManager.getUserId(), file.getSize());
+
+                if (flag > 0) return ResponseData.ok();
+            }
+        }
+        return ResponseData.error("还原失败");
+    }
 }

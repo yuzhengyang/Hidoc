@@ -5,6 +5,9 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.format.DateTimeFormat;
 import com.alibaba.excel.annotation.format.NumberFormat;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.yuzhyn.azylee.core.systems.bases.SystemType;
+import com.yuzhyn.azylee.core.systems.bases.SystemTypeTool;
+import com.yuzhyn.hidoc.app.aarg.R;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -45,17 +48,32 @@ public class File {
     @ExcelProperty("SHA1")
     private String sha1;
 
+    /**
+     * 是否删除
+     */
     private Boolean isDelete;
-    private String deleteUserId;
     private LocalDateTime deleteTime;
     /**
-     * 释放状态
-     * 进入释放流程后，不允许从删除状态还原
-     * 但是如果上传同一指纹的文件，可以从删除状态撤回（状态1和2可以）
-     *
-     * 状态改变间隔时间为：10天
-     * 1-计划释放（可逆），2-进入释放任务（可逆），3-准备执行释放（不可逆），4、释放完成（不可逆）
+     * 是否清理（删除n天之后才可以清理，如果这期间存在引用，则撤销删除状态）
      */
-    private Long releaseStatus;
-    private LocalDateTime releaseTime;
+    private Boolean isClean;
+    private LocalDateTime cleanTime;
+
+    private LocalDateTime downloadTime;
+    private Long downloadCount;
+
+    /**
+     * 根据系统类型，返回处理后的路径
+     *
+     * @return
+     */
+    public String getRealPath() {
+        switch (R.SystemType) {
+            case Windows:
+                return path.replace('/', '\\');
+            case Linux:
+            default:
+                return path.replace('\\', '/');
+        }
+    }
 }

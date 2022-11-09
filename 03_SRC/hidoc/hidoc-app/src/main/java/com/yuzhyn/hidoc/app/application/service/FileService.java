@@ -171,6 +171,9 @@ public class FileService {
                 sysFile.setPath(path);
                 sysFile.setCreateTime(createTime);
                 sysFile.setUserId(userId);
+                sysFile.setIsDelete(false);
+                sysFile.setIsClean(false);
+                sysFile.setDownloadCount(0L);
                 return sysFile;
             }
         }
@@ -195,6 +198,7 @@ public class FileService {
             sysFile.setSha1(FileCharCodeTool.sha1(dest));
             // 查询重复文件（依据文件特征码）
             File record = fileMapper.selectOne(new LambdaQueryWrapper<File>()
+                    .eq(File::getIsDelete, false)
                     .eq(File::getMd5, sysFile.getMd5())
                     .eq(File::getSha1, sysFile.getSha1())
                     .eq(File::getSize, sysFile.getSize()));
@@ -267,14 +271,11 @@ public class FileService {
                 cursor.setVersion(String.valueOf(System.currentTimeMillis()));
                 cursor.setExpiryTime(expiryTime);
                 cursor.setUname(cursor.getId() + "." + sysFile.getExt());
+                cursor.setIsDelete(false);
                 int flag = fileCursorMapper.insert(cursor);
                 if (flag > 0) {
                     // 一切保存成功后，刷新用户文件配额信息
-                    SysUserFileConf conf = sysUserFileConfMapper.selectById(sysFile.getUserId());
-                    if (conf != null) {
-                        conf.setUsedSpace(conf.getUsedSpace() + sysFile.getSize());
-                        sysUserFileConfMapper.updateById(conf);
-                    }
+                    Long updateFlag = sysUserFileConfMapper.updateUsedSpace(sysFile.getUserId(), sysFile.getSize());
                     return cursor;
                 }
             }
@@ -361,28 +362,6 @@ public class FileService {
     }
 
     /**
-     * 保存文件下载日志信息
-     *
-     * @param cursor
-     * @param file
-     * @param ip
-     */
-    public void saveDownloadLog(FileCursor cursor, File file, String ip) {
-        if (cursor != null && file != null) {
-            try {
-                FileDownloadLog log = new FileDownloadLog();
-                log.setId(R.SnowFlake.nexts());
-                log.setIp(ip);
-                log.setCreateTime(LocalDateTime.now());
-                log.setCursorId(cursor.getId());
-                log.setFileName(file.getName());
-                fileDownloadLogMapper.insert(log);
-            } catch (Exception ex) {
-            }
-        }
-    }
-
-    /**
      * 根据 文件指针信息和文件信息 下载文件
      *
      * @param sysFileCursor
@@ -394,9 +373,20 @@ public class FileService {
         if (sysFileCursor != null && sysFile != null) {
             try {
                 log.info("download log: " + ClientIPTool.getIp(request) + ", file: " + sysFile.getName());
-//                saveDownloadLog(sysFileCursor, sysFile, ClientIPTool.getIp(request));
 
-                String pathName = DirTool.combine(R.Paths.SysFile, sysFile.getPath());
+                try {
+                    FileDownloadLog log = new FileDownloadLog();
+                    log.setId(R.SnowFlake.nexts());
+                    log.setIp(ClientIPTool.getIp(request));
+                    log.setCreateTime(LocalDateTime.now());
+                    log.setCursorId(sysFileCursor.getId());
+                    log.setFileName(sysFile.getName());
+                    log.setFileId(sysFile.getId());
+                    R.Queues.FileDownloadLogQueue.add(log);
+                } catch (Exception ex) {
+                }
+
+                String pathName = DirTool.combine(R.Paths.SysFile, sysFile.getRealPath());
 
                 log.info("下载文件路径检查：" + pathName);
                 if (FileTool.isExist(pathName)) {

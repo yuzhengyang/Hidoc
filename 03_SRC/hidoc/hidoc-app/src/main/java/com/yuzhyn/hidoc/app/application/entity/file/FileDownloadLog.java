@@ -16,4 +16,5 @@ public class FileDownloadLog {
     private LocalDateTime createTime;
     private String cursorId;
     private String fileName;
+    private String fileId;
 }
