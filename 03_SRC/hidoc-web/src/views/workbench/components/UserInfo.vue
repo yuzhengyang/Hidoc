@@ -26,7 +26,18 @@
                         <el-table-column prop="ip" label="登录IP地址"></el-table-column>
                         <el-table-column prop="loginTime" label="登录时间"></el-table-column>
                         <el-table-column prop="expiryTime" label="过期时间"></el-table-column>
-
+                        <el-table-column label="是否过期" width="100">
+                            <template #default="scope">
+                                <div class="name-wrapper">
+                                    <div v-if="scope.row.isExpired">
+                                        <el-tag size="medium" type="danger">已过期</el-tag>
+                                    </div>
+                                    <div v-else>
+                                        <el-tag size="medium">正常</el-tag>
+                                    </div>
+                                </div>
+                            </template>
+                        </el-table-column>
                         <el-table-column label="当前登录" width="100">
                             <template #default="scope">
                                 <div class="name-wrapper">

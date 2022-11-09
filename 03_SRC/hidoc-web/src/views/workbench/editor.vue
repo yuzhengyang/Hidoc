@@ -34,38 +34,40 @@
         <!-- 引用文档弹出框 -->
         <el-dialog v-model="ilinkDialog.show" title="引用文档" width="50%" center>
             <el-container>
+                <el-header>
+                    <el-input v-model="this.ilinkDialog.searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchEnter" clearable>
+                        <template #prepend>
+                            <el-select v-model="this.ilinkDialog.searchMode" placeholder="Select" style="width: 110px">
+                                <el-option label="全文" value="1"></el-option>
+                                <el-option label="关键字" value="2"></el-option>
+                            </el-select>
+                        </template>
+                        <template #append>
+                            <el-button @click="search()">
+                                <el-icon>
+                                    <Search />
+                                </el-icon>
+                            </el-button>
+                        </template>
+                    </el-input>
+                </el-header>
                 <el-main>
-                    <el-row>
-                        <el-col :span="24">
-                            <el-input v-model="this.ilinkDialog.searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchEnter" clearable>
-                                <template #prepend>
-                                    <el-select v-model="this.ilinkDialog.searchMode" placeholder="Select" style="width: 110px">
-                                        <el-option label="全文" value="1"></el-option>
-                                        <el-option label="关键字" value="2"></el-option>
-                                    </el-select>
-                                </template>
-                                <template #append>
-                                    <el-button @click="search()">
-                                        <el-icon>
-                                            <Search />
-                                        </el-icon>
-                                    </el-button>
-                                </template>
-                            </el-input>
-                        </el-col>
-                    </el-row>
-                    <el-collapse accordion>
-                        <el-collapse-item v-for="colItem in this.ilinkDialog.collectedList" :key="colItem" :title="colItem.name" :name="colItem.id">
-                            <el-row v-for="docItem in colItem.docLites" :key="docItem" style="border-bottom: 1px solid #111111">
-                                <el-col :span="20">
-                                    {{ docItem.title }}
-                                </el-col>
-                                <el-col :span="4">
-                                    <el-link type="primary" @click="addIlinkDoc(docItem.title, colItem.id, docItem.id)">引用到文档中</el-link>
-                                </el-col>
-                            </el-row>
-                        </el-collapse-item>
-                    </el-collapse>
+                    <div style="height: 360px">
+                        <el-collapse accordion>
+                            <el-collapse-item v-for="colItem in this.ilinkDialog.collectedList" :key="colItem" :title="colItem.name" :name="colItem.id">
+                                <el-row v-for="docItem in colItem.docLites" :key="docItem" style="border-bottom: 1px dashed #bbbbbb">
+                                    <el-col :span="2"></el-col>
+                                    <el-col :span="16">
+                                        {{ docItem.title }}
+                                    </el-col>
+                                    <el-col :span="4">
+                                        <el-link type="primary" @click="addIlinkDoc(docItem.title, colItem.id, docItem.id)">引用链接</el-link>
+                                    </el-col>
+                                    <el-col :span="2"></el-col>
+                                </el-row>
+                            </el-collapse-item>
+                        </el-collapse>
+                    </div>
                 </el-main>
             </el-container>
             <template #footer>
@@ -385,7 +387,7 @@ export default {
         // 解锁并关闭编辑器
         close() {
             ElMessageBox.confirm('关闭会丢失您修改的内容，确认继续吗？', '注意', {
-                confirmButtonText: '不保存并关闭页面',
+                confirmButtonText: '强制关闭页面',
                 cancelButtonText: '继续编辑',
                 type: 'warning'
             })

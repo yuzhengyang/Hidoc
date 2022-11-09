@@ -15,7 +15,7 @@
             </el-row>
             <el-tree :data="this.collected.docLites" node-key="id" default-expand-all :expand-on-click-node="false" @node-click="goDocPage">
                 <template #default="{ data }">
-                    <span v-if="length(data.title) < 35" :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
+                    <span v-if="length(data.title) < 30" :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
                     <el-tooltip v-else effect="dark" :content="data.title" placement="right">
                         <span :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
                     </el-tooltip>
@@ -178,10 +178,9 @@
                 </div>
             </el-main>
         </el-container>
-        <!-- 大纲导航 -->
-        <el-aside v-if="pageMode === 'detail' && isShowAnchor" width="250px" style="height: 100%">
-            <div style="padding: 45px 10px 100px 10px; font-size: 12px">
-                <div v-for="anchor in titles" :key="anchor" class="anchor-item" :style="{ padding: `4px 0 4px ${anchor.indent * 10}px` }" @click="handleAnchorClick(anchor)">
+        <el-aside v-if="pageMode === 'detail'" width="250px" style="height: 100%; overflow: hidden">
+            <div style="padding: 10px; height: 100%; font-size: 18px; overflow: auto">
+                <div v-for="anchor in titles" :key="anchor" :style="{ padding: `1px 0 1px ${anchor.indent * 20}px` }" style="cursor: pointer" @click="handleAnchorClick(anchor)">
                     <a>{{ anchor.title }}</a>
                 </div>
             </div>
@@ -190,23 +189,23 @@
 
     <div v-if="pageMode === 'detail'">
         <!-- ========== ========== ========== 右下角快捷按钮组 ========== ========== ==========  -->
-        <div style="position: fixed; bottom: 50px; right: 20px; z-index: 9999">
+        <div style="position: fixed; bottom: 50px; right: 30px; z-index: 9999">
             <el-badge :value="this.commentCount" class="item" :hidden="this.commentCount == 0">
                 <el-button icon="el-icon-chat-dot-square" circle @click="this.scrollToBlock('comment')" style="box-shadow: 0px 0px 5px 5px #ddd"></el-button>
             </el-badge>
         </div>
-        <div style="position: fixed; bottom: 100px; right: 20px; z-index: 9999">
+        <div style="position: fixed; bottom: 100px; right: 30px; z-index: 9999">
             <el-badge :value="this.thumbCount" class="item" :hidden="this.thumbCount == 0">
                 <el-button v-if="this.myThumb.isSupporter" type="primary" icon="el-icon-thumb" circle @click="createThumb" style="box-shadow: 0px 0px 5px 5px #ddd"></el-button>
                 <el-button v-else icon="el-icon-thumb" circle @click="createThumb" style="box-shadow: 0px 0px 5px 5px #ddd"></el-button>
             </el-badge>
         </div>
-        <div style="position: fixed; bottom: 150px; right: 20px; z-index: 9999">
+        <div style="position: fixed; bottom: 150px; right: 30px; z-index: 9999">
             <el-button icon="el-icon-caret-top" circle @click="this.scrollToBlock('top')" style="box-shadow: 0px 0px 5px 5px #ddd"></el-button>
         </div>
         <!-- ========== ========== ========== 右侧快捷按钮：工具条 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
-        <div style="position: fixed; top: 50px; right: 20px; z-index: 9999" v-if="this.$store.state.user.token != undefined && this.$store.state.user.token != ''">
+        <div style="position: fixed; top: 50px; right: 30px; z-index: 9999" v-if="this.$store.state.user.token != undefined && this.$store.state.user.token != ''">
             <!-- <el-popover placement="left" title="标题" width="200" trigger="hover">
                 <div>456456</div>
                 <el-button type="primary" icon="el-icon-menu" circle>click 激活</el-button>
@@ -248,11 +247,19 @@
             </el-popover>
         </div>
 
-        <!-- ========== ========== ========== 右侧快捷按钮：大纲导航 ========== ========== ==========  -->
+        <!-- ========== ========== ========== 右侧快捷按钮：目录导航 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
-        <div style="position: fixed; top: 50px; right: 70px; z-index: 9999">
-            <el-button type="success" icon="el-icon-tickets" circle @click="isShowAnchor = !isShowAnchor"></el-button>
+        <div style="position: fixed; top: 100px; right: 30px">
+            <el-button type="success" icon="el-icon-tickets" circle @click="drawer = true"></el-button>
         </div>
+        <!-- size="260" 不带px单位，运行效果为自适应的 -->
+        <el-drawer title="目录导航" v-model="drawer" :with-header="true" size="360px">
+            <div style="padding: 10px">
+                <div v-for="anchor in titles" :key="anchor" :style="{ padding: `10px 0 10px ${anchor.indent * 20}px` }" style="cursor: pointer" @click="handleAnchorClick(anchor)">
+                    <a>{{ anchor.title }}</a>
+                </div>
+            </div>
+        </el-drawer>
     </div>
 </template>
 
@@ -271,7 +278,6 @@ export default {
             isLogin: false,
             activeName: 'first',
             drawer: false,
-            isShowAnchor: true,
             inputComment: {
                 text: '',
                 replyCommentId: '',
@@ -334,7 +340,6 @@ export default {
         indexPage() {
             this.pageMode = 'index';
             this.docId = '';
-            this.$router.push({ name: 'collected', params: { collectedId: this.collected.id, docId: '_intro' } });
 
             if (this.activeName == 'ilinkRelation') {
                 this.$nextTick(() => {
@@ -739,7 +744,7 @@ export default {
     background-color: #bfc1c4;
 }
 
-/* 树自定义样式 */
+/** 树自定义样式 */
 .el-tree-node__content {
     width: 280px;
     height: 46px;
@@ -748,33 +753,5 @@ export default {
     border-bottom: 1px dashed lightgrey;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-/* 大纲导航 */
-
-.anchor-item {
-    cursor: pointer;
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    text-transform: uppercase;
-    /* font-weight: bold; */
-    /* font-size: 20px; */
-    /* padding: 15px 50px; */
-    position: relative;
-    color: #636363;
-}
-.anchor-item:before {
-    transition: all 0.2s linear ;
-    content: '';
-    width: 0%;
-    height: 100%;
-    background: #59a1ff46;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-.anchor-item:hover:before {
-    background: #59a1ff46;
-    width: 100%;
 }
 </style>
