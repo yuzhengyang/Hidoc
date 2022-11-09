@@ -90,6 +90,14 @@ public class LimitAccess {
      */
     private String forbidVersions;
     /**
+     * 允许设备
+     */
+    private String allowMachines;
+    /**
+     * 禁止设备
+     */
+    private String forbidMachines;
+    /**
      * 允许MAC
      */
     private String allowMacs;
