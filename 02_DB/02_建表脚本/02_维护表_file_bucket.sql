@@ -11,3 +11,7 @@ CREATE TABLE IF NOT EXISTS public.file_bucket (
 	is_open bool NULL,
 	CONSTRAINT sys_file_bucket_pkey PRIMARY KEY (id)
 );
+
+
+
+SELECT * FROM sysdb_add_unique_index('file_bucket', 'uidx_file_bucket_user_id_name', '"user_id", "name"');

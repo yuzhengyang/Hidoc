@@ -27,3 +27,9 @@ CREATE TABLE IF NOT EXISTS "limit_access" (
   CONSTRAINT limit_access_pkey PRIMARY KEY (id)
 )
 ;
+
+
+
+-- 增加字段
+SELECT * FROM sysdb_add_column('limit_access', 'allow_machines', 'text');
+SELECT * FROM sysdb_add_column('limit_access', 'forbid_machines', 'text');

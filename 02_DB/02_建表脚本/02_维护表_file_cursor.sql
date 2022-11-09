@@ -22,6 +22,11 @@ CREATE TABLE IF NOT EXISTS public.file_cursor (
 );
 
 
-SELECT * FROM sysdb_add_column('file_cursor', 'is_delete', 'bool NULL');
+SELECT * FROM sysdb_add_column('file_cursor', 'is_delete', 'bool DEFAULT false');
 SELECT * FROM sysdb_add_column('file_cursor', 'delete_user_id', 'varchar(20) NULL');
 SELECT * FROM sysdb_add_column('file_cursor', 'delete_time', 'timestamp NULL');
+
+
+
+-- 更新字段默认值
+UPDATE file_cursor SET is_delete = false WHERE is_delete IS NULL;
