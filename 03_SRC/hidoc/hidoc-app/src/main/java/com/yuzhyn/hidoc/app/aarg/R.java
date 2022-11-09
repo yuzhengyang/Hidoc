@@ -3,9 +3,12 @@ package com.yuzhyn.hidoc.app.aarg;
 import com.yuzhyn.azylee.core.datas.ids.SnowFlake;
 import com.yuzhyn.azylee.core.ios.dirs.DirTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemPropertyTool;
+import com.yuzhyn.azylee.core.systems.bases.SystemType;
+import com.yuzhyn.azylee.core.systems.bases.SystemTypeTool;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
+import com.yuzhyn.hidoc.app.application.entity.file.FileDownloadLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
@@ -34,6 +37,7 @@ public final class R {
     public static int MinPasswordLength = 6;
     public static long AccessTimes = 0;
     public static long TodayAccessTimes = 0;
+    public static SystemType SystemType = SystemTypeTool.getOSname();
     public static SshManager SshManager = new SshManager();
 
     public static LocalDateTime Today() {
@@ -51,6 +55,7 @@ public final class R {
         public static ConcurrentLinkedQueue<SysAccessLog> SysAccessLogQueue = new ConcurrentLinkedQueue<>();
         public static ConcurrentLinkedQueue<DocAccessLog> DocAccessLogQueue = new ConcurrentLinkedQueue<>();
         public static ConcurrentLinkedQueue<CmdRunLog> CmdRunLogQueue = new ConcurrentLinkedQueue<>();
+        public static ConcurrentLinkedQueue<FileDownloadLog> FileDownloadLogQueue = new ConcurrentLinkedQueue<>();
     }
 
     public static class Maps {
