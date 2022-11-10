@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.*;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
@@ -71,6 +72,7 @@ public class DocCollectedController {
             String description = MapTool.get(params, "description", "").toString();
             Boolean isOpen = MapTool.getBoolean(params, "isOpen", false);
             Boolean isLoginAccess = MapTool.getBoolean(params, "isLoginAccess", false);
+            Boolean isTemplet = MapTool.getBoolean(params, "isTemplet", false);
             String token = MapTool.get(params, "token", "").toString();
 
             if (StringTool.ok(name, token)) {
@@ -85,6 +87,7 @@ public class DocCollectedController {
                 docCollected.setDescription(description);
                 docCollected.setIsOpen(isOpen);
                 docCollected.setIsLoginAccess(isLoginAccess);
+                docCollected.setIsTemplet(isTemplet);
                 docCollected.setIsDelete(false);
                 int flag = docCollectedMapper.insert(docCollected);
                 if (flag > 0) {
@@ -103,6 +106,7 @@ public class DocCollectedController {
             String description = MapTool.get(params, "description", "").toString();
             Boolean isOpen = MapTool.getBoolean(params, "isOpen", false);
             Boolean isLoginAccess = MapTool.getBoolean(params, "isLoginAccess", false);
+            Boolean isTemplet = MapTool.getBoolean(params, "isTemplet", false);
             String token = MapTool.get(params, "token", "").toString();
 
             if (StringTool.ok(id, name, token)) {
@@ -117,6 +121,7 @@ public class DocCollectedController {
                     record.setDescription(description);
                     record.setIsOpen(isOpen);
                     record.setIsLoginAccess(isLoginAccess);
+                    record.setIsTemplet(isTemplet);
                     int flag = docCollectedMapper.updateById(record);
                     if (flag > 0) {
                         return ResponseData.okData("docCollected", record);
@@ -214,6 +219,7 @@ public class DocCollectedController {
         int pageSize = 5;
         String keyword = MapTool.get(params, "keyword", "").toString();
         String from = MapTool.get(params, "from", "").toString();
+        Boolean isTemplet = MapTool.getBoolean(params, "isTemplet", false);
 
         String[] keywordArray = StringTool.split(keyword, " ", true, true);
         List<String> collectedIds = new ArrayList<>();
@@ -249,9 +255,8 @@ public class DocCollectedController {
         }
 
         // 此处根据关键字筛选的信息来框定返回内容
-        LambdaQueryWrapper<DocCollected> docCollectedLambdaQueryWrapper = new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getIsOpen, true).eq(DocCollected::getIsDelete, false);
-        if (ListTool.ok(collectedIds))
-            docCollectedLambdaQueryWrapper = docCollectedLambdaQueryWrapper.in(DocCollected::getId, collectedIds);
+        LambdaQueryWrapper<DocCollected> docCollectedLambdaQueryWrapper = new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getIsOpen, true).eq(DocCollected::getIsDelete, false).eq(DocCollected::getIsTemplet, isTemplet);
+        if (ListTool.ok(collectedIds)) docCollectedLambdaQueryWrapper = docCollectedLambdaQueryWrapper.in(DocCollected::getId, collectedIds);
 
         List<DocCollected> collectedList = docCollectedMapper.selectList(docCollectedLambdaQueryWrapper);
         if (ListTool.ok(collectedList)) {

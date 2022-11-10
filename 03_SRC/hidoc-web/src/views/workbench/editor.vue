@@ -17,8 +17,7 @@
             <el-row style="padding: 5px">
                 <el-col :span="6">
                     <el-button-group>
-                        <el-button size="mini">使用模板</el-button>
-                        <el-button size="mini">保存模板</el-button>
+                        <el-button size="mini" @click="openTempletDialog()">使用模板</el-button>
                     </el-button-group>
                     <el-button-group style="padding-left: 5px">
                         <el-button size="mini" @click="openIlinkDialog()">引用文档</el-button>
@@ -35,7 +34,7 @@
         <el-dialog v-model="ilinkDialog.show" title="引用文档" width="50%" center>
             <el-container>
                 <el-header>
-                    <el-input v-model="this.ilinkDialog.searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchEnter" clearable>
+                    <el-input v-model="this.ilinkDialog.searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchIlinkEnter" clearable>
                         <template #prepend>
                             <el-select v-model="this.ilinkDialog.searchMode" placeholder="Select" style="width: 110px">
                                 <el-option label="全文" value="1"></el-option>
@@ -43,28 +42,21 @@
                             </el-select>
                         </template>
                         <template #append>
-                            <el-button @click="search()">
-                                <el-icon>
-                                    <Search />
-                                </el-icon>
+                            <el-button @click="searchIlink()">
+                                <el-icon><Search /></el-icon>
                             </el-button>
                         </template>
                     </el-input>
                 </el-header>
-                <el-main>
+                <el-main style="margin-left: 30px; margin-right: 30px">
                     <div style="height: 360px">
                         <el-collapse accordion>
                             <el-collapse-item v-for="colItem in this.ilinkDialog.collectedList" :key="colItem" :title="colItem.name" :name="colItem.id">
-                                <el-row v-for="docItem in colItem.docLites" :key="docItem" style="border-bottom: 1px dashed #bbbbbb">
-                                    <el-col :span="2"></el-col>
-                                    <el-col :span="16">
-                                        {{ docItem.title }}
-                                    </el-col>
-                                    <el-col :span="4">
-                                        <el-link type="primary" @click="addIlinkDoc(docItem.title, colItem.id, docItem.id)">引用链接</el-link>
-                                    </el-col>
-                                    <el-col :span="2"></el-col>
-                                </el-row>
+                                <div v-for="docItem in colItem.docLites" :key="docItem" style="border-bottom: 1px dashed #ccc; padding: 2px">
+                                    <div class="import-item" style="cursor: pointer" @click="addIlinkDoc(docItem.title, colItem.id, docItem.id)">
+                                        <span>　{{ docItem.title }}　</span>
+                                    </div>
+                                </div>
                             </el-collapse-item>
                         </el-collapse>
                     </div>
@@ -79,6 +71,48 @@
             </template>
         </el-dialog>
 
+        <!-- 模板文档弹出框 -->
+        <el-dialog v-model="templetDialog.show" title="模板文档" width="50%" center>
+            <el-container>
+                <el-header>
+                    <el-input v-model="this.templetDialog.searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchTempletEnter" clearable>
+                        <template #prepend>
+                            <el-select v-model="this.templetDialog.searchMode" placeholder="Select" style="width: 110px">
+                                <el-option label="全文" value="1"></el-option>
+                                <el-option label="关键字" value="2"></el-option>
+                            </el-select>
+                        </template>
+                        <template #append>
+                            <el-button @click="searchTemplet()">
+                                <el-icon><Search /></el-icon>
+                            </el-button>
+                        </template>
+                    </el-input>
+                </el-header>
+                <el-main style="margin-left: 30px; margin-right: 30px">
+                    <div style="height: 360px">
+                        <el-collapse accordion >
+                            <el-collapse-item v-for="colItem in this.templetDialog.collectedList" :key="colItem" :title="colItem.name" :name="colItem.id">
+                                <div v-for="docItem in colItem.docLites" :key="docItem" style="border-bottom: 1px dashed #ccc; padding: 2px">
+                                    <div class="import-item" style="cursor: pointer" @click="addTempletDoc(docItem.title, colItem.id, docItem.id)">
+                                        <span>　{{ docItem.title }}　</span>
+                                    </div>
+                                </div>
+                            </el-collapse-item>
+                        </el-collapse>
+                    </div>
+                </el-main>
+            </el-container>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-affix position="bottom" :offset="20">
+                        <el-button type="primary" size="mini" @click="templetDialog.show = false" style="width: 200px">关闭</el-button>
+                    </el-affix>
+                </span>
+            </template>
+        </el-dialog>
+
+        <!-- 文档标签 -->
         <!-- <el-footer>
             <el-row>
                 <el-tag :key="tag" v-for="tag in dynamicTags" closable :disable-transitions="false" @close="handleClose(tag)">
@@ -128,6 +162,12 @@ export default {
                 searchMode: '',
                 searchText: ''
             },
+            templetDialog: {
+                show: false,
+                collectedList: [],
+                searchMode: '',
+                searchText: ''
+            },
             dynamicTags: ['标签一', '标签二', '标签三'],
             inputVisible: false,
             inputValue: '',
@@ -153,6 +193,7 @@ export default {
         };
     },
     mounted() {
+        // 标记当前页面为加载状态
         this.loadStatus = 'mounted';
         // 默认开启目录导航
         this.$refs.editor.toggleToc();
@@ -213,6 +254,8 @@ export default {
                 id: this.$route.params.collectedId
             }
         }).then(res => {
+            // 标记当前页面为活动状态
+            this.loadStatus = 'active';
             this.collected = res.meta.collected;
 
             switch (docId) {
@@ -231,7 +274,6 @@ export default {
                             this.content = res.meta.doc.content;
                             this.title = res.meta.doc.title;
                             this.docId = res.meta.doc.id;
-                            this.loadStatus = 'active';
 
                             switch (res.status) {
                                 case 'ok': {
@@ -330,24 +372,23 @@ export default {
                 }
             });
         },
-        handleClose(tag) {
-            this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
-        },
-
-        showInput() {
-            this.inputVisible = true;
-            this.$nextTick(_ => {
-                this.$refs.saveTagInput.$refs.input.focus();
-            });
-        },
-        handleInputConfirm() {
-            let inputValue = this.inputValue;
-            if (inputValue) {
-                this.dynamicTags.push(inputValue);
-            }
-            this.inputVisible = false;
-            this.inputValue = '';
-        },
+        // handleClose(tag) {
+        //     this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
+        // },
+        // showInput() {
+        //     this.inputVisible = true;
+        //     this.$nextTick(_ => {
+        //         this.$refs.saveTagInput.$refs.input.focus();
+        //     });
+        // },
+        // handleInputConfirm() {
+        //     let inputValue = this.inputValue;
+        //     if (inputValue) {
+        //         this.dynamicTags.push(inputValue);
+        //     }
+        //     this.inputVisible = false;
+        //     this.inputValue = '';
+        // },
         beforePreviewChange(text, next) {
             // 预览前对文本进行处理，然后再渲染预览
             if (this.loadStatus == 'active') {
@@ -426,15 +467,16 @@ export default {
                 });
         },
         openIlinkDialog() {
+            // this.ilinkDialog.searchText = '';
             this.ilinkDialog.show = true;
-            this.search();
+            this.searchIlink();
         },
-        searchEnter(e) {
+        searchIlinkEnter(e) {
             if (e.keyCode == 13) {
-                this.search();
+                this.searchIlink();
             }
         },
-        search() {
+        searchIlink() {
             request({
                 url: '/collected/preview',
                 method: 'post',
@@ -461,6 +503,40 @@ export default {
                 };
             });
             this.ilinkDialog.show = false;
+        },
+        openTempletDialog() {
+            // this.templetDialog.searchText = '';
+            this.templetDialog.show = true;
+            this.searchTemplet();
+        },
+        searchTempletEnter(e) {
+            if (e.keyCode == 13) {
+                this.searchTemplet();
+            }
+        },
+        searchTemplet() {
+            request({
+                url: '/collected/preview',
+                method: 'post',
+                data: { mode: this.templetDialog.searchMode, keyword: this.templetDialog.searchText, from: 'editor', isTemplet: true }
+            }).then(res => {
+                if (res.code == 0) {
+                    this.templetDialog.collectedList = res.data;
+                }
+            });
+        },
+        addTempletDoc(docTitle, collectedId, docId) {
+            request({
+                url: '/doc/get',
+                method: 'post',
+                data: { id: docId }
+            }).then(res => {
+                if (res.code == 0) {
+                    this.doc = res.meta.doc;
+                    this.content = this.doc.content;
+                    this.templetDialog.show = false;
+                }
+            });
         }
     }
 };
@@ -481,5 +557,32 @@ export default {
     width: 90px;
     margin-left: 10px;
     vertical-align: bottom;
+}
+/* 引用项目特效 */
+.import-item {
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    text-transform: uppercase;
+    /* font-weight: bold; */
+    /* font-size: 20px; */
+    /* padding: 15px 50px; */
+    position: relative;
+    color: #636363;
+}
+.import-item:before {
+    transition: all 0.2s linear;
+    content: '';
+    width: 0%;
+    height: 100%;
+    background: #59a1ff46;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.import-item:hover:before {
+    background: #59a1ff46;
+    width: 100%;
 }
 </style>

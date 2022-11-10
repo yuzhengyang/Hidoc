@@ -749,8 +749,7 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-/* 大纲导航 */
-
+/* 大纲导航特效 */
 .anchor-item {
     cursor: pointer;
     background: transparent;

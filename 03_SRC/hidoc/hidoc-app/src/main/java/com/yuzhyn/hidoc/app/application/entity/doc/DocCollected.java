@@ -34,6 +34,11 @@ public class DocCollected {
      */
     private String passwordAccess;
 
+    /**
+     * 是否模板文集（可作为模板引入内容）
+     */
+    private Boolean isTemplet;
+
     @TableField(exist = false)
     private List<DocLite> docLites;
 

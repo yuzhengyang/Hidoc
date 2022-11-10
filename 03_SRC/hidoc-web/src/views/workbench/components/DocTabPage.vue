@@ -26,38 +26,39 @@
                     <el-menu default-active="2" @open="handleOpen" @close="handleClose" :unique-opened="true">
                         <el-sub-menu index="1">
                             <template #title>
-                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的协作（{{ myCoop.length ?? 0 }}）</span>
+                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的协作（{{ collectedList.myCoop.length ?? 0 }}）</span>
                             </template>
-                            <el-menu-item v-for="item in myCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
+                            <el-menu-item v-for="item in collectedList.myCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                                 {{ item.name }}
-                                <el-tag v-show="item.isOpen" size="mini" style="margin-left: 2px; margin-right: 2px">公开</el-tag>
-                                <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag>
+                                <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
+                                <!-- <el-tag v-show="item.isOpen" size="mini" style="margin-left: 2px; margin-right: 2px">公开</el-tag> -->
+                                <!-- <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag> -->
                             </el-menu-item>
                         </el-sub-menu>
                         <el-sub-menu index="2">
                             <template #title>
-                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我参与的协作（{{ joinCoop.length ?? 0 }}）</span>
+                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我参与的协作（{{ collectedList.joinCoop.length ?? 0 }}）</span>
                             </template>
-                            <el-menu-item v-for="item in joinCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{ item.name }}</el-menu-item>
+                            <el-menu-item v-for="item in collectedList.joinCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{ item.name }}</el-menu-item>
                         </el-sub-menu>
                         <el-sub-menu index="3">
                             <template #title>
-                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的文集（{{ myOpen.length ?? 0 }}）</span>
+                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的文集（{{ collectedList.myOpen.length ?? 0 }}）</span>
                             </template>
-                            <el-menu-item v-for="item in myOpen" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
+                            <el-menu-item v-for="item in collectedList.myOpen" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                                 {{ item.name }}
-                                <el-tag v-show="item.isOpen" size="mini" style="margin-left: 2px; margin-right: 2px">公开</el-tag>
-                                <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag>
+                                <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
+                                <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
                             </el-menu-item>
                         </el-sub-menu>
                         <el-sub-menu index="4">
                             <template #title>
-                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">私有文集（{{ myPrivate.length ?? 0 }}）</span>
+                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">私有文集（{{ collectedList.myPrivate.length ?? 0 }}）</span>
                             </template>
-                            <el-menu-item v-for="item in myPrivate" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
+                            <el-menu-item v-for="item in collectedList.myPrivate" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                                 {{ item.name }}
-                                <el-tag v-show="item.isOpen" size="mini" style="margin-left: 2px; margin-right: 2px">公开</el-tag>
-                                <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag>
+                                <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
+                                <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
                             </el-menu-item>
                         </el-sub-menu>
                     </el-menu>
@@ -153,6 +154,9 @@
             <el-form-item label="需登录查看" :label-width="formLabelWidth">
                 <el-switch v-model="collectedForm.isLoginAccess" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
             </el-form-item>
+            <el-form-item label="作为模板" :label-width="formLabelWidth">
+                <el-switch v-model="collectedForm.isTemplet" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+            </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
@@ -211,7 +215,8 @@ export default {
             collectedForm: {
                 name: '',
                 description: '',
-                isOpen: false
+                isOpen: false,
+                isTemplet: false
             },
             formLabelWidth: '120px',
             memberUser: [],
@@ -220,11 +225,13 @@ export default {
             memberId: [],
             mineList: [],
             coopList: [],
-            myCoop: [], // 我发起的协作
-            joinCoop: [], // 我加入的协作（别人创建的）
-            myOpen: [], // 我公开的文集
-            myPrivate: [], // 私有文集
-            myAll: [] // 我的全部
+            collectedList: {
+                myCoop: [], // 我发起的协作
+                joinCoop: [], // 我加入的协作（别人创建的）
+                myOpen: [], // 我公开的文集
+                myPrivate: [], // 私有文集
+                // myAll: [] // 我的全部
+            }
         };
     },
     mounted() {
@@ -250,11 +257,11 @@ export default {
                     this.mineList = res.meta.mine;
                     this.coopList = res.meta.coop;
 
-                    this.myCoop = _.filter(res.meta.mine, { isCoop: true, isOpen: true }); // 我公开的协作
-                    this.joinCoop = res.meta.coop; // 我参与的协作
-                    this.myOpen = _.filter(res.meta.mine, { isCoop: false, isOpen: true }); // 我公开的文集
-                    this.myPrivate = _.filter(res.meta.mine, { isOpen: false }); // 私有文集
-                    this.myAll = res.meta.mine;
+                    this.collectedList.myCoop = _.filter(res.meta.mine, { isCoop: true, isOpen: true }); // 我公开的协作
+                    this.collectedList.joinCoop = res.meta.coop; // 我参与的协作
+                    this.collectedList.myOpen = _.filter(res.meta.mine, { isCoop: false, isOpen: true }); // 我公开的文集
+                    this.collectedList.myPrivate = _.filter(res.meta.mine, { isOpen: false }); // 私有文集
+                    // this.myAll = res.meta.mine;
                 }
             });
         },
@@ -303,6 +310,8 @@ export default {
             this.collectedForm.name = '';
             this.collectedForm.description = '';
             this.collectedForm.isOpen = false;
+            this.collectedForm.isTemplet = false;
+            this.collectedForm.isLoginAccess = false;
             this.dialogFormVisible = true;
         },
         openEditCollected() {
@@ -311,6 +320,8 @@ export default {
             this.collectedForm.name = this.currentCollected.name;
             this.collectedForm.description = this.currentCollected.description;
             this.collectedForm.isOpen = this.currentCollected.isOpen;
+            this.collectedForm.isLoginAccess = this.currentCollected.isLoginAccess;
+            this.collectedForm.isTemplet = this.currentCollected.isTemplet;
             this.dialogFormVisible = true;
         },
         // 打开协作成员弹框，并可编辑成员
@@ -355,7 +366,8 @@ export default {
                         description: this.collectedForm.description,
                         token: this.$store.state.user.token,
                         isOpen: this.collectedForm.isOpen,
-                        isLoginAccess: this.collectedForm.isLoginAccess
+                        isLoginAccess: this.collectedForm.isLoginAccess,
+                        isTemplet: this.collectedForm.isTemplet
                     }
                 }).then(res => {
                     if (res.code == 0) {
@@ -374,7 +386,8 @@ export default {
                         description: this.collectedForm.description,
                         token: this.$store.state.user.token,
                         isOpen: this.collectedForm.isOpen,
-                        isLoginAccess: this.collectedForm.isLoginAccess
+                        isLoginAccess: this.collectedForm.isLoginAccess,
+                        isTemplet: this.collectedForm.isTemplet
                     }
                 }).then(res => {
                     if (res.code == 0) {
@@ -390,10 +403,7 @@ export default {
                 method: 'post',
                 data: {
                     id: this.currentCollected.id,
-                    name: this.collectedForm.name,
-                    description: this.collectedForm.description,
-                    token: this.$store.state.user.token,
-                    isOpen: this.collectedForm.isOpen
+                    token: this.$store.state.user.token
                 }
             }).then(res => {
                 if (res.code == 0) {
