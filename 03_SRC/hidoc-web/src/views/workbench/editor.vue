@@ -564,15 +564,11 @@ export default {
     background: transparent;
     border: 0;
     border-radius: 0;
-    text-transform: uppercase;
-    /* font-weight: bold; */
-    /* font-size: 20px; */
-    /* padding: 15px 50px; */
     position: relative;
     color: #636363;
 }
 .import-item:before {
-    transition: all 0.2s linear;
+    transition: all 0 linear;
     content: '';
     width: 0%;
     height: 100%;

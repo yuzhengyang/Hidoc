@@ -755,10 +755,6 @@ export default {
     background: transparent;
     border: 0;
     border-radius: 0;
-    text-transform: uppercase;
-    /* font-weight: bold; */
-    /* font-size: 20px; */
-    /* padding: 15px 50px; */
     position: relative;
     color: #636363;
 }

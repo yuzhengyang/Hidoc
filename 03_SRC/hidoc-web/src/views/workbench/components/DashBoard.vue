@@ -21,6 +21,25 @@
             <div id="myChart" :style="{ width: '100%', height: '300px' }"></div>
         </el-col>
     </el-row>
+
+    <el-row>
+        <el-col :span="2"></el-col>
+        <el-col :span="20"><h3>我的文档阅读记录</h3></el-col>
+    </el-row>
+    <el-row>
+        <el-col :span="2"></el-col>
+        <el-col :span="20">
+            <el-table :data="myDocReadLog" style="width: 100%" height="360" stripe>
+                <el-table-column fixed prop="readTime" label="阅读时间" width="180" />
+                <el-table-column prop="collectedName" label="文集" width="200" />
+                <el-table-column prop="docTitle" label="文档" width="300" />
+                <el-table-column prop="createUser" label="创建" width="120" />
+                <el-table-column prop="ownerUser" label="管理" width="120" />
+                <el-table-column prop="readUser" label="读者" width="120" />
+                <el-table-column prop="ip" label="访问IP" width="120" />
+            </el-table>
+        </el-col>
+    </el-row>
 </template>
 
 <script>
@@ -40,7 +59,8 @@ export default {
                 docCountList: [],
                 docUpdateCountList: [],
                 readCountList: []
-            }
+            },
+            myDocReadLog: []
         };
     },
     mounted() {
@@ -48,6 +68,8 @@ export default {
         this.initChart();
         //this.$root => app
         console.log(this.echarts);
+
+        this.loadMyDocReadLog();
     },
     methods: {
         loadUserBoard() {
@@ -68,11 +90,24 @@ export default {
                 }
             });
         },
+        loadMyDocReadLog() {
+            request({
+                url: '/dashboard/myDocReadLog',
+                method: 'post',
+                data: {
+                    docId: ''
+                }
+            }).then(res => {
+                if (res.code == 0 && res.data.length > 0) {
+                    this.myDocReadLog = res.data;
+                }
+            });
+        },
         initChart() {
             let myChart = this.$echarts.init(document.getElementById('myChart'));
             // 绘制图表
             myChart.setOption({
-                title: { text: '趋势' },
+                title: { text: '　　趋势　　' },
                 tooltip: {},
                 legend: {},
                 xAxis: {

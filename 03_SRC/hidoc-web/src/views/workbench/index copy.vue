@@ -1,71 +1,75 @@
 <template>
     <el-container style="height: 100%">
         <!-- 内容区域 -->
-        <el-aside width="180px" style="height: 100%; border-right:1px solid #CCC">
-            <el-menu default-active="1000" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                <el-menu-item index="1000" @click="changeMenu(1000)">
-                    <i class="el-icon-data-analysis"></i>
-                    <template #title>信息看板</template>
-                </el-menu-item>
-                <el-menu-item index="2000" @click="changeMenu(2000)">
-                    <i class="el-icon-collection"></i>
-                    <template #title>文集文档</template>
-                </el-menu-item>
-                <el-menu-item index="2010" @click="changeMenu(2010)">
-                    <i class="el-icon-delete"></i>
-                    <template #title>回收站</template>
-                </el-menu-item>
-                <el-menu-item index="2020" @click="changeMenu(2020)">
-                    <i class="el-icon-chat-line-square"></i>
-                    <template #title>互动评论</template>
-                </el-menu-item>
-                <el-menu-item index="3000" @click="changeMenu(3000)">
-                    <i class="el-icon-picture-outline"></i>
-                    <template #title>素材库</template>
-                </el-menu-item>
-                <el-menu-item index="3010" @click="changeMenu(3010)">
-                    <i class="el-icon-files"></i>
-                    <template #title>我的文件</template>
-                </el-menu-item>
-                <el-menu-item index="7000" @click="changeMenu(7000)">
-                    <i class="el-icon-notebook-2"></i>
-                    <template #title>代码注释</template>
-                </el-menu-item>
-                <el-menu-item index="8000" @click="changeMenu(8000)">
-                    <i class="el-icon-box"></i>
-                    <template #title>数据收集器</template>
-                </el-menu-item>
-                <el-menu-item index="8010" @click="changeMenu(8010)">
-                    <i class="el-icon-odometer"></i>
-                    <template #title>剂量控制器</template>
-                </el-menu-item>
-                <el-menu-item index="8020" @click="changeMenu(8020)">
-                    <i class="el-icon-news"></i>
-                    <template #title>服务管理</template>
-                </el-menu-item>
-                <el-menu-item index="9000" @click="changeMenu(9000)">
-                    <i class="el-icon-user"></i>
-                    <template #title>个人信息</template>
-                </el-menu-item>
-                <!-- <el-menu-item index="9999" @click="changeMenu(9999)">
+        <el-main style="height: 100%">
+            <el-row style="height: 100%">
+                <el-col :span="3" style="height: 100%">
+                    <el-menu default-active="1000" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+                        <el-menu-item index="1000" @click="changeMenu(1000)">
+                            <i class="el-icon-data-analysis"></i>
+                            <template #title>信息看板</template>
+                        </el-menu-item>
+                        <el-menu-item index="2000" @click="changeMenu(2000)">
+                            <i class="el-icon-collection"></i>
+                            <template #title>文集文档</template>
+                        </el-menu-item>
+                        <el-menu-item index="2010" @click="changeMenu(2010)">
+                            <i class="el-icon-delete"></i>
+                            <template #title>回收站</template>
+                        </el-menu-item>
+                        <el-menu-item index="2020" @click="changeMenu(2020)">
+                            <i class="el-icon-chat-line-square"></i>
+                            <template #title>互动评论</template>
+                        </el-menu-item>
+                        <el-menu-item index="3000" @click="changeMenu(3000)">
+                            <i class="el-icon-picture-outline"></i>
+                            <template #title>素材库</template>
+                        </el-menu-item>
+                        <el-menu-item index="3010" @click="changeMenu(3010)">
+                            <i class="el-icon-files"></i>
+                            <template #title>我的文件</template>
+                        </el-menu-item>
+                        <el-menu-item index="7000" @click="changeMenu(7000)">
+                            <i class="el-icon-notebook-2"></i>
+                            <template #title>代码注释</template>
+                        </el-menu-item>
+                        <el-menu-item index="8000" @click="changeMenu(8000)">
+                            <i class="el-icon-box"></i>
+                            <template #title>数据收集器</template>
+                        </el-menu-item>
+                        <el-menu-item index="8010" @click="changeMenu(8010)">
+                            <i class="el-icon-odometer"></i>
+                            <template #title>剂量控制器</template>
+                        </el-menu-item>
+                        <el-menu-item index="8020" @click="changeMenu(8020)">
+                            <i class="el-icon-news"></i>
+                            <template #title>服务管理</template>
+                        </el-menu-item>
+                        <el-menu-item index="9000" @click="changeMenu(9000)">
+                            <i class="el-icon-user"></i>
+                            <template #title>个人信息</template>
+                        </el-menu-item>
+                        <!-- <el-menu-item index="9999" @click="changeMenu(9999)">
                             <i class="el-icon-pear"></i>
                             <template #title>实验室</template>
                         </el-menu-item> -->
-            </el-menu>
-        </el-aside>
-        <el-main style="height: 100%">
-            <dash-board v-if="this.currentMenuIndex == 1000"></dash-board>
-            <doc-tab-page v-if="this.currentMenuIndex == 2000"></doc-tab-page>
-            <recycle-bin v-if="this.currentMenuIndex == 2010"></recycle-bin>
-            <doc-comment v-if="this.currentMenuIndex == 2020"></doc-comment>
-            <material-library v-if="this.currentMenuIndex == 3000"></material-library>
-            <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
-            <java-doc v-if="this.currentMenuIndex == 7000"></java-doc>
-            <data-collector v-if="this.currentMenuIndex == 8000"></data-collector>
-            <dose-controller v-if="this.currentMenuIndex == 8010"></dose-controller>
-            <server-manager v-if="this.currentMenuIndex == 8020"></server-manager>
-            <user-info v-if="this.currentMenuIndex == 9000"></user-info>
-            <laboratory v-if="this.currentMenuIndex == 9999"></laboratory>
+                    </el-menu>
+                </el-col>
+                <el-col :span="21" style="height: 100%">
+                    <dash-board v-if="this.currentMenuIndex == 1000"></dash-board>
+                    <doc-tab-page v-if="this.currentMenuIndex == 2000"></doc-tab-page>
+                    <recycle-bin v-if="this.currentMenuIndex == 2010"></recycle-bin>
+                    <doc-comment v-if="this.currentMenuIndex == 2020"></doc-comment>
+                    <material-library v-if="this.currentMenuIndex == 3000"></material-library>
+                    <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
+                    <java-doc v-if="this.currentMenuIndex == 7000"></java-doc>
+                    <data-collector v-if="this.currentMenuIndex == 8000"></data-collector>
+                    <dose-controller v-if="this.currentMenuIndex == 8010"></dose-controller>
+                    <server-manager v-if="this.currentMenuIndex == 8020"></server-manager>
+                    <user-info v-if="this.currentMenuIndex == 9000"></user-info>
+                    <laboratory v-if="this.currentMenuIndex == 9999"></laboratory>
+                </el-col>
+            </el-row>
         </el-main>
     </el-container>
     <el-backtop></el-backtop>

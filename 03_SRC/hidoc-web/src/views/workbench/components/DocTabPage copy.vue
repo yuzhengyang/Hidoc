@@ -20,120 +20,122 @@
                 </el-button-group>
             </el-row>
         </el-header>
-        <el-container style="height: 100%">
-            <el-aside width="250px" style="height: 100%">
-                <el-menu default-active="2" @open="handleOpen" @close="handleClose" :unique-opened="true">
-                    <el-sub-menu index="1">
-                        <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的协作（{{ collectedList.myCoop.length ?? 0 }}）</span>
-                        </template>
-                        <el-menu-item v-for="item in collectedList.myCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
-                            {{ item.name }}
-                            <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
-                            <!-- <el-tag v-show="item.isOpen" size="mini" style="margin-left: 2px; margin-right: 2px">公开</el-tag> -->
-                            <!-- <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag> -->
-                        </el-menu-item>
-                    </el-sub-menu>
-                    <el-sub-menu index="2">
-                        <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我参与的协作（{{ collectedList.joinCoop.length ?? 0 }}）</span>
-                        </template>
-                        <el-menu-item v-for="item in collectedList.joinCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{ item.name }}</el-menu-item>
-                    </el-sub-menu>
-                    <el-sub-menu index="3">
-                        <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的文集（{{ collectedList.myOpen.length ?? 0 }}）</span>
-                        </template>
-                        <el-menu-item v-for="item in collectedList.myOpen" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
-                            {{ item.name }}
-                            <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
-                            <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
-                        </el-menu-item>
-                    </el-sub-menu>
-                    <el-sub-menu index="4">
-                        <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">私有文集（{{ collectedList.myPrivate.length ?? 0 }}）</span>
-                        </template>
-                        <el-menu-item v-for="item in collectedList.myPrivate" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
-                            {{ item.name }}
-                            <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
-                            <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
-                        </el-menu-item>
-                    </el-sub-menu>
-                </el-menu>
-            </el-aside>
-            <el-main>
-                <el-row style="font-weight: bold; color: grey">
-                    <el-col :span="9"><span style="padding-left: 20px">标题</span></el-col>
-                    <el-col :span="2"><span style="padding-left: 5px">拥有者</span></el-col>
-                    <el-col :span="2"><span style="padding-left: 5px">最近更新</span></el-col>
-                    <el-col :span="2"><span style="padding-left: 5px">锁(编辑中)</span></el-col>
-                    <el-col :span="4"><span style="padding-left: 5px">排序</span></el-col>
-                    <el-col :span="4"><span style="padding-left: 5px">操作</span></el-col>
-                </el-row>
-                <el-row style="width: 100%">
-                    <el-col :span="23" style="padding: 10px; border-bottom: 1px solid lightgrey"></el-col>
-                </el-row>
-                <el-tree :data="tableData" node-key="id" default-expand-all :expand-on-click-node="false" :draggable="docNodeDragEnable" @node-drop="docNodeDrop">
-                    <template #default="{ data }">
-                        <el-row style="width: 100%">
-                            <el-col :span="9">
-                                <span v-if="docNodeDragEnable"><i class="el-icon-rank" style="padding-left: 4px; padding-right: 4px"></i></span>
-                                <span @click="previewDoc(data)">{{ data.title }}</span>
-                                <!-- <el-button @click="previewDoc(data)" type="text" size="medium">{{ data.title }}</el-button> -->
-                            </el-col>
-                            <el-col :span="2">{{ data.ownerUser.realName }}</el-col>
-                            <el-col :span="2">
-                                <el-popover effect="light" trigger="hover" placement="top">
-                                    <template #default>
-                                        <p>{{ data.updateTime }}</p>
-                                    </template>
-                                    <template #reference>
-                                        <div class="name-wrapper">
-                                            {{ data.relativeUpdateTime }}
+        <el-main style="height: 100%">
+            <el-row style="height: 100%">
+                <el-col :span="5" style="height: 100%; overflow: hidden; overflow: auto">
+                    <el-menu default-active="2" @open="handleOpen" @close="handleClose" :unique-opened="true">
+                        <el-sub-menu index="1">
+                            <template #title>
+                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的协作（{{ collectedList.myCoop.length ?? 0 }}）</span>
+                            </template>
+                            <el-menu-item v-for="item in collectedList.myCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
+                                {{ item.name }}
+                                <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
+                                <!-- <el-tag v-show="item.isOpen" size="mini" style="margin-left: 2px; margin-right: 2px">公开</el-tag> -->
+                                <!-- <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag> -->
+                            </el-menu-item>
+                        </el-sub-menu>
+                        <el-sub-menu index="2">
+                            <template #title>
+                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我参与的协作（{{ collectedList.joinCoop.length ?? 0 }}）</span>
+                            </template>
+                            <el-menu-item v-for="item in collectedList.joinCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{ item.name }}</el-menu-item>
+                        </el-sub-menu>
+                        <el-sub-menu index="3">
+                            <template #title>
+                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的文集（{{ collectedList.myOpen.length ?? 0 }}）</span>
+                            </template>
+                            <el-menu-item v-for="item in collectedList.myOpen" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
+                                {{ item.name }}
+                                <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
+                                <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
+                            </el-menu-item>
+                        </el-sub-menu>
+                        <el-sub-menu index="4">
+                            <template #title>
+                                <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">私有文集（{{ collectedList.myPrivate.length ?? 0 }}）</span>
+                            </template>
+                            <el-menu-item v-for="item in collectedList.myPrivate" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
+                                {{ item.name }}
+                                <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
+                                <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
+                            </el-menu-item>
+                        </el-sub-menu>
+                    </el-menu>
+                </el-col>
+                <el-col :span="19" style="height: 100%; overflow: hidden; overflow: auto">
+                    <el-row style="font-weight: bold; color: grey">
+                        <el-col :span="10"><span style="padding-left: 20px">标题</span></el-col>
+                        <el-col :span="2"><span style="padding-left: 5px">拥有者</span></el-col>
+                        <el-col :span="2"><span style="padding-left: 5px">最近更新</span></el-col>
+                        <el-col :span="2"><span style="padding-left: 5px">锁(编辑中)</span></el-col>
+                        <el-col :span="4"><span style="padding-left: 5px">排序</span></el-col>
+                        <el-col :span="4"><span style="padding-left: 5px">操作</span></el-col>
+                    </el-row>
+                    <el-row style="width: 100%">
+                        <el-col :span="24" style="padding: 10px; border-bottom: 1px solid lightgrey"></el-col>
+                    </el-row>
+                    <el-tree :data="tableData" node-key="id" default-expand-all :expand-on-click-node="false" :draggable="docNodeDragEnable" @node-drop="docNodeDrop">
+                        <template #default="{ data }">
+                            <el-row style="width: 100%">
+                                <el-col :span="10">
+                                    <span v-if="docNodeDragEnable"><i class="el-icon-rank" style="padding-left: 4px; padding-right: 4px"></i></span>
+                                    <span @click="previewDoc(data)">{{ data.title }}</span>
+                                    <!-- <el-button @click="previewDoc(data)" type="text" size="medium">{{ data.title }}</el-button> -->
+                                </el-col>
+                                <el-col :span="2">{{ data.ownerUser.realName }}</el-col>
+                                <el-col :span="2">
+                                    <el-popover effect="light" trigger="hover" placement="top">
+                                        <template #default>
+                                            <p>{{ data.updateTime }}</p>
+                                        </template>
+                                        <template #reference>
+                                            <div class="name-wrapper">
+                                                {{ data.relativeUpdateTime }}
+                                            </div>
+                                        </template>
+                                    </el-popover>
+                                </el-col>
+                                <el-col :span="2">
+                                    <div class="name-wrapper">
+                                        <div v-if="data.isCurrentUserLock">
+                                            <el-tag v-if="data.lockUser" size="medium">我</el-tag>
                                         </div>
-                                    </template>
-                                </el-popover>
-                            </el-col>
-                            <el-col :span="2">
-                                <div class="name-wrapper">
-                                    <div v-if="data.isCurrentUserLock">
-                                        <el-tag v-if="data.lockUser" size="medium">我</el-tag>
-                                    </div>
-                                    <div v-else>
-                                        <div v-if="data.lockUserId != ''">
-                                            <el-tag v-if="data.lockUser" size="medium" type="warning">{{ data.lockUser.realName }}</el-tag>
-                                            <el-tag v-else size="medium" type="danger">未知</el-tag>
+                                        <div v-else>
+                                            <div v-if="data.lockUserId != ''">
+                                                <el-tag v-if="data.lockUser" size="medium" type="warning">{{ data.lockUser.realName }}</el-tag>
+                                                <el-tag v-else size="medium" type="danger">未知</el-tag>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </el-col>
-                            <el-col :span="4">
-                                <el-button @click="setOrder(data, 0)" type="text" size="small">顶</el-button>
-                                <el-button @click="setOrder(data, 1)" type="text" size="small">上</el-button>
-                                <el-button @click="setOrder(data, 2)" type="text" size="small">下</el-button>
-                                <el-button @click="setOrder(data, 3)" type="text" size="small">底</el-button>
-                            </el-col>
-                            <el-col :span="4">
-                                <el-button @click="createChildDoc(data.id)" type="text" size="small">创建子文档</el-button>
-                                <el-button @click="docEdit(data)" type="text" size="small">编辑</el-button>
-                                <el-button @click="docUnlock(data)" type="text" size="small">解锁</el-button>
+                                </el-col>
+                                <el-col :span="4">
+                                    <el-button @click="setOrder(data, 0)" type="text" size="small">顶</el-button>
+                                    <el-button @click="setOrder(data, 1)" type="text" size="small">上</el-button>
+                                    <el-button @click="setOrder(data, 2)" type="text" size="small">下</el-button>
+                                    <el-button @click="setOrder(data, 3)" type="text" size="small">底</el-button>
+                                </el-col>
+                                <el-col :span="4">
+                                    <el-button @click="createChildDoc(data.id)" type="text" size="small">创建子文档</el-button>
+                                    <el-button @click="docEdit(data)" type="text" size="small">编辑</el-button>
+                                    <el-button @click="docUnlock(data)" type="text" size="small">解锁</el-button>
 
-                                <el-popover placement="top-start" :width="200" trigger="click">
-                                    <p>删除操作不可撤回，确定删除吗？</p>
-                                    <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="docDelete(data)">确定删除</el-button>
-                                    </div>
-                                    <template #reference>
-                                        <el-button type="text" size="small">删除</el-button>
-                                    </template>
-                                </el-popover>
-                            </el-col>
-                        </el-row>
-                    </template>
-                </el-tree>
-            </el-main>
-        </el-container>
+                                    <el-popover placement="top-start" :width="200" trigger="click">
+                                        <p>删除操作不可撤回，确定删除吗？</p>
+                                        <div style="text-align: right; margin: 0">
+                                            <el-button type="danger" size="mini" @click="docDelete(data)">确定删除</el-button>
+                                        </div>
+                                        <template #reference>
+                                            <el-button type="text" size="small">删除</el-button>
+                                        </template>
+                                    </el-popover>
+                                </el-col>
+                            </el-row>
+                        </template>
+                    </el-tree>
+                </el-col>
+            </el-row>
+        </el-main>
     </el-container>
     <el-backtop></el-backtop>
 
@@ -227,7 +229,7 @@ export default {
                 myCoop: [], // 我发起的协作
                 joinCoop: [], // 我加入的协作（别人创建的）
                 myOpen: [], // 我公开的文集
-                myPrivate: [] // 私有文集
+                myPrivate: [], // 私有文集
                 // myAll: [] // 我的全部
             }
         };
