@@ -258,4 +258,4 @@ Email：[yuzhyn@163.com](mailto:yuzhyn@163.com)
 
 如果本项目对你有帮助，可以赞助请我喝饮料哦~
 
-[用爱发电，友情赞助](https://afdian.net/a/hidoc?tab=feed)
+[用爱发电，友情赞助](https://afdian.net/a/hidoc?tab=home)
