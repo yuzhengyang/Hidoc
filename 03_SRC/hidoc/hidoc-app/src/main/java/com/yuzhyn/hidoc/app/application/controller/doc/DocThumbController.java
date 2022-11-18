@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.controller;
+package com.yuzhyn.hidoc.app.application.controller.doc;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;

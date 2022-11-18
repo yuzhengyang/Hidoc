@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.controller;
+package com.yuzhyn.hidoc.app.application.controller.file;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

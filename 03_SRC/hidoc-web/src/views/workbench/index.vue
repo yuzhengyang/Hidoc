@@ -1,7 +1,7 @@
 <template>
     <el-container style="height: 100%">
         <!-- 内容区域 -->
-        <el-aside width="180px" style="height: 100%; border-right:1px solid #CCC">
+        <el-aside width="180px" style="height: 100%; border-right: 1px solid #ccc">
             <el-menu default-active="1000" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
                 <el-menu-item index="1000" @click="changeMenu(1000)">
                     <i class="el-icon-data-analysis"></i>
@@ -19,7 +19,11 @@
                     <i class="el-icon-chat-line-square"></i>
                     <template #title>互动评论</template>
                 </el-menu-item>
-                <el-menu-item index="3000" @click="changeMenu(3000)">
+                <el-menu-item index="2030" @click="changeMenu(2030)">
+                    <i class="el-icon-office-building"></i>
+                    <template #title>团队信息</template>
+                </el-menu-item>
+                <el-menu-item index="3000" v-if="user.roles.includes('sa')" @click="changeMenu(3000)">
                     <i class="el-icon-picture-outline"></i>
                     <template #title>素材库</template>
                 </el-menu-item>
@@ -27,19 +31,19 @@
                     <i class="el-icon-files"></i>
                     <template #title>我的文件</template>
                 </el-menu-item>
-                <el-menu-item index="7000" @click="changeMenu(7000)">
+                <el-menu-item index="7000" v-if="user.roles.includes('sa')" @click="changeMenu(7000)">
                     <i class="el-icon-notebook-2"></i>
                     <template #title>代码注释</template>
                 </el-menu-item>
-                <el-menu-item index="8000" @click="changeMenu(8000)">
+                <el-menu-item index="8000" v-if="user.roles.includes('sa')" @click="changeMenu(8000)">
                     <i class="el-icon-box"></i>
                     <template #title>数据收集器</template>
                 </el-menu-item>
-                <el-menu-item index="8010" @click="changeMenu(8010)">
+                <el-menu-item index="8010" v-if="user.roles.includes('sa')" @click="changeMenu(8010)">
                     <i class="el-icon-odometer"></i>
                     <template #title>剂量控制器</template>
                 </el-menu-item>
-                <el-menu-item index="8020" @click="changeMenu(8020)">
+                <el-menu-item index="8020" v-if="user.roles.includes('sa')" @click="changeMenu(8020)">
                     <i class="el-icon-news"></i>
                     <template #title>服务管理</template>
                 </el-menu-item>
@@ -58,6 +62,7 @@
             <doc-tab-page v-if="this.currentMenuIndex == 2000"></doc-tab-page>
             <recycle-bin v-if="this.currentMenuIndex == 2010"></recycle-bin>
             <doc-comment v-if="this.currentMenuIndex == 2020"></doc-comment>
+            <team-manager v-if="this.currentMenuIndex == 2030"></team-manager>
             <material-library v-if="this.currentMenuIndex == 3000"></material-library>
             <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
             <java-doc v-if="this.currentMenuIndex == 7000"></java-doc>
@@ -86,6 +91,7 @@ import RecycleBin from './components/RecycleBin';
 import JavaDoc from './components/JavaDoc';
 import DoseController from './components/DoseController';
 import ServerManager from './components/ServerManager';
+import TeamManager from './components/TeamManager';
 // import { Delete } from '@element-plus/icons';
 
 export default {
@@ -109,19 +115,21 @@ export default {
             memberUser: [],
             otherUser: [],
             allUser: [],
-            memberId: []
+            memberId: [],
+            user: { roles: [] }
         };
     },
     mounted() {
-        //  debugger;
+        // debugger;
         // let token = this.$store.state.user.token;
         // console.log('token-1-1-1: ' + token);
         // let name = this.$store.state.user.name;
         // console.log('name: ' + name);
         // this.loadCollected();
+        this.user.roles = this.$store.state.user.roles;
         document.title = 'Hidoc-工作台';
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc, ServerManager, DoseController, DocComment },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc, ServerManager, DoseController, DocComment, TeamManager },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);

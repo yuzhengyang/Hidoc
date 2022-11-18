@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.controller;
+package com.yuzhyn.hidoc.app.application.controller.doc;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

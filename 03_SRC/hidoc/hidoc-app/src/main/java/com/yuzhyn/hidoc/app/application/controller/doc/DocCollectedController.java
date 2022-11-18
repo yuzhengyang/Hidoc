@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.controller;
+package com.yuzhyn.hidoc.app.application.controller.doc;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;

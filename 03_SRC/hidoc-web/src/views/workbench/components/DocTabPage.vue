@@ -20,7 +20,7 @@
                 </el-button-group>
             </el-row>
         </el-header>
-        <el-container style="height: 100%">
+        <el-container style="height: 90%">
             <el-aside width="250px" style="height: 100%">
                 <el-menu default-active="2" @open="handleOpen" @close="handleClose" :unique-opened="true">
                     <el-sub-menu index="1">
