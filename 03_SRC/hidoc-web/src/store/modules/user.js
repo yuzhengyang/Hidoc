@@ -1,5 +1,5 @@
 import { register, login, logout, getInfo } from '@/api/user';
-import { getToken, setToken, removeToken, getRealName, setRealName, removeRealName } from '@/utils/auth';
+import { getToken, setToken, removeToken, getRealName, setRealName, removeRealName, getVipLevel, setVipLevel, removeVipLevel, getRoles, setRoles, removeRoles } from '@/utils/auth';
 import router from '@/router';
 
 const state = {
@@ -8,8 +8,9 @@ const state = {
     name: getRealName(),
     avatar: '',
     introduction: '',
-    roles: [],
-    id: ''
+    roles: getRoles(),
+    id: '',
+    vipLevel: 0
 };
 
 const mutations = {
@@ -30,6 +31,9 @@ const mutations = {
     },
     SET_ID: (state, id) => {
         state.id = id;
+    },
+    SET_VIP_LEVEL: (state, vipLevel) => {
+        state.vipLevel = vipLevel;
     }
 };
 
@@ -57,8 +61,11 @@ const actions = {
                     // const { data } = response;
                     commit('SET_TOKEN', response.token);
                     commit('SET_NAME', response.meta.sysUser.realName);
+                    commit('SET_ROLES', response.meta.sysUser.roles);
                     commit('SET_ID', response.meta.sysUser.id);
+                    commit('SET_VIP_LEVEL', response.meta.sysUser.vipLevel);
                     setToken(response.token);
+                    setRoles(response.meta.sysUser.roles);
                     setRealName(response.meta.sysUser.realName);
                     resolve();
                 })
@@ -108,7 +115,9 @@ const actions = {
                 .then(() => {
                     commit('SET_TOKEN', '');
                     commit('SET_ROLES', []);
+                    commit('SET_VIP_LEVEL', 0);
                     removeToken();
+                    removeRoles();
                     removeRealName();
                     // resetRouter();
 
@@ -137,7 +146,7 @@ const actions = {
     // dynamically modify permissions
     async changeRoles({ commit, dispatch }, role) {
         const token = role + '-token';
-
+        debugger;
         commit('SET_TOKEN', token);
         setToken(token);
 

@@ -1,14 +1,16 @@
 package com.yuzhyn.hidoc.app.application.entity.sys;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.yuzhyn.hidoc.app.system.ibatis.handler.JsonbTypeHandler;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-@TableName("sys_user")
+@TableName(value = "sys_user", autoResultMap = true)
 public class SysUser {
 
     @TableId("id")
@@ -34,4 +36,7 @@ public class SysUser {
     private LocalDateTime onlineTime;
 
     private Integer vipLevel;
+
+    @TableField(typeHandler = JsonbTypeHandler.class)
+    private JSONArray roles;
 }

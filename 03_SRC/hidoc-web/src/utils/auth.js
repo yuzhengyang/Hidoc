@@ -2,6 +2,8 @@ import Cookies from 'js-cookie';
 
 const TokenKey = 'Admin-Token';
 const RealNameKey = 'User-RealName';
+const VipLevel = 'User-VipLevel';
+const Roles = 'User-Roles';
 
 export function getToken() {
     return Cookies.get(TokenKey);
@@ -27,4 +29,30 @@ export function setRealName(name) {
 
 export function removeRealName() {
     return Cookies.remove(RealNameKey);
+}
+
+export function getVipLevel() {
+    return Cookies.get(VipLevel);
+}
+
+export function setVipLevel(level) {
+    console.log('level: ' + level);
+    return Cookies.set(VipLevel, level);
+}
+
+export function removeVipLevel() {
+    return Cookies.remove(VipLevel);
+}
+
+export function getRoles() {
+    return Cookies.get(Roles);
+}
+
+export function setRoles(roles) {
+    console.log('roles: ' + roles);
+    return Cookies.set(Roles, roles);
+}
+
+export function removeRoles() {
+    return Cookies.remove(Roles);
 }
