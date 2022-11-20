@@ -63,6 +63,11 @@
                         <el-col :span="16">qweqweqweqwe</el-col>
                     </el-row>
                 </el-tab-pane>
+                <el-tab-pane label="所有团队">
+                    <el-row style="padding: 50px">
+                        <el-col :span="16">qweqweqweqwe</el-col>
+                    </el-row>
+                </el-tab-pane>
             </el-tabs>
         </el-main>
     </el-container>

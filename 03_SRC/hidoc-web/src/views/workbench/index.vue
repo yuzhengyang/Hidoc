@@ -158,6 +158,9 @@ export default {
                 case 2020:
                     document.title = 'Hidoc-互动评论';
                     break;
+                case 2030:
+                    document.title = 'Hidoc-团队信息';
+                    break;
                 case 3000:
                     document.title = 'Hidoc-素材库';
                     break;
