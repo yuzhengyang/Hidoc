@@ -25,7 +25,7 @@
                 </el-menu-item>
                 <el-menu-item index="3000" v-if="user.roles.includes('sa')" @click="changeMenu(3000)">
                     <i class="el-icon-picture-outline"></i>
-                    <template #title>素材库</template>
+                    <template #title>素材库 *</template>
                 </el-menu-item>
                 <el-menu-item index="3010" @click="changeMenu(3010)">
                     <i class="el-icon-files"></i>
@@ -33,28 +33,32 @@
                 </el-menu-item>
                 <el-menu-item index="7000" v-if="user.roles.includes('sa')" @click="changeMenu(7000)">
                     <i class="el-icon-notebook-2"></i>
-                    <template #title>代码注释</template>
+                    <template #title>代码注释 *</template>
                 </el-menu-item>
                 <el-menu-item index="8000" v-if="user.roles.includes('sa')" @click="changeMenu(8000)">
                     <i class="el-icon-box"></i>
-                    <template #title>数据收集器</template>
+                    <template #title>数据收集器 *</template>
                 </el-menu-item>
                 <el-menu-item index="8010" v-if="user.roles.includes('sa')" @click="changeMenu(8010)">
                     <i class="el-icon-odometer"></i>
-                    <template #title>剂量控制器</template>
+                    <template #title>剂量控制器 *</template>
                 </el-menu-item>
                 <el-menu-item index="8020" v-if="user.roles.includes('sa')" @click="changeMenu(8020)">
                     <i class="el-icon-news"></i>
-                    <template #title>服务管理</template>
+                    <template #title>服务管理 *</template>
                 </el-menu-item>
                 <el-menu-item index="9000" @click="changeMenu(9000)">
                     <i class="el-icon-user"></i>
                     <template #title>个人信息</template>
                 </el-menu-item>
-                <!-- <el-menu-item index="9999" @click="changeMenu(9999)">
-                            <i class="el-icon-pear"></i>
-                            <template #title>实验室</template>
-                        </el-menu-item> -->
+                <el-menu-item index="9900" v-if="user.roles.includes('sa')" @click="changeMenu(9900)">
+                    <i class="el-icon-lock"></i>
+                    <template #title>权限管理 *</template>
+                </el-menu-item>
+                <el-menu-item index="9999" v-if="user.roles.includes('sa')" @click="changeMenu(9999)">
+                    <i class="el-icon-pear"></i>
+                    <template #title>实验室 *</template>
+                </el-menu-item>
             </el-menu>
         </el-aside>
         <el-main style="height: 100%">
@@ -70,6 +74,7 @@
             <dose-controller v-if="this.currentMenuIndex == 8010"></dose-controller>
             <server-manager v-if="this.currentMenuIndex == 8020"></server-manager>
             <user-info v-if="this.currentMenuIndex == 9000"></user-info>
+            <user-roles v-if="this.currentMenuIndex == 9900"></user-roles>
             <laboratory v-if="this.currentMenuIndex == 9999"></laboratory>
         </el-main>
     </el-container>
@@ -92,6 +97,7 @@ import JavaDoc from './components/JavaDoc';
 import DoseController from './components/DoseController';
 import ServerManager from './components/ServerManager';
 import TeamManager from './components/TeamManager';
+import UserRoles from './components/UserRoles';
 // import { Delete } from '@element-plus/icons';
 
 export default {
@@ -129,7 +135,7 @@ export default {
         this.user.roles = this.$store.state.user.roles;
         document.title = 'Hidoc-工作台';
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc, ServerManager, DoseController, DocComment, TeamManager },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc, ServerManager, DoseController, DocComment, TeamManager,UserRoles },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);

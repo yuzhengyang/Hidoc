@@ -8,8 +8,10 @@ import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocComment;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManMachine;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.entity.team.Team;
 import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
@@ -38,21 +40,26 @@ public class TeamController {
     @Autowired
     TeamMemberMapper teamMemberMapper;
 
+    @Autowired
+    SysUserLiteMapper sysUserLiteMapper;
+
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "name")) {
             String name = MapTool.getString(params, "name", "");
             String description = MapTool.getString(params, "description", "");
+            Object joinRuleObject = MapTool.get(params, "joinRule", null);
 
             if (StringTool.ok(name)) {
                 Team team = new Team();
                 team.setId(R.SnowFlake.nexts());
                 team.setName(name);
                 team.setDescription(description);
+                if (joinRuleObject != null && joinRuleObject instanceof JSONObject) team.setJoinRule((JSONObject) joinRuleObject);
                 team.setCreateTime(LocalDateTime.now());
                 team.setCreateUserId(CurrentUserManager.getUserId());
                 team.setOwnerUserId(CurrentUserManager.getUserId());
-                team.setMemberCount(0);
+                team.setMemberCount(1);
                 team.setIsDelete(false);
 
                 int flag = teamMapper.insert(team);
@@ -66,7 +73,7 @@ public class TeamController {
 
     @PostMapping("edit")
     public ResponseData edit(@RequestBody Map<String, Object> params) {
-        if (MapTool.ok(params, "id", "name" )) {
+        if (MapTool.ok(params, "id", "name")) {
             String id = MapTool.get(params, "id", "").toString();
             String name = MapTool.get(params, "name", "").toString();
             String description = MapTool.get(params, "description", "").toString();
@@ -131,8 +138,8 @@ public class TeamController {
      * @param params
      * @return
      */
-    @PostMapping("myJoinTeam")
-    public ResponseData myJoinTeam(@RequestBody Map<String, Object> params) {
+    @PostMapping("getJoinTeams")
+    public ResponseData getJoinTeams(@RequestBody Map<String, Object> params) {
         ResponseData responseData = ResponseData.ok();
         List<TeamMember> teamMembers = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
         if (ListTool.ok(teamMembers)) {
@@ -140,6 +147,10 @@ public class TeamController {
             List<Team> teams = teamMapper.selectList(new LambdaQueryWrapper<Team>().in(Team::getId, ids));
 
             if (ListTool.ok(teams)) {
+                for (Team item : teams) {
+                    SysUserLite ownerUser = sysUserLiteMapper.selectById(item.getOwnerUserId());
+                    if (ownerUser != null) item.setOwnerUser(ownerUser);
+                }
                 responseData.putData(teams);
             }
         }
@@ -147,18 +158,44 @@ public class TeamController {
     }
 
     /**
-     * 属于我的团队
+     * 属于我的团队（我管理的团队）
      *
      * @param params
      * @return
      */
-    @PostMapping("myOwnerTeam")
-    public ResponseData myOwnerTeam(@RequestBody Map<String, Object> params) {
+    @PostMapping("getOwnerTeams")
+    public ResponseData getOwnerTeams(@RequestBody Map<String, Object> params) {
         ResponseData responseData = ResponseData.ok();
         List<Team> teams = teamMapper.selectList(new LambdaQueryWrapper<Team>().eq(Team::getOwnerUserId, CurrentUserManager.getUserId()));
         if (ListTool.ok(teams)) {
+            for (Team item : teams) {
+                SysUserLite ownerUser = sysUserLiteMapper.selectById(item.getOwnerUserId());
+                if (ownerUser != null) item.setOwnerUser(ownerUser);
+            }
             responseData.putData(teams);
         }
         return responseData;
     }
+
+    /**
+     * 其他团队
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("getOtherTeams")
+    public ResponseData getOtherTeams(@RequestBody Map<String, Object> params) {
+        ResponseData responseData = ResponseData.ok();
+        List<Team> teams = teamMapper.selectOthers(CurrentUserManager.getUserId());
+        if (ListTool.ok(teams)) {
+            for (Team item : teams) {
+                SysUserLite ownerUser = sysUserLiteMapper.selectById(item.getOwnerUserId());
+                if (ownerUser != null) item.setOwnerUser(ownerUser);
+            }
+            responseData.putData(teams);
+        }
+        return responseData;
+    }
+
+
 }

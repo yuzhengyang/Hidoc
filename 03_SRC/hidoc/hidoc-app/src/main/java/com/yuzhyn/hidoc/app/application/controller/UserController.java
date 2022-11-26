@@ -1,6 +1,8 @@
 package com.yuzhyn.hidoc.app.application.controller;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
@@ -77,6 +79,12 @@ public class UserController {
     @Autowired
     AuthCodeService authCodeService;
 
+    /**
+     * 用户注册
+     *
+     * @param params
+     * @return
+     */
     @PostMapping("register")
     public ResponseData register(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "username", "email", "password", "realname", "authCode", "uid")) {
@@ -149,6 +157,12 @@ public class UserController {
         return ResponseData.error("注册失败，请完善信息");
     }
 
+    /**
+     * 重置密码
+     *
+     * @param params
+     * @return
+     */
     @PostMapping("resetPassword")
     public ResponseData resetPassword(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "email", "authCode", "uid", "password", "passwordConfirm")) {
@@ -184,6 +198,12 @@ public class UserController {
         return ResponseData.error("重置失败，请输入完整内容");
     }
 
+    /**
+     * 用户登录
+     *
+     * @param params
+     * @return
+     */
     @PostMapping("login")
     public ResponseData login(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "username", "password")) {
@@ -229,7 +249,12 @@ public class UserController {
         return ResponseData.error("登录失败，账号或密码不正确");
     }
 
-
+    /**
+     * 修改密码
+     *
+     * @param params
+     * @return
+     */
     @PostMapping("changePassword")
     public ResponseData changePassword(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "password", "password2")) {
@@ -250,6 +275,11 @@ public class UserController {
         return ResponseData.error("修改失败，请完善信息");
     }
 
+    /**
+     * 当前登录用户信息
+     *
+     * @return
+     */
     @PostMapping("currentUserInfo")
     public ResponseData currentUserInfo() {
         SysUserLite user = sysUserLiteMapper.selectById(CurrentUserManager.getUser().getId());
@@ -262,6 +292,11 @@ public class UserController {
         return responseData;
     }
 
+    /**
+     * 当前登录用户看板数据
+     *
+     * @return
+     */
     @PostMapping("currentUserBoard")
     public ResponseData currentUserBoard() {
         // 文集数量 文档数量 文件数量 阅读数量 我阅读数量
@@ -327,12 +362,23 @@ public class UserController {
         return responseData;
     }
 
+    /**
+     * ！未使用！更新当前用户信息
+     *
+     * @return
+     */
     @PostMapping("updateCurrentUserInfo")
     public ResponseData updateCurrentUserInfo() {
         ResponseData responseData = ResponseData.ok();
         return responseData;
     }
 
+    /**
+     * 退出登录
+     *
+     * @param params
+     * @return
+     */
     @PostMapping("logout")
     public ResponseData logout(@RequestBody Map<String, Object> params) {
 
@@ -357,13 +403,12 @@ public class UserController {
         return ResponseData.ok();
     }
 
-    @GetMapping("userList")
-    public ResponseData userList() {
-        List<SysUser> list = sysUserMapper.selectList(null);
-        list = new ArrayList<>();
-        return ResponseData.okData(list);
-    }
 
+    /**
+     * 当前用户的多端登录状态信息
+     *
+     * @return
+     */
     @PostMapping("getLoginUserInfo")
     public ResponseData getLoginUserInfo() {
 
@@ -376,6 +421,56 @@ public class UserController {
             }
         }
         return ResponseData.okData(userInfoList);
+    }
+
+
+    /**
+     * 获取用户列表
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("getUsers")
+    public ResponseData getUsers(@RequestBody Map<String, Object> params) {
+        List<SysUserLite> list = sysUserLiteMapper.selectList(new LambdaQueryWrapper<SysUserLite>()
+                .orderByAsc(SysUserLite::getIsFrozen).orderByAsc(SysUserLite::getRealName));
+        if (ListTool.ok(list)) {
+            for (SysUserLite liteItem : list) {
+                for (Iterator<Cache.Entry<String, UserInfo>> i = R.Caches.UserInfo.iterator(); i.hasNext(); ) {
+                    Cache.Entry<String, UserInfo> cacheItem = i.next();
+                    if (liteItem.getId().equals(cacheItem.getValue().getUser().getId())) {
+                        liteItem.setIsOnline(true);
+                        break;
+                    }
+                }
+            }
+        }
+        return ResponseData.okData(list);
+    }
+
+    @PostMapping("setAdmin")
+    public ResponseData setAdmin(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "userId", "op")) {
+            // 验证登录用户的身份，必须为超级管理员（sa）
+            if (!CurrentUserManager.getUser().getRoles().contains("sa")) return ResponseData.error("您没有权限进行该项操作");
+
+            String userId = MapTool.get(params, "userId", "").toString();
+            boolean op = MapTool.getBoolean(params, "op", "");
+
+            SysUser user = sysUserMapper.selectById(userId);
+            if (user.getRoles() == null) user.setRoles(new JSONArray());
+            if (op) {
+                if (!user.getRoles().contains("admin")) user.getRoles().add("admin");
+            } else {
+                user.getRoles().remove("admin");
+            }
+
+            int flag = sysUserMapper.updateById(user);
+            if (flag > 0) {
+                return ResponseData.ok("操作成功");
+            }
+        }
+        return ResponseData.error("操作失败，请完善信息");
     }
 
 //    @PostMapping("createAnalysisIndex")
