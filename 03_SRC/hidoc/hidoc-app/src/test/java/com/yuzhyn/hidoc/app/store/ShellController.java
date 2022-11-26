@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.unuse;
+package com.yuzhyn.hidoc.app.store;
 
 import com.yuzhyn.azylee.core.systems.bases.SystemTypeTool;
 import com.yuzhyn.hidoc.app.application.model.sys.StreamGobbler;

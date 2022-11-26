@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.javadoctemp;
+package com.yuzhyn.hidoc.app.javadoc.javadoctemp;
 
 import java.io.IOException;
 import java.util.ArrayList;

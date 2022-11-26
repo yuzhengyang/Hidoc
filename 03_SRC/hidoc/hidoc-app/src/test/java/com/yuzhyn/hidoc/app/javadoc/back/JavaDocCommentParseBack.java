@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.back;
+package com.yuzhyn.hidoc.app.javadoc.back;
 
 import com.yuzhyn.azylee.core.datas.strings.StringConst;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;

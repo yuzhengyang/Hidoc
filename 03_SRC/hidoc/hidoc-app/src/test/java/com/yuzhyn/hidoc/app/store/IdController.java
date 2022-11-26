@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.unuse;
+package com.yuzhyn.hidoc.app.store;
 
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.service.IdService;
