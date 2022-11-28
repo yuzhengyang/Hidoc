@@ -11,6 +11,7 @@ import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManMachine;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.entity.team.Team;
 import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamMemberLog;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
@@ -59,7 +60,7 @@ public class TeamController {
                 team.setCreateTime(LocalDateTime.now());
                 team.setCreateUserId(CurrentUserManager.getUserId());
                 team.setOwnerUserId(CurrentUserManager.getUserId());
-                team.setMemberCount(1);
+                team.setMemberCount(0);
                 team.setIsDelete(false);
 
                 int flag = teamMapper.insert(team);
@@ -77,6 +78,7 @@ public class TeamController {
             String id = MapTool.get(params, "id", "").toString();
             String name = MapTool.get(params, "name", "").toString();
             String description = MapTool.get(params, "description", "").toString();
+            Object joinRuleObject = MapTool.get(params, "joinRule", null);
 
             if (StringTool.ok(id, name)) {
                 Team team = teamMapper.selectById(id);
@@ -87,6 +89,7 @@ public class TeamController {
                     }
                     team.setName(name);
                     team.setDescription(description);
+                    if (joinRuleObject != null && joinRuleObject instanceof JSONObject) team.setJoinRule((JSONObject) joinRuleObject);
                     team.setUpdateTime(LocalDateTime.now());
                     team.setUpdateUserId(CurrentUserManager.getUser().getId());
 
@@ -132,29 +135,15 @@ public class TeamController {
         return ResponseData.error("删除失败，请重新选择");
     }
 
-    /**
-     * 我加入的团队
-     *
-     * @param params
-     * @return
-     */
-    @PostMapping("getJoinTeams")
-    public ResponseData getJoinTeams(@RequestBody Map<String, Object> params) {
-        ResponseData responseData = ResponseData.ok();
-        List<TeamMember> teamMembers = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
-        if (ListTool.ok(teamMembers)) {
-            List<String> ids = teamMembers.stream().map(TeamMember::getTeamId).distinct().collect(toList());
-            List<Team> teams = teamMapper.selectList(new LambdaQueryWrapper<Team>().in(Team::getId, ids));
 
-            if (ListTool.ok(teams)) {
-                for (Team item : teams) {
-                    SysUserLite ownerUser = sysUserLiteMapper.selectById(item.getOwnerUserId());
-                    if (ownerUser != null) item.setOwnerUser(ownerUser);
-                }
-                responseData.putData(teams);
-            }
+    @PostMapping("get")
+    public ResponseData get(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "id")) {
+            String id = MapTool.get(params, "id", "").toString();
+            Team team = teamMapper.selectById(id);
+            return ResponseData.okData("team", team);
         }
-        return responseData;
+        return ResponseData.error("未查询到数据");
     }
 
     /**
@@ -166,7 +155,7 @@ public class TeamController {
     @PostMapping("getOwnerTeams")
     public ResponseData getOwnerTeams(@RequestBody Map<String, Object> params) {
         ResponseData responseData = ResponseData.ok();
-        List<Team> teams = teamMapper.selectList(new LambdaQueryWrapper<Team>().eq(Team::getOwnerUserId, CurrentUserManager.getUserId()));
+        List<Team> teams = teamMapper.selectList(new LambdaQueryWrapper<Team>().eq(Team::getOwnerUserId, CurrentUserManager.getUserId()).orderByAsc(Team::getName));
         if (ListTool.ok(teams)) {
             for (Team item : teams) {
                 SysUserLite ownerUser = sysUserLiteMapper.selectById(item.getOwnerUserId());
@@ -183,19 +172,34 @@ public class TeamController {
      * @param params
      * @return
      */
-    @PostMapping("getOtherTeams")
-    public ResponseData getOtherTeams(@RequestBody Map<String, Object> params) {
+    @PostMapping("getAllTeams")
+    public ResponseData getAllTeams(@RequestBody Map<String, Object> params) {
         ResponseData responseData = ResponseData.ok();
-        List<Team> teams = teamMapper.selectOthers(CurrentUserManager.getUserId());
-        if (ListTool.ok(teams)) {
-            for (Team item : teams) {
-                SysUserLite ownerUser = sysUserLiteMapper.selectById(item.getOwnerUserId());
-                if (ownerUser != null) item.setOwnerUser(ownerUser);
+        List<Team> teamList = teamMapper.selectList(new LambdaQueryWrapper<Team>().orderByAsc(Team::getName));
+        if (ListTool.ok(teamList)) {
+            List<TeamMember> memberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
+
+            for (Team teamItem : teamList) {
+
+                // 补充是否加入状态
+                teamItem.setMyJoinStatus("n");
+                if (ListTool.ok(memberList)) {
+                    for (TeamMember memberItem : memberList) {
+                        if (teamItem.getId().equals(memberItem.getTeamId())) {
+                            teamItem.setMyJoinStatus("y");
+                            break;
+                        }
+                    }
+                }
+
+                // 补充所属用户信息
+                SysUserLite ownerUser = sysUserLiteMapper.selectById(teamItem.getOwnerUserId());
+                if (ownerUser != null) teamItem.setOwnerUser(ownerUser);
             }
-            responseData.putData(teams);
+
+            responseData.putData(teamList);
         }
+
         return responseData;
     }
-
-
 }

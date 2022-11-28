@@ -148,12 +148,16 @@
             </el-form-item>
             <el-form-item label="公开" :label-width="formLabelWidth">
                 <el-switch v-model="collectedForm.isOpen" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                <span v-if="collectedForm.isOpen" class="tips">在团队内可见</span>
+                <span v-else class="tips">自己及协作成员可见</span>
             </el-form-item>
             <el-form-item label="需登录查看" :label-width="formLabelWidth">
                 <el-switch v-model="collectedForm.isLoginAccess" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                <span class="tips">设置是否登录后才能获取文档内容</span>
             </el-form-item>
             <el-form-item label="作为模板" :label-width="formLabelWidth">
                 <el-switch v-model="collectedForm.isTemplet" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+                <span class="tips">为文档编写提供模板，不可被搜索</span>
             </el-form-item>
         </el-form>
         <template #footer>
@@ -165,6 +169,9 @@
     </el-dialog>
 
     <el-dialog title="协作成员" v-model="dialogMemberVisible">
+        <el-row style="margin-bottom: 20px">
+            <el-alert title="协作成员拥有编辑权限，可编辑 “文集” 或 “文档”， 同时可以邀请其他成员进入协作" type="warning" :closable="false" />
+        </el-row>
         <el-row>
             <el-col :span="24">
                 <div style="text-align: center">
@@ -597,5 +604,12 @@ export default {
     font-size: 12px;
     line-height: 50px;
     border-bottom: 1px dashed lightgrey;
+}
+
+.tips {
+    font-size: 12px;
+    color: rgb(94, 94, 94);
+    padding-left: 10px;
+    padding-right: 10px;
 }
 </style>

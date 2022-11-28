@@ -39,4 +39,10 @@ public class Team {
     @TableField(exist = false)
     private SysUserLite ownerUser;
 
+    /**
+     * 我的加入状态：y-已加入，n-未加入
+     */
+    @TableField(exist = false)
+    private String myJoinStatus;
+
 }

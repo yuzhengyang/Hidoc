@@ -3,9 +3,9 @@
         <el-main>
             <el-row class="login-main">
                 <el-col :span="9">
-                    <div class="grid-content" style="text-align: right;cursor:pointer" @click="home">
+                    <div class="grid-content" style="text-align: right; cursor: pointer" @click="home">
                         <img alt="Vue logo" src="../..//assets/logo.png" />
-                        <div style="height:150px;"></div>
+                        <div style="height: 150px"></div>
                     </div>
                 </el-col>
                 <el-col :span="1"></el-col>
@@ -18,7 +18,7 @@
                             <el-input id="password" type="password" v-model="form.password" maxlength="64" autocomplete="off" placeholder="请输入您的密码"></el-input>
                         </el-form-item>
                         <el-form-item>
-                            <el-button type="primary" @click="onSubmit()">登录</el-button>
+                            <el-button type="primary" @click="onSubmit()" style="width: 200px">登录</el-button>
                         </el-form-item>
                         <el-form-item>
                             <el-button type="text" @click="back">
@@ -50,9 +50,7 @@
         <el-form :model="changePasswordForm">
             <el-form-item label="邮箱" prop="email">
                 <el-input v-model="resetPasswordForm.email" maxlength="64" placeholder="请输入您的注册邮箱"></el-input>
-                <el-button type="text" @click="getAuthCodeForResetPassword">
-                    获取验证码
-                </el-button>
+                <el-button type="text" @click="getAuthCodeForResetPassword">获取验证码</el-button>
             </el-form-item>
             <!-- <el-form-item label="账号(选填)" prop="username">
                 <el-input id="username" v-model="resetPasswordForm.username" maxlength="64" placeholder="请输入您的登录账号，忘记时可以不填"></el-input>

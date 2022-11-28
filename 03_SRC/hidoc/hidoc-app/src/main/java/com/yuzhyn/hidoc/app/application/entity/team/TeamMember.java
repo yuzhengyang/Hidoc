@@ -19,18 +19,13 @@ public class TeamMember {
     private String id;
     private String teamId;
     private String userId;
+
     @TableField(typeHandler = JsonbTypeHandler.class)
-    private JSONObject collectedPermission;
-    @TableField(typeHandler = JsonbTypeHandler.class)
-    private JSONObject docPermission;
-    @TableField(typeHandler = JsonbTypeHandler.class)
-    private JSONObject noticePermission;
+    private JSONObject permissionRule;
+
     private LocalDateTime createTime;
     private String createUserId;
     private LocalDateTime updateTime;
     private String updateUserId;
-    private LocalDateTime deleteTime;
-    private String deleteUserId;
-    private Boolean isDelete;
 
 }

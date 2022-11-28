@@ -7,25 +7,33 @@
         </el-header>
         <el-main>
             <el-tabs type="card" style="padding: 10px">
-                <el-tab-pane label="我加入的团队">
+                <el-tab-pane label="团队列表">
                     <el-row style="padding: 10px">
                         <el-col :span="24">
-                            <el-table :data="this.teams.join" style="width: 100%">
-                                <el-table-column prop="name" label="名称"></el-table-column>
-                                <el-table-column prop="description" label="描述"></el-table-column>
-                                <el-table-column prop="createTime" label="创建时间"></el-table-column>
-                                <el-table-column prop="ownerUser.realName" label="所属人"></el-table-column>
-                                <el-table-column fixed="right" label="管理" width="200">
+                            <el-table :data="this.teams.all" style="width: 100%">
+                                <el-table-column prop="name" label="名称" width="180"></el-table-column>
+                                <el-table-column prop="description" label="描述" width="240"></el-table-column>
+                                <el-table-column prop="createTime" label="创建时间" width="180"></el-table-column>
+                                <el-table-column prop="ownerUser.realName" label="所属人" width="120"></el-table-column>
+                                <el-table-column prop="memberCount" label="团队人数" width="100"></el-table-column>
+                                <el-table-column label="加入状态" width="100">
+                                    <template #default="scope_myJoinStatus">
+                                        <el-tag v-if="scope_myJoinStatus.row.myJoinStatus == 'y'" type="success" size="small">已加入</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="操作">
                                     <template #default="scopeOp">
-                                        <el-link type="success" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, false)">邀请成员</el-link>
-                                        <el-link type="danger" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, true)">退出团队</el-link>
+                                        <el-link v-if="scopeOp.row.myJoinStatus == 'n'" type="warning" style="font-size: 12px; margin-right: 10px" @click="joinTeam(scopeOp.row.id, 'autoJoinEmailSuffix', '')">自动加入</el-link>
+                                        <el-link v-if="scopeOp.row.myJoinStatus == 'n'" type="success" style="font-size: 12px; margin-right: 10px" @click="openJoinTeam(scopeOp.row.id)">密码加入</el-link>
+                                        <el-link v-if="scopeOp.row.myJoinStatus == 'y'" type="success" style="font-size: 12px; margin-right: 10px" @click="openInviteUser(scopeOp.row.id)">邀请成员</el-link>
+                                        <el-link v-if="scopeOp.row.myJoinStatus == 'y'" type="danger" style="font-size: 12px; margin-right: 10px" @click="quitTeam(scopeOp.row.id, true)">退出团队</el-link>
                                     </template>
                                 </el-table-column>
                             </el-table>
                         </el-col>
                     </el-row>
                 </el-tab-pane>
-                <el-tab-pane label="我管理的团队" v-if="user.roles.includes('sa')">
+                <el-tab-pane label="我管理的团队" v-if="user.roles.includes('admin')">
                     <el-row>
                         <el-button-group>
                             <el-button round type="success" size="small" @click="openCreateTeam">创建团队</el-button>
@@ -41,28 +49,10 @@
                                 <el-table-column prop="memberCount" label="团队人数" width="180"></el-table-column>
                                 <el-table-column fixed="right" label="管理">
                                     <template #default="scopeOp">
-                                        <el-link type="warning" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, true)">编辑信息</el-link>
-                                        <el-link type="success" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, false)">管理成员</el-link>
-                                        <el-link  style="font-size: 12px; margin-right: 10px" @click="previewDoc(scopeOp.row)">团队转让</el-link>
-                                        <el-link type="danger" style="font-size: 12px; margin-right: 10px" @click="previewDoc(scopeOp.row)">删除团队</el-link>
-                                    </template>
-                                </el-table-column>
-                            </el-table>
-                        </el-col>
-                    </el-row>
-                </el-tab-pane>
-                <el-tab-pane label="其他团队">
-                    <el-row style="padding: 10px">
-                        <el-col :span="24">
-                            <el-table :data="this.teams.other" style="width: 100%">
-                                <el-table-column prop="name" label="名称"></el-table-column>
-                                <el-table-column prop="description" label="描述"></el-table-column>
-                                <el-table-column prop="createTime" label="创建时间"></el-table-column>
-                                <el-table-column prop="ownerUser.realName" label="所属人"></el-table-column>
-                                <el-table-column fixed="right" label="管理" width="200">
-                                    <template #default="scopeOp">
-                                        <el-link type="warning" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, true)">自动加入</el-link>
-                                        <el-link type="success" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, false)">密码加入</el-link>
+                                        <el-link type="warning" style="font-size: 12px; margin-right: 10px" @click="openEditTeam(scopeOp.row.id, true)">编辑信息</el-link>
+                                        <!-- <el-link type="success" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, false)">xx管理成员</el-link>
+                                        <el-link style="font-size: 12px; margin-right: 10px" @click="previewDoc(scopeOp.row)">xx团队转让</el-link>
+                                        <el-link type="danger" style="font-size: 12px; margin-right: 10px" @click="previewDoc(scopeOp.row)">xx删除团队</el-link> -->
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -73,26 +63,58 @@
         </el-main>
     </el-container>
 
-    <!-- Form -->
+    <!-- Form 创建团队 -->
     <el-dialog :title="this.teamForm.mode == 'create' ? '创建团队' : '编辑团队'" v-model="this.teamForm.dialog">
         <el-form :model="this.teamForm.prop">
-            <el-form-item label="名称" label-width="100px">
-                <el-input v-model="this.teamForm.prop.name" autocomplete="off"></el-input>
+            <el-form-item label="名称" label-width="150px">
+                <el-input v-model="this.teamForm.prop.name" autocomplete="off" maxlength="20"></el-input>
             </el-form-item>
-            <el-form-item label="描述" label-width="100px">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="this.teamForm.prop.description"></el-input>
+            <el-form-item label="描述" label-width="150px">
+                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="this.teamForm.prop.description" maxlength="200"></el-input>
             </el-form-item>
-            <el-form-item label="自动加入邮箱后缀" label-width="100px">
-                <el-input v-model="this.teamForm.prop.joinRule.autoJoinEmailSuffix" autocomplete="off"></el-input>
+            <el-form-item label="加入邮箱后缀" label-width="150px">
+                <el-input v-model="this.teamForm.prop.joinRule.autoJoinEmailSuffix" placeholder="example.com" autocomplete="off" maxlength="40">
+                    <template #prepend>@</template>
+                </el-input>
             </el-form-item>
-            <el-form-item label="自助加入密码" label-width="100px">
-                <el-input v-model="this.teamForm.prop.joinRule.userJoinPassword" autocomplete="off"></el-input>
+            <el-form-item label="加入密码" label-width="150px">
+                <el-input v-model="this.teamForm.prop.joinRule.userJoinPassword" placeholder="请输入密码" autocomplete="off" maxlength="40"></el-input>
             </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="this.teamForm.dialog = false">取 消</el-button>
                 <el-button type="primary" @click="saveTeam()">保 存</el-button>
+            </span>
+        </template>
+    </el-dialog>
+
+    <!-- Form 密码加入到团队 -->
+    <el-dialog v-model="this.joinTeamForm.dialog" title="使用密码加入团队">
+        <el-form :model="this.joinTeamForm.prop">
+            <el-form-item label="请输入密码" :label-width="formLabelWidth">
+                <el-input v-model="this.joinTeamForm.prop.joinPassword" autocomplete="off" />
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="this.joinTeamForm.dialog = false">取 消</el-button>
+                <el-button type="primary" @click="joinTeam(this.joinTeamForm.prop.teamId, 'userJoinPassword', '')">加 入</el-button>
+            </span>
+        </template>
+    </el-dialog>
+
+    <!-- Form 邀请到团队 -->
+    <el-dialog v-model="this.inviteUserForm.dialog" title="邀请成员加入团队">
+        <el-form :model="this.inviteUserForm.prop">
+            <el-form-item label="成员邮箱" :label-width="formLabelWidth">
+                <el-input v-model="this.inviteUserForm.prop.email" autocomplete="off" />
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="this.inviteUserForm.dialog = false">取 消</el-button>
+                <el-button type="primary" @click="inviteUser()">加 入</el-button>
             </span>
         </template>
     </el-dialog>
@@ -106,26 +128,34 @@ export default {
         return {
             user: { roles: [] },
             teams: {
-                join: [],
-                owner: [],
-                other: []
+                all: [],
+                owner: []
             },
             teamForm: {
                 mode: 'create',
                 dialog: false,
                 prop: {
+                    id: '',
                     name: '',
                     description: '',
                     joinRule: { autoJoinEmailSuffix: '', userJoinPassword: '' }
                 }
+            },
+            joinTeamForm: {
+                dialog: false,
+                prop: { joinPassword: '' }
+            },
+            inviteUserForm: {
+                dialog: false,
+                prop: { email: '' }
             },
             currentMachineList: []
         };
     },
     mounted() {
         this.user.roles = this.$store.state.user.roles;
+        this.showAllTeams();
         this.showOwnerTeams();
-        this.showOtherTeams();
     },
     components: {},
     methods: {
@@ -137,6 +167,22 @@ export default {
             this.teamForm.prop.joinRule.userJoinPassword = '';
             this.teamForm.mode = 'create';
             this.teamForm.dialog = true;
+        },
+        openEditTeam(teamId) {
+            return request({
+                url: '/team/get',
+                method: 'post',
+                data: { token: this.$store.state.user.token, id: teamId }
+            }).then(res => {
+                if (res.code == 0 && res.meta.team) {
+                    this.teamForm.prop = res.meta.team;
+                    if (this.teamForm.prop.joinRule == undefined) this.teamForm.prop.joinRule = {};
+                    if (this.teamForm.prop.joinRule.autoJoinEmailSuffix == undefined) this.teamForm.prop.joinRule.autoJoinEmailSuffix = '';
+                    if (this.teamForm.prop.joinRule.userJoinPassword == undefined) this.teamForm.prop.joinRule.userJoinPassword = '';
+                    this.teamForm.mode = 'edit';
+                    this.teamForm.dialog = true;
+                }
+            });
         },
         saveTeam() {
             if (this.teamForm.mode == 'create') {
@@ -160,6 +206,7 @@ export default {
                     url: '/team/edit',
                     method: 'post',
                     data: {
+                        id: this.teamForm.prop.id,
                         name: this.teamForm.prop.name,
                         description: this.teamForm.prop.description,
                         joinRule: this.teamForm.prop.joinRule
@@ -171,19 +218,6 @@ export default {
                     }
                 });
             }
-        },
-        showTeamList() {},
-        showJoinTeams() {
-            return request({
-                url: '/team/getJoinTeams',
-                method: 'post',
-                data: { token: this.$store.state.user.token }
-            }).then(res => {
-                if (res.code == 0) {
-                    console.log(res);
-                    this.teams.join = res.data;
-                }
-            });
         },
         showOwnerTeams() {
             return request({
@@ -197,15 +231,77 @@ export default {
                 }
             });
         },
-        showOtherTeams() {
+        showAllTeams() {
             return request({
-                url: '/team/getOtherTeams',
+                url: '/team/getAllTeams',
                 method: 'post',
                 data: { token: this.$store.state.user.token }
             }).then(res => {
                 if (res.code == 0) {
                     console.log(res);
-                    this.teams.other = res.data;
+                    this.teams.all = res.data;
+                }
+            });
+        },
+        openJoinTeam(teamId) {
+            this.joinTeamForm.prop.teamId = teamId;
+            this.joinTeamForm.prop.joinPassword = '';
+            this.joinTeamForm.dialog = true;
+        },
+        joinTeam(teamId, type, value) {
+            switch (type) {
+                case 'userJoinPassword':
+                    return request({
+                        url: '/teamMember/create',
+                        method: 'post',
+                        data: { teamId: teamId, type: type, value: this.joinTeamForm.prop.joinPassword }
+                    }).then(res => {
+                        if (res.code == 0) {
+                            console.log(res);
+                            this.showAllTeams();
+                            this.joinTeamForm.dialog = false;
+                        }
+                    });
+                case 'autoJoinEmailSuffix':
+                    return request({
+                        url: '/teamMember/create',
+                        method: 'post',
+                        data: { teamId: teamId, type: type, value: '' }
+                    }).then(res => {
+                        if (res.code == 0) {
+                            console.log(res);
+                            this.showAllTeams();
+                        }
+                    });
+            }
+        },
+        quitTeam(teamId) {
+            return request({
+                url: '/teamMember/delete',
+                method: 'post',
+                data: { teamId: teamId }
+            }).then(res => {
+                if (res.code == 0) {
+                    console.log(res);
+                    this.showAllTeams();
+                }
+            });
+        },
+        openInviteUser(teamId) {
+            this.inviteUserForm.prop.teamId = teamId;
+            this.inviteUserForm.prop.email = '';
+            this.inviteUserForm.dialog = true;
+        },
+        inviteUser() {
+            return request({
+                url: '/teamMember/invite',
+                method: 'post',
+                data: { teamId: this.inviteUserForm.prop.teamId, email: this.inviteUserForm.prop.email }
+            }).then(res => {
+                if (res.code == 0) {
+                    console.log(res);
+                    this.showAllTeams();
+                    this.inviteUserForm.dialog = false;
                 }
             });
         }
