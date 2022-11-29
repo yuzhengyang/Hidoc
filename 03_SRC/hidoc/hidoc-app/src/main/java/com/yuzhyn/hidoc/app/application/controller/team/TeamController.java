@@ -10,9 +10,11 @@ import com.yuzhyn.hidoc.app.application.entity.doc.DocComment;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManMachine;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.entity.team.Team;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamLite;
 import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
 import com.yuzhyn.hidoc.app.application.entity.team.TeamMemberLog;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
+import com.yuzhyn.hidoc.app.application.mapper.team.TeamLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +46,9 @@ public class TeamController {
 
     @Autowired
     SysUserLiteMapper sysUserLiteMapper;
+
+    @Autowired
+    TeamLiteMapper teamLiteMapper;
 
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
@@ -144,6 +150,23 @@ public class TeamController {
             return ResponseData.okData("team", team);
         }
         return ResponseData.error("未查询到数据");
+    }
+
+    @PostMapping("getMyJoinTeams")
+    public ResponseData getMyJoinTeams(@RequestBody Map<String, Object> params) {
+        ResponseData responseData = ResponseData.ok();
+
+        List<String> teamIds = new ArrayList<>();
+        List<TeamMember> memberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
+        if (ListTool.ok(memberList)) teamIds.addAll(memberList.stream().map(TeamMember::getTeamId).distinct().collect(toList()));
+
+        if (ListTool.ok(teamIds)) {
+            List<TeamLite> teams = teamLiteMapper.selectList(new LambdaQueryWrapper<TeamLite>().in(TeamLite::getId, teamIds).orderByAsc(TeamLite::getName));
+            if (ListTool.ok(teams)) {
+                responseData.putData(teams);
+            }
+        }
+        return responseData;
     }
 
     /**

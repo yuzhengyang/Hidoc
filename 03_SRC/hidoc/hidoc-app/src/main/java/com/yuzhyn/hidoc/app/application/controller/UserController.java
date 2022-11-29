@@ -221,6 +221,9 @@ public class UserController {
 
             if (user != null) {
 
+                user.setLoginTime(LocalDateTime.now());
+                sysUserMapper.updateById(user);
+
                 // 判断账号是否冻结
                 if (user.getIsFrozen()) {
                     return ResponseData.error("账号为冻结状态，新注册账号请联系管理员启用。");

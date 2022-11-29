@@ -31,6 +31,8 @@ public class SysUserLite {
 
     private LocalDateTime onlineTime;
 
+    private LocalDateTime loginTime;
+
     @TableField(exist = false)
     private String memberDesc;
 

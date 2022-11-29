@@ -22,6 +22,7 @@ export default {
         let token = this.$store.state.user.token;
         // this.heartbeatTimer = setInterval(this.heartbeat, 120 * 1000);
         // clearInterval(this.heartbeatTimer);
+        this.heartbeat();
     },
     methods: {
         handleOpen(key, keyPath) {

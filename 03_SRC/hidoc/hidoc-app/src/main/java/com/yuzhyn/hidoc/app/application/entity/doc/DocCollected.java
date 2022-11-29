@@ -1,9 +1,12 @@
 package com.yuzhyn.hidoc.app.application.entity.doc;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamLite;
+import com.yuzhyn.hidoc.app.system.ibatis.handler.JsonbTypeHandler;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,7 +16,7 @@ import java.util.List;
  * @author inc
  */
 @Data
-@TableName("doc_collected")
+@TableName(value = "doc_collected", autoResultMap = true)
 public class DocCollected {
     @TableId("id")
     private String id;
@@ -62,4 +65,10 @@ public class DocCollected {
      */
     @TableField(exist = false)
     private LocalDateTime docLastUpdateTime;
+
+    @TableField(typeHandler = JsonbTypeHandler.class)
+    private JSONArray teamIdList;
+
+    @TableField(exist = false)
+    private List<TeamLite> teamList;
 }

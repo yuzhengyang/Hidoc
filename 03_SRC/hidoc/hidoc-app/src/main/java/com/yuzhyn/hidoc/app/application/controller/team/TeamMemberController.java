@@ -14,6 +14,7 @@ import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
+import com.yuzhyn.hidoc.app.application.service.team.TeamMemberService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,9 @@ public class TeamMemberController {
     @Autowired
     SysUserLiteMapper sysUserLiteMapper;
 
-    @Transactional
+    @Autowired
+    TeamMemberService teamMemberService;
+
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "teamId", "type", "value")) {
@@ -57,37 +60,8 @@ public class TeamMemberController {
             String email = CurrentUserManager.getUser().getEmail();
             String action = "加入团队";
 
-            Team team = teamMapper.selectById(teamId);
-            if (team == null) return ResponseData.error("团队信息不存在");
-            if (team.getJoinRule() == null) return ResponseData.error("加入规则未配置");
+            return teamMemberService.create(teamId, CurrentUserManager.getUserId(), type, value, email, action, CurrentUserManager.getUserId());
 
-            switch (type) {
-                case "userJoinPassword":
-                    String password = team.getJoinRule().getString("userJoinPassword");
-                    if (!(StringTool.ok(password, value) && password.equals(value))) return ResponseData.error("加入密码错误");
-                    action = "加入团队（通过密码）";
-                    break;
-                case "autoJoinEmailSuffix":
-                    String emailSuffix = team.getJoinRule().getString("autoJoinEmailSuffix");
-                    if (!(StringTool.ok(emailSuffix, email) && email.endsWith("@" + emailSuffix))) return ResponseData.error("不符合加入邮箱规则");
-                    action = "加入团队（通过邮箱规则）";
-                    break;
-            }
-
-            TeamMember teamMember = new TeamMember();
-            teamMember.setId(R.SnowFlake.nexts());
-            teamMember.setTeamId(teamId);
-            teamMember.setUserId(CurrentUserManager.getUserId());
-            teamMember.setCreateTime(LocalDateTime.now());
-            teamMember.setCreateUserId(CurrentUserManager.getUserId());
-            int flag = teamMemberMapper.insert(teamMember);
-            if (flag > 0) {
-                TeamMemberLog teamMemberLog = TeamMemberLog.create(R.SnowFlake.nexts(), CurrentUserManager.getUserId(), teamMember, action);
-                teamMemberLogMapper.insert(teamMemberLog);
-
-                teamMapper.updateMemberCount(teamId);
-                return ResponseData.ok();
-            }
         }
         return ResponseData.error("加入失败，请检查信息");
     }

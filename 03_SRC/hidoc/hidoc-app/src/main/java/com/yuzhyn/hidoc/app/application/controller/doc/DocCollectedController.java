@@ -9,8 +9,10 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.*;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
 import com.yuzhyn.hidoc.app.application.mapper.doc.*;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
+import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.application.service.doc.DocCollectedService;
 import com.yuzhyn.hidoc.app.application.service.doc.DocParseService;
@@ -65,6 +67,9 @@ public class DocCollectedController {
     @Autowired
     DocCollectedService docCollectedService;
 
+    @Autowired
+    TeamMemberMapper teamMemberMapper;
+
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "name", "token")) {
@@ -74,6 +79,7 @@ public class DocCollectedController {
             Boolean isLoginAccess = MapTool.getBoolean(params, "isLoginAccess", false);
             Boolean isTemplet = MapTool.getBoolean(params, "isTemplet", false);
             String token = MapTool.get(params, "token", "").toString();
+            Object teamIdListObject = MapTool.get(params, "teamIdList", null);
 
             if (StringTool.ok(name, token)) {
                 DocCollected docCollected = new DocCollected();
@@ -85,6 +91,7 @@ public class DocCollectedController {
                 docCollected.setOwnerUserId(userInfo.getUser().getId());
                 docCollected.setName(name);
                 docCollected.setDescription(description);
+                if (teamIdListObject != null && teamIdListObject instanceof JSONArray) docCollected.setTeamIdList((JSONArray) teamIdListObject);
                 docCollected.setIsOpen(isOpen);
                 docCollected.setIsLoginAccess(isLoginAccess);
                 docCollected.setIsTemplet(isTemplet);
@@ -108,6 +115,7 @@ public class DocCollectedController {
             Boolean isLoginAccess = MapTool.getBoolean(params, "isLoginAccess", false);
             Boolean isTemplet = MapTool.getBoolean(params, "isTemplet", false);
             String token = MapTool.get(params, "token", "").toString();
+            Object teamIdListObject = MapTool.get(params, "teamIdList", null);
 
             if (StringTool.ok(id, name, token)) {
                 DocCollected record = docCollectedMapper.selectById(id);
@@ -119,6 +127,7 @@ public class DocCollectedController {
 
                     record.setName(name);
                     record.setDescription(description);
+                    if (teamIdListObject != null && teamIdListObject instanceof JSONArray) record.setTeamIdList((JSONArray) teamIdListObject);
                     record.setIsOpen(isOpen);
                     record.setIsLoginAccess(isLoginAccess);
                     record.setIsTemplet(isTemplet);
@@ -254,8 +263,24 @@ public class DocCollectedController {
             }
         }
 
-        // 此处根据关键字筛选的信息来框定返回内容
-        LambdaQueryWrapper<DocCollected> docCollectedLambdaQueryWrapper = new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getIsOpen, true).eq(DocCollected::getIsDelete, false).eq(DocCollected::getIsTemplet, isTemplet);
+        // 获取当前用户的团队关系
+        List<String> teamIds = new ArrayList<>();
+        if (CurrentUserManager.isLogin()) {
+            List<TeamMember> memberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
+            if (ListTool.ok(memberList)) teamIds.addAll(memberList.stream().map(TeamMember::getTeamId).distinct().collect(toList()));
+        }
+
+        // 此处框定返回内容
+        LambdaQueryWrapper<DocCollected> docCollectedLambdaQueryWrapper = new LambdaQueryWrapper<DocCollected>()
+                .eq(DocCollected::getIsOpen, true)
+                .eq(DocCollected::getIsDelete, false)
+                .eq(DocCollected::getIsTemplet, isTemplet)
+                .and(p -> {
+                    p.or().apply("team_id_list IS NULL OR team_id_list = '[]'");
+                    for (String teamId : teamIds) {
+                        p.or().apply("jsonb_exists(team_id_list, {0})", teamId);
+                    }
+                });
         if (ListTool.ok(collectedIds)) docCollectedLambdaQueryWrapper = docCollectedLambdaQueryWrapper.in(DocCollected::getId, collectedIds);
 
         List<DocCollected> collectedList = docCollectedMapper.selectList(docCollectedLambdaQueryWrapper);

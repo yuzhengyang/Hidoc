@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS public.doc_collected (
 	is_open bool DEFAULT false,
 	is_delete bool DEFAULT false,
 	is_templet bool DEFAULT false,
+    team_id_list jsonb,
 	CONSTRAINT doc_collected_pkey PRIMARY KEY (id)
 );
 
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS public.doc_collected (
 SELECT * FROM sysdb_add_column('doc_collected', 'is_login_access', 'bool DEFAULT false');
 SELECT * FROM sysdb_add_column('doc_collected', 'password_access', 'varchar(255) NULL');
 SELECT * FROM sysdb_add_column('doc_collected', 'is_templet', 'bool DEFAULT false');
+SELECT * FROM sysdb_add_column('doc_collected', 'team_id_list', 'jsonb');
 
 
 UPDATE doc_collected SET is_open = false WHERE is_open IS NULL;

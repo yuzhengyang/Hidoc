@@ -35,6 +35,8 @@ public class SysUser {
 
     private LocalDateTime onlineTime;
 
+    private LocalDateTime loginTime;
+
     private Integer vipLevel;
 
     @TableField(typeHandler = JsonbTypeHandler.class)

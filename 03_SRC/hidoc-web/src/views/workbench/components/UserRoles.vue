@@ -15,8 +15,8 @@
                         <el-table-column prop="email" label="邮箱" width="240" />
                         <el-table-column prop="createTime" label="创建时间" width="180" />
                         <el-table-column label="最近登录" width="120">
-                            <template #default="scope_onlineTime">
-                                <span>{{ setDatetimeDiff(scope_onlineTime.row.onlineTime) }}</span>
+                            <template #default="scope_loginTime">
+                                <span>{{ setDatetimeDiff(scope_loginTime.row.loginTime) }}</span>
                             </template>
                         </el-table-column>
                         <el-table-column label="在线" width="80">

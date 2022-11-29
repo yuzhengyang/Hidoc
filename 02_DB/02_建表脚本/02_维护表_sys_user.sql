@@ -15,11 +15,13 @@ CREATE TABLE IF NOT EXISTS public.sys_user (
 	"password" varchar(255) NULL,
 	is_frozen bool NULL,
 	online_time timestamp NULL,
+	login_time timestamp NULL,
 	vip_level int4,
 	CONSTRAINT sys_user_pkey PRIMARY KEY (id)
 );
 
 SELECT * FROM sysdb_add_column('sys_user', 'online_time', 'timestamp NULL');
+SELECT * FROM sysdb_add_column('sys_user', 'login_time', 'timestamp NULL');
 SELECT * FROM sysdb_add_column('sys_user', 'vip_level', 'int4');
 SELECT * FROM sysdb_add_column('sys_user', 'roles', 'jsonb NULL');
 

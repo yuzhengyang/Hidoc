@@ -159,6 +159,12 @@
                 <el-switch v-model="collectedForm.isTemplet" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
                 <span class="tips">为文档编写提供模板，不可被搜索</span>
             </el-form-item>
+            <el-form-item label="所属团队" :label-width="formLabelWidth">
+                <el-select v-model="this.collectedForm.teamIdList" multiple placeholder="可选择已加入的团队" style="width: 300px">
+                    <el-option v-for="item in this.team.myJoin" :key="item.id" :label="item.name" :value="item.id" />
+                </el-select>
+                <span class="tips">选取后，仅对应团队可见</span>
+            </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
@@ -221,7 +227,8 @@ export default {
                 name: '',
                 description: '',
                 isOpen: false,
-                isTemplet: false
+                isTemplet: false,
+                teamIdList: []
             },
             formLabelWidth: '120px',
             memberUser: [],
@@ -236,6 +243,9 @@ export default {
                 myOpen: [], // 我公开的文集
                 myPrivate: [] // 私有文集
                 // myAll: [] // 我的全部
+            },
+            team: {
+                myJoin: []
             }
         };
     },
@@ -251,6 +261,18 @@ export default {
     },
     components: {},
     methods: {
+        loadMyJoinTeam() {
+            return request({
+                url: '/team/getMyJoinTeams',
+                method: 'post',
+                data: { token: this.$store.state.user.token }
+            }).then(res => {
+                if (res.code == 0) {
+                    // debugger;
+                    this.team.myJoin = res.data;
+                }
+            });
+        },
         loadCollected() {
             return request({
                 url: '/collected/list',
@@ -314,20 +336,24 @@ export default {
             this.dialogFormMode = 'create';
             this.collectedForm.name = '';
             this.collectedForm.description = '';
+            this.collectedForm.teamIdList = [];
             this.collectedForm.isOpen = false;
             this.collectedForm.isTemplet = false;
             this.collectedForm.isLoginAccess = false;
             this.dialogFormVisible = true;
+            this.loadMyJoinTeam();
         },
         openEditCollected() {
             console.log('编辑文集');
             this.dialogFormMode = 'edit';
             this.collectedForm.name = this.currentCollected.name;
             this.collectedForm.description = this.currentCollected.description;
+            this.collectedForm.teamIdList = this.currentCollected.teamIdList;
             this.collectedForm.isOpen = this.currentCollected.isOpen;
             this.collectedForm.isLoginAccess = this.currentCollected.isLoginAccess;
             this.collectedForm.isTemplet = this.currentCollected.isTemplet;
             this.dialogFormVisible = true;
+            this.loadMyJoinTeam();
         },
         // 打开协作成员弹框，并可编辑成员
         openMemberList() {
@@ -369,6 +395,7 @@ export default {
                     data: {
                         name: this.collectedForm.name,
                         description: this.collectedForm.description,
+                        teamIdList: this.collectedForm.teamIdList,
                         token: this.$store.state.user.token,
                         isOpen: this.collectedForm.isOpen,
                         isLoginAccess: this.collectedForm.isLoginAccess,
@@ -389,6 +416,7 @@ export default {
                         id: this.currentCollected.id,
                         name: this.collectedForm.name,
                         description: this.collectedForm.description,
+                        teamIdList: this.collectedForm.teamIdList,
                         token: this.$store.state.user.token,
                         isOpen: this.collectedForm.isOpen,
                         isLoginAccess: this.collectedForm.isLoginAccess,
@@ -398,6 +426,7 @@ export default {
                     if (res.code == 0) {
                         this.dialogFormVisible = false;
                         this.loadCollected();
+                        this.selectCollected(res.meta.docCollected);
                     }
                 });
             }
