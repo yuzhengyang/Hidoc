@@ -91,7 +91,7 @@
                 </el-header>
                 <el-main style="margin-left: 30px; margin-right: 30px">
                     <div style="height: 360px">
-                        <el-collapse accordion >
+                        <el-collapse accordion>
                             <el-collapse-item v-for="colItem in this.templetDialog.collectedList" :key="colItem" :title="colItem.name" :name="colItem.id">
                                 <div v-for="docItem in colItem.docLites" :key="docItem" style="border-bottom: 1px dashed #ccc; padding: 2px">
                                     <div class="import-item" style="cursor: pointer" @click="addTempletDoc(docItem.title, colItem.id, docItem.id)">
@@ -132,6 +132,7 @@ import request from '../../utils/request.js';
 import { config } from '@/utils/config';
 import { mdFormat } from '../../utils/mdtools';
 import { Search, Share, Guide } from '@element-plus/icons';
+
 export default {
     name: 'editor',
     data() {

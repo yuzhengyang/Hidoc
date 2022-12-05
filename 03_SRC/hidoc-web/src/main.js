@@ -97,6 +97,9 @@ import * as echarts from 'echarts';
 // 如果您正在使用CDN引入，请删除下面一行
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 
+// import mermaid from 'mermaid';
+// mermaid.initialize({ startOnLoad: true });
+
 const app = createApp(App);
 app.use(router);
 app.use(store);
@@ -104,6 +107,7 @@ app.use(ElementPlus);
 app.use(VMdEditor);
 app.use(VMdPreview);
 app.config.globalProperties.$echarts = echarts;
+// app.use(mermaid);
 app.mount('#app');
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component);
