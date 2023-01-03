@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW "v_doc_read_history" AS  SELECT dal.ip,
+CREATE VIEW "public"."v_doc_read_history" AS  SELECT dal.ip,
     dal.create_time,
     su.real_name,
     dc.name,
@@ -11,5 +11,4 @@ CREATE OR REPLACE VIEW "v_doc_read_history" AS  SELECT dal.ip,
      LEFT JOIN doc d ON (((dal.doc_id)::text = (d.id)::text)))
      LEFT JOIN sys_user su2 ON (((dal.create_user_id)::text = (su2.id)::text)))
      LEFT JOIN sys_user su3 ON (((dal.owner_user_id)::text = (su3.id)::text)))
-  ORDER BY dal.create_time DESC
-	;
+  ORDER BY dal.create_time DESC;

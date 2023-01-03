@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW "v_hdt_use_desc" AS  SELECT t1.sender_id,
+CREATE VIEW "public"."v_hdt_use_desc" AS  SELECT t1.sender_id,
     t1.sender_name,
     t1.first_time,
     t1.last_time,
@@ -16,7 +16,7 @@ CREATE OR REPLACE VIEW "v_hdt_use_desc" AS  SELECT t1.sender_id,
           WHERE ((data_coll.plan_id)::text = '101642217487073280'::text)
           GROUP BY data_coll.sender_id, data_coll.sender_name
           ORDER BY (count(1)) DESC) t1
-     LEFT JOIN ( SELECT t1_1.sender_id,
+     LEFT JOIN ( SELECT DISTINCT t1_1.sender_id,
             t1_1.sender_name,
             t1_1.create_time,
             ((t2_1.data -> 'Component'::text) ->> 'Province'::text) AS province,
@@ -30,7 +30,7 @@ CREATE OR REPLACE VIEW "v_hdt_use_desc" AS  SELECT t1.sender_id,
                   GROUP BY data_coll.sender_id, data_coll.sender_name) t1_1
              LEFT JOIN data_coll t2_1 ON ((((t1_1.sender_id)::text = (t2_1.sender_id)::text) AND ((t1_1.sender_name)::text = (t2_1.sender_name)::text) AND (t1_1.create_time = t2_1.create_time))))
           WHERE ((t2_1.plan_id)::text = '119510508821807104'::text)) t2 ON ((((t1.sender_id)::text = (t2.sender_id)::text) AND ((t1.sender_name)::text = (t2.sender_name)::text))))
-     LEFT JOIN ( SELECT t1_1.sender_id,
+     LEFT JOIN ( SELECT DISTINCT t1_1.sender_id,
             t1_1.sender_name,
             t1_1.last_time,
             t2_1.version
@@ -46,5 +46,4 @@ CREATE OR REPLACE VIEW "v_hdt_use_desc" AS  SELECT t1.sender_id,
                     (data_coll.data ->> 'version'::text) AS version
                    FROM data_coll
                   WHERE ((data_coll.plan_id)::text = '180629271172222977'::text)) t2_1 ON ((((t1_1.sender_id)::text = (t2_1.sender_id)::text) AND ((t1_1.sender_name)::text = (t2_1.sender_name)::text) AND (t1_1.last_time = t2_1.create_time))))) t3 ON ((((t1.sender_id)::text = (t3.sender_id)::text) AND ((t1.sender_name)::text = (t3.sender_name)::text))))
-  ORDER BY t1.last_time DESC, t1.total DESC
-	;
+  ORDER BY t1.last_time DESC, t1.total DESC;
