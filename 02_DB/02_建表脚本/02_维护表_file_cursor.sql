@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS public.file_cursor (
 SELECT * FROM sysdb_add_column('file_cursor', 'is_delete', 'bool DEFAULT false');
 SELECT * FROM sysdb_add_column('file_cursor', 'delete_user_id', 'varchar(20) NULL');
 SELECT * FROM sysdb_add_column('file_cursor', 'delete_time', 'timestamp NULL');
+SELECT * FROM sysdb_add_column('file_cursor', 'download_time', 'timestamp NULL');
+SELECT * FROM sysdb_add_column('file_cursor', 'download_count', 'int8 DEFAULT 0');
 
 
 

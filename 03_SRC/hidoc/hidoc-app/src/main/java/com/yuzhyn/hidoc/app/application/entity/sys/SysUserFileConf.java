@@ -22,4 +22,8 @@ public class SysUserFileConf {
 
     @TableField(exist = false)
     private Long spaceUsage;
+
+    @TableField(exist = false)
+    private Long usedSpacePercent;
+
 }

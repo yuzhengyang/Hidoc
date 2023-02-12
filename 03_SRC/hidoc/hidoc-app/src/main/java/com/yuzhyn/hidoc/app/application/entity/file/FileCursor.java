@@ -21,4 +21,6 @@ public class FileCursor {
     private Boolean isDelete;
     private String deleteUserId;
     private LocalDateTime deleteTime;
+    private LocalDateTime downloadTime;
+    private Long downloadCount;
 }

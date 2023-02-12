@@ -14,6 +14,11 @@
                         <el-table-column prop="realName" label="姓名" width="140" />
                         <el-table-column prop="email" label="邮箱" width="240" />
                         <el-table-column prop="createTime" label="创建时间" width="180" />
+                        <el-table-column label="空间用量" width="140">
+                            <template #default="scope_space">
+                                <span>{{ parseInt(scope_space.row.sysUserFileConf.usedSpace / 1024 / 1024) }} MB ({{ scope_space.row.sysUserFileConf.usedSpacePercent }}%)</span>
+                            </template>
+                        </el-table-column>
                         <el-table-column label="最近登录" width="120">
                             <template #default="scope_loginTime">
                                 <span>{{ setDatetimeDiff(scope_loginTime.row.loginTime) }}</span>

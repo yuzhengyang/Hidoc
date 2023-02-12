@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.schedule;
+package com.yuzhyn.hidoc.app.application.schedule.tests;
 
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysMachineStatusLog;

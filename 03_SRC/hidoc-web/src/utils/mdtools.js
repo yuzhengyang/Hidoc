@@ -20,6 +20,14 @@ export function mdFormat(text) {
         }
     }
 
+    // ====== 处理站内连接地址 ======
+    {
+        let quotes = getUrls(newText);
+        for (let i = 0; i < quotes.length; i++) {
+            newText = newText.replaceAll(quotes[i], psUrls(quotes[i]));
+        }
+    }
+
     // ====== 处理超链接 ======
 
     return newText;
@@ -53,4 +61,19 @@ function psIlinks(str) {
     let linkUrl = window.location.protocol + '//' + window.location.host + '/collected/';
     console.log(linkUrl);
     return str.replaceAll('(#hd.ilink->', '(' + linkUrl);
+}
+
+function getUrls(str) {
+    var reg = /#hd.url:\/\//g;
+    var list = [];
+    var result = null;
+    do {
+        result = reg.exec(str);
+        result && list.push(result[0]);
+    } while (result);
+    return list;
+}
+function psUrls(str) {
+    let baseUrl = config().baseServer + '';
+    return str.replaceAll('#hd.url://', baseUrl);
 }

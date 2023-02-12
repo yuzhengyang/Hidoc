@@ -29,7 +29,7 @@
                         <el-table-column label="是否过期" width="100">
                             <template #default="scope">
                                 <div class="name-wrapper">
-                                    <div v-if="scope.row.isExpired">
+                                    <div v-if="scope.row.expired">
                                         <el-tag size="medium" type="danger">已过期</el-tag>
                                     </div>
                                     <div v-else>

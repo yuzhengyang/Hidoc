@@ -28,6 +28,10 @@ public final class R {
     public static final String AppNameCH = "Hidoc文档";
     public static final String AppNameCHShort = "文档";
     public static final String AppId = "";
+    /**
+     * 文档素材文件夹名称
+     */
+    public static final String HidocFileBucket  = ".hidoc";
     public static final LocalDateTime StartTime = LocalDateTime.now();
     public static String MachineId = "";
     public static int WorkerId = -1;

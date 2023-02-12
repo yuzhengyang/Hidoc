@@ -61,11 +61,8 @@ public class AppDefaultSchedule {
     @Autowired
     ServerManExeLogMapper serverManExeLogMapper;
 
-    @Autowired
-    FileDownloadLogMapper fileDownloadLogMapper;
 
-    @Autowired
-    FileMapper fileMapper;
+
 
     @Async
     @Scheduled(cron = "0 */2 * * * ?")
@@ -81,9 +78,6 @@ public class AppDefaultSchedule {
 
         // 保存文章阅读日志
         saveDocAccessLog();
-
-        // 保存文件下载日志
-        saveFileDownloadLog();
 
         // 保存系统状态日志
         saveSysStatusLog();
@@ -114,31 +108,6 @@ public class AppDefaultSchedule {
             if (docAccessLog != null) {
                 try {
                     docAccessLogMapper.insert(docAccessLog);
-                } catch (Exception ex) {
-                    log.error(ExceptionTool.getStackTrace(ex));
-                }
-            } else {
-                break;
-            }
-        }
-    }
-
-    public void saveFileDownloadLog() {
-        for (int i = 0; i < 1000 * 60; i++) {
-            FileDownloadLog logItem = R.Queues.FileDownloadLogQueue.poll();
-            if (logItem != null) {
-                try {
-                    fileDownloadLogMapper.insert(logItem);
-
-                    // 记录文件下载时间和下载次数
-                    File file = fileMapper.selectById(logItem.getFileId());
-                    if (file != null) {
-                        Long count = file.getDownloadCount() != null ? file.getDownloadCount() + 1 : 1L;
-                        file.setDownloadTime(logItem.getCreateTime());
-                        file.setDownloadCount(count);
-                        fileMapper.updateById(file);
-                    }
-
                 } catch (Exception ex) {
                     log.error(ExceptionTool.getStackTrace(ex));
                 }

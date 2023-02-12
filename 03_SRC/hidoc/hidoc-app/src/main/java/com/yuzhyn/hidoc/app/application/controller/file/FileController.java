@@ -8,6 +8,7 @@ import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocCollected;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
+import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
@@ -53,7 +54,6 @@ public class FileController {
     @Autowired
     FileMapper fileMapper;
 
-    //region 查看文件列表
 
     /**
      * 查看文件列表（带分页）
@@ -69,9 +69,51 @@ public class FileController {
         List<File> list = sysFilePage.getRecords();
         return ResponseData.okData(list);
     }
-    //endregion
 
-    //region 上传文件
+    /**
+     * 已删除文件列表
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("deletedList")
+    public ResponseData deletedList(@RequestBody Map<String, Object> params) {
+        ResponseData responseData = ResponseData.ok();
+        LocalDateTime expireTime = LocalDateTime.now().minusDays(180);
+        List<FileCursor> list = fileCursorMapper.selectList(new LambdaQueryWrapper<FileCursor>()
+                .eq(FileCursor::getUserId, CurrentUserManager.getUser().getId())
+                .eq(FileCursor::getIsDelete, true)
+                .ge(FileCursor::getDeleteTime, expireTime)
+                .orderByDesc(FileCursor::getDeleteTime));
+        responseData.putData(list);
+        return responseData;
+    }
+
+    /**
+     * hidoc文档素材库文件列表
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("hidocList")
+    public ResponseData hidocList(@RequestBody Map<String, Object> params) {
+        int current = MapTool.getInt(params, "current", 1);
+        int size = MapTool.getInt(params, "size", 100);
+        ResponseData responseData = ResponseData.ok();
+        FileBucket fileBucket = fileBucketMapper.selectOne(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, CurrentUserManager.getUserId()).eq(FileBucket::getName, R.HidocFileBucket));
+
+        if (fileBucket != null) {
+            IPage<FileCursor> fileCursorPage = fileCursorMapper.selectPage(new Page<FileCursor>(current, size), new LambdaQueryWrapper<FileCursor>()
+                    .eq(FileCursor::getUserId, CurrentUserManager.getUser().getId())
+                    .eq(FileCursor::getBucketId, fileBucket.getId())
+                    .eq(FileCursor::getIsDelete, false)
+                    .orderByDesc(FileCursor::getCreateTime));
+
+            responseData.putData(fileCursorPage.getRecords(), fileCursorPage.getTotal());
+        }
+        return responseData;
+    }
+
 
     /**
      * 上传文件
@@ -97,7 +139,7 @@ public class FileController {
         }
         return ResponseData.error("请选择文件");
     }
-    //endregion
+
 
     /**
      * 删除文件（后续动作由定时任务执行，删除超期的文件，并释放空间，另外注意上传时，如果有文件指纹相同的已删除文件，要注意处理）
@@ -194,19 +236,12 @@ public class FileController {
     //endregion
 
 
-    @PostMapping("deletedList")
-    public ResponseData deletedList(@RequestBody Map<String, Object> params) {
-        ResponseData responseData = ResponseData.ok();
-        LocalDateTime expireTime = LocalDateTime.now().minusDays(180);
-        List<FileCursor> list = fileCursorMapper.selectList(new LambdaQueryWrapper<FileCursor>()
-                .eq(FileCursor::getUserId, CurrentUserManager.getUser().getId())
-                .eq(FileCursor::getIsDelete, true)
-                .ge(FileCursor::getDeleteTime, expireTime)
-                .orderByDesc(FileCursor::getDeleteTime));
-        responseData.putData(list);
-        return responseData;
-    }
-
+    /**
+     * 从回收站还原文件
+     *
+     * @param params
+     * @return
+     */
     @PostMapping("restore")
     public ResponseData restore(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "id")) {

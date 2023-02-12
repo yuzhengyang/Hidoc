@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.schedule;
+package com.yuzhyn.hidoc.app.application.schedule.tests;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import com.yuzhyn.azylee.core.threads.sleeps.Sleep;

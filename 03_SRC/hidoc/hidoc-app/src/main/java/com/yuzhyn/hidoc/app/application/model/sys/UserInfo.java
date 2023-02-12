@@ -16,7 +16,6 @@ public class UserInfo implements Serializable {
     private Boolean isCurrent;
     private LocalDateTime loginTime;
     private LocalDateTime expiryTime;
-    private Boolean isExpired;
 
     public Boolean getExpired() {
         if (expiryTime != null) {

@@ -14,6 +14,7 @@ public class ResponseData {
     private String msg;
     private int code;
     private long count;
+    private long total;
     private Map<String, Object> meta = new HashMap();
     private List data = new ArrayList();
     private Integer popUp;
@@ -88,6 +89,12 @@ public class ResponseData {
 
     public ResponseData putData(List value) {
         this.data.addAll(value);
+        return this;
+    }
+
+    public ResponseData putData(List value, long total) {
+        this.data.addAll(value);
+        this.total = total;
         return this;
     }
 

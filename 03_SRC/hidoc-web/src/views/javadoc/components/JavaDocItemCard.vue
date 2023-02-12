@@ -18,12 +18,12 @@
                     <div v-if="this.dataObj._class == 'JavaDocClass'" style="float: right">
                         <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" :disabled="this.dataObj.commentExample == ''" @click="showDialog('commentExampleDialog')">示例说明</el-button>
                         <el-button type="warning" size="small" round v-if="this.dataObj.commentLog != ''" :disabled="this.dataObj.commentLog == ''" @click="showDialog('commentLogDialog')">修改记录</el-button>
-                        <el-button type="danger" size="small" round @click="showDialog('originDocumentDialog')">源文件</el-button>
+                        <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('originDocumentDialog')">源文件</el-button>
                     </div>
                     <div v-if="this.dataObj._class == 'JavaDocMethod'" style="float: right">
                         <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" :disabled="this.dataObj.commentExample == ''" @click="showDialog('commentExampleDialog')">示例说明</el-button>
                         <el-button type="success" size="small" round v-if="this.dataObj.javaDocClassLite ? true : false" @click="showDialog('classDetailsDialog')">类信息</el-button>
-                        <el-button type="danger" size="small" round @click="showDialog('sourceCodeDialog')">方法源码</el-button>
+                        <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('sourceCodeDialog')">方法源码</el-button>
                     </div>
                 </el-col>
             </el-row>
@@ -228,10 +228,12 @@ export default {
             sourceCodeDialog: false,
             sourceCodeText: '',
             originalDocumentText: '',
-            dataObj: {}
+            dataObj: {},
+            user: { roles: [] }
         };
     },
     mounted() {
+        this.user.roles = this.$store.state.user.roles;
         if (this.$store.state.user.token == undefined || this.$store.state.user.token == '') {
             this.isLogin = false;
         } else {

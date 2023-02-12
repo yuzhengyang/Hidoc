@@ -43,4 +43,7 @@ public class SysUserLite {
 
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONArray roles;
+
+    @TableField(exist = false)
+    private SysUserFileConf sysUserFileConf;
 }

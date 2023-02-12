@@ -10,6 +10,7 @@ import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
 import com.yuzhyn.azylee.core.datas.encrypts.MixdeTool;
 import com.yuzhyn.azylee.core.datas.regexs.RegexPattern;
 import com.yuzhyn.hidoc.app.aarg.R;
+import com.yuzhyn.hidoc.app.application.entity.datacoll.DataCollPlan;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocCollected;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
@@ -43,6 +44,7 @@ import reactor.util.function.Tuple2;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -131,6 +133,7 @@ public class UserController {
             user.setEmail(email);
             user.setPassword(MixdeTool.md5Mix(user.getName(), password));
             user.setCreateTime(LocalDateTime.now());
+            user.setLoginTime(LocalDateTime.now());
             user.setIsFrozen(false);
             int flag = sysUserMapper.insert(user);
             if (flag > 0) {
@@ -139,7 +142,7 @@ public class UserController {
                 conf.setUserId(user.getId());
                 conf.setCreateTime(LocalDateTime.now());
                 conf.setExpiryTime(LocalDateTimeTool.max());
-                conf.setSpaceLimit(1024 * 1024 * 1024L);
+                conf.setSpaceLimit(1024 * 1024 * 1024L); // 1G
                 conf.setUrlPrefix(name);
                 conf.setUsedSpace(0L);
                 sysUserFileConfMapper.insert(conf);
@@ -147,7 +150,7 @@ public class UserController {
                 FileBucket fileBucket = new FileBucket();
                 fileBucket.setId(R.SnowFlake.nexts());
                 fileBucket.setIsOpen(true);
-                fileBucket.setName(".hidoc");
+                fileBucket.setName(R.HidocFileBucket);
                 fileBucket.setUserId(user.getId());
                 fileBucketMapper.insert(fileBucket);
 
@@ -436,9 +439,24 @@ public class UserController {
     @PostMapping("getUsers")
     public ResponseData getUsers(@RequestBody Map<String, Object> params) {
         List<SysUserLite> list = sysUserLiteMapper.selectList(new LambdaQueryWrapper<SysUserLite>()
-                .orderByAsc(SysUserLite::getIsFrozen).orderByAsc(SysUserLite::getRealName));
+                .orderByAsc(SysUserLite::getIsFrozen).orderByDesc(SysUserLite::getLoginTime));
         if (ListTool.ok(list)) {
+            // 查询用户的空间用量信息
+            List<String> userIds = list.stream().map(SysUserLite::getId).collect(Collectors.toList());
+            List<SysUserFileConf> confList = sysUserFileConfMapper.selectList(new LambdaQueryWrapper<SysUserFileConf>()
+                    .in(SysUserFileConf::getUserId, userIds));
+
             for (SysUserLite liteItem : list) {
+                // 补充用户的空间用量信息
+                for (SysUserFileConf conf : confList) {
+                    if (liteItem.getId().equals(conf.getUserId())) {
+                        conf.setUsedSpacePercent(conf.getUsedSpace() * 100 / conf.getSpaceLimit());
+                        liteItem.setSysUserFileConf(conf);
+                        break;
+                    }
+                }
+
+                // 补充用户的在线状态
                 for (Iterator<Cache.Entry<String, UserInfo>> i = R.Caches.UserInfo.iterator(); i.hasNext(); ) {
                     Cache.Entry<String, UserInfo> cacheItem = i.next();
                     if (liteItem.getId().equals(cacheItem.getValue().getUser().getId())) {
@@ -455,7 +473,8 @@ public class UserController {
     public ResponseData setAdmin(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "userId", "op")) {
             // 验证登录用户的身份，必须为超级管理员（sa）
-            if (!CurrentUserManager.getUser().getRoles().contains("sa")) return ResponseData.error("您没有权限进行该项操作");
+            if (!CurrentUserManager.getUser().getRoles().contains("sa"))
+                return ResponseData.error("您没有权限进行该项操作");
 
             String userId = MapTool.get(params, "userId", "").toString();
             boolean op = MapTool.getBoolean(params, "op", "");
