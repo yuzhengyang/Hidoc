@@ -391,6 +391,9 @@ public class DocController {
                 if (StringTool.ok(lockUserId) && !lockUserId.equals(CurrentUserManager.getUser().getId())) {
                     return ResponseData.error("文档已被他人锁定");
                 } else {
+                    boolean hasChildDoc = docLiteMapper.exists(new LambdaQueryWrapper<DocLite>().eq(DocLite::getParentDocId, id).eq(DocLite::getIsDelete, false));
+                    if (hasChildDoc) return ResponseData.error("文档中还存在子文档，不能删除");
+
 //                    docLite.setUpdateTime(LocalDateTime.now());
                     docLite.setDeleteTime(LocalDateTime.now());
                     docLite.setDeleteUserId(CurrentUserManager.getUser().getId());

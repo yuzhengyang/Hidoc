@@ -629,7 +629,7 @@ export default {
 /** 树自定义样式 */
 .el-tree-node__content {
     width: 100%;
-    height: 46px;
+    height: 40px;
     font-size: 12px;
     line-height: 50px;
     border-bottom: 1px dashed lightgrey;

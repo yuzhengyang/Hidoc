@@ -741,8 +741,8 @@ export default {
 
 /* 树自定义样式 */
 .el-tree-node__content {
-    width: 280px;
-    height: 46px;
+    width: 240px;
+    height: 40px;
     font-size: 14px;
     line-height: 50px;
     border-bottom: 1px dashed lightgrey;
