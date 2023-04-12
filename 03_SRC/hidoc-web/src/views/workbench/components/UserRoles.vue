@@ -39,7 +39,8 @@
                             <template #default="scopeOp">
                                 <el-link type="success" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, true)">设为管理员</el-link>
                                 <el-link type="warning" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, false)">取消管理员</el-link>
-                                <el-link type="danger" style="font-size: 12px; margin-right: 10px" @click="previewDoc(scopeOp.row)">冻结</el-link>
+                                <el-link type="danger" style="font-size: 12px; margin-right: 10px" @click="setFrozen(scopeOp.row, true)">冻结</el-link>
+                                <el-link type="danger" style="font-size: 12px; margin-right: 10px" @click="setFrozen(scopeOp.row, false)">恢复</el-link>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -88,6 +89,18 @@ export default {
         setAdmin(row, op) {
             return request({
                 url: '/user/setAdmin',
+                method: 'post',
+                data: { token: this.$store.state.user.token, userId: row.id, op: op }
+            }).then(res => {
+                if (res.code == 0) {
+                    console.log(res);
+                    this.loadUserList();
+                }
+            });
+        },
+        setFrozen(row, op) {
+            return request({
+                url: '/user/setFrozen',
                 method: 'post',
                 data: { token: this.$store.state.user.token, userId: row.id, op: op }
             }).then(res => {

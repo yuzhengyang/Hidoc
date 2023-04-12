@@ -64,7 +64,8 @@
             </el-aside>
             <el-main>
                 <el-row style="font-weight: bold; color: grey">
-                    <el-col :span="9"><span style="padding-left: 20px">标题</span></el-col>
+                    <el-col :span="8"><span style="padding-left: 20px">标题</span></el-col>
+                    <el-col :span="1"><span style="padding-left: 20px">字数</span></el-col>
                     <el-col :span="2"><span style="padding-left: 5px">拥有者</span></el-col>
                     <el-col :span="2"><span style="padding-left: 5px">最近更新</span></el-col>
                     <el-col :span="2"><span style="padding-left: 5px">锁(编辑中)</span></el-col>
@@ -77,9 +78,13 @@
                 <el-tree :data="tableData" node-key="id" default-expand-all :expand-on-click-node="false" :draggable="docNodeDragEnable" @node-drop="docNodeDrop">
                     <template #default="{ data }">
                         <el-row style="width: 100%">
-                            <el-col :span="9">
+                            <el-col :span="8">
                                 <span v-if="docNodeDragEnable"><i class="el-icon-rank" style="padding-left: 4px; padding-right: 4px"></i></span>
                                 <span @click="previewDoc(data)">{{ data.title }}</span>
+                                <!-- <el-button @click="previewDoc(data)" type="text" size="medium">{{ data.title }}</el-button> -->
+                            </el-col>
+                            <el-col :span="1">
+                                <span @click="previewDoc(data)">{{ data.contentLength }}</span>
                                 <!-- <el-button @click="previewDoc(data)" type="text" size="medium">{{ data.title }}</el-button> -->
                             </el-col>
                             <el-col :span="2">{{ data.ownerUser.realName }}</el-col>

@@ -206,7 +206,7 @@
         </div>
         <!-- ========== ========== ========== 右侧快捷按钮：工具条 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
-        <div style="position: fixed; top: 50px; right: 20px; z-index: 9999" v-if="this.$store.state.user.token != undefined && this.$store.state.user.token != ''">
+        <div style="position: fixed; top: 50px; right: 70px; z-index: 9999" v-if="this.$store.state.user.token != undefined && this.$store.state.user.token != ''">
             <!-- <el-popover placement="left" title="标题" width="200" trigger="hover">
                 <div>456456</div>
                 <el-button type="primary" icon="el-icon-menu" circle>click 激活</el-button>
@@ -250,7 +250,7 @@
 
         <!-- ========== ========== ========== 右侧快捷按钮：大纲导航 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
-        <div style="position: fixed; top: 50px; right: 70px; z-index: 9999">
+        <div style="position: fixed; top: 50px; right: 20px; z-index: 9999">
             <el-button type="success" icon="el-icon-tickets" circle @click="isShowAnchor = !isShowAnchor"></el-button>
         </div>
     </div>

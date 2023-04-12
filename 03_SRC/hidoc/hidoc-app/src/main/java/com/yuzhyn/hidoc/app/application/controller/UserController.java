@@ -256,6 +256,29 @@ public class UserController {
     }
 
     /**
+     * 冻结账号
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("setFrozen")
+    public ResponseData setFrozen(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "userId")) {
+            String userId = MapTool.get(params, "userId", "").toString();
+            boolean op = MapTool.getBoolean(params, "op", "");
+
+            SysUserLite userLite = sysUserLiteMapper.selectById(userId);
+            if (userLite != null) {
+                userLite.setIsFrozen(op);
+                sysUserLiteMapper.updateById(userLite);
+                if (op) return ResponseData.ok(userLite.getRealName() + " 账号已冻结");
+                else return ResponseData.ok(userLite.getRealName() + " 账号已恢复");
+            }
+        }
+        return ResponseData.error("操作失败");
+    }
+
+    /**
      * 修改密码
      *
      * @param params
