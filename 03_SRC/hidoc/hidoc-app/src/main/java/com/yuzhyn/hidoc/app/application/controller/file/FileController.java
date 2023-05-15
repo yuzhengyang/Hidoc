@@ -10,11 +10,13 @@ import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
+import com.yuzhyn.hidoc.app.application.entity.file.HidocFileView;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
+import com.yuzhyn.hidoc.app.application.mapper.file.HidocFileViewMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
 import com.yuzhyn.hidoc.app.application.service.FileService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
@@ -53,6 +55,9 @@ public class FileController {
 
     @Autowired
     FileMapper fileMapper;
+
+    @Autowired
+    HidocFileViewMapper hidocFileViewMapper;
 
 
     /**
@@ -100,17 +105,8 @@ public class FileController {
         int current = MapTool.getInt(params, "current", 1);
         int size = MapTool.getInt(params, "size", 100);
         ResponseData responseData = ResponseData.ok();
-        FileBucket fileBucket = fileBucketMapper.selectOne(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, CurrentUserManager.getUserId()).eq(FileBucket::getName, R.HidocFileBucket));
-
-        if (fileBucket != null) {
-            IPage<FileCursor> fileCursorPage = fileCursorMapper.selectPage(new Page<FileCursor>(current, size), new LambdaQueryWrapper<FileCursor>()
-                    .eq(FileCursor::getUserId, CurrentUserManager.getUser().getId())
-                    .eq(FileCursor::getBucketId, fileBucket.getId())
-                    .eq(FileCursor::getIsDelete, false)
-                    .orderByDesc(FileCursor::getCreateTime));
-
-            responseData.putData(fileCursorPage.getRecords(), fileCursorPage.getTotal());
-        }
+        List<HidocFileView> hidocFiles = hidocFileViewMapper.selectFiles(CurrentUserManager.getUserId());
+        responseData.putData(hidocFiles);
         return responseData;
     }
 

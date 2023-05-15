@@ -46,7 +46,7 @@ const router = createRouter({
         {
             name: 'workbench_editor',
             path: '/workbench/editor/:collectedId/:docId/:parentDocId/:copyDocId',
-            component: () => import('@/views/workbench/editor')
+            component: () => import('@/views/workbench/editors/editor')
         },
         {
             name: 'docfocus',

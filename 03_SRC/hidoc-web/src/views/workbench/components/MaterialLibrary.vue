@@ -12,10 +12,16 @@
                 <el-col :span="23">
                     <el-table :data="hidocFileList" style="width: 100%">
                         <el-table-column prop="fileName" label="文件名称"></el-table-column>
-                        <el-table-column prop="collectedId" label="文集ID *"></el-table-column>
-                        <el-table-column prop="createTime" label="创建时间"></el-table-column>
-                        <el-table-column prop="downloadTime" label="最后查看时间"></el-table-column>
-                        <el-table-column prop="downloadCount" label="总查看次数"></el-table-column>
+                        <el-table-column label="文件大小">
+                            <template #default="scope">
+                                <span>{{ parseInt(scope.row.size / 1024 / 1024) }} MB</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="collectedName" label="文集名称"></el-table-column>
+                        <el-table-column prop="collectedOwnerName" label="文集管理员" width="120"></el-table-column>
+                        <el-table-column prop="createTime" label="上传时间" width="180"></el-table-column>
+                        <el-table-column prop="downloadTime" label="最后查看时间" width="180"></el-table-column>
+                        <el-table-column prop="downloadCount" label="总查看次数" width="120"></el-table-column>
                         <!-- <el-table-column fixed="right" label="操作" width="200">
                             <template #default="scope">
                                 <el-button @click="previewDoc(scope.row)" type="text" size="small">下载</el-button>

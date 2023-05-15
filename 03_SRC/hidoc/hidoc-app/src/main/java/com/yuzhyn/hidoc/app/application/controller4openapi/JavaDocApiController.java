@@ -2,6 +2,8 @@ package com.yuzhyn.hidoc.app.application.controller4openapi;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
@@ -331,5 +333,27 @@ public class JavaDocApiController {
 //    public ResponseData upload(@RequestParam(value = "projectId") String projectId, @RequestParam("file") MultipartFile[] files) {
 //        return javaDocService.upload(projectId, files);
 //    }
+
+    /**
+     * 查询引用信息
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("queryClassByImport")
+    public ResponseData queryClassByImport(@RequestBody Map<String, Object> params) {
+        String importClass = MapTool.get(params, "importClass", "").toString();
+        if (!StringTool.ok(importClass)) return ResponseData.error("请输入类名称");
+
+        LambdaQueryWrapper<JavaDocClass> wrapper = new LambdaQueryWrapper<JavaDocClass>().like(JavaDocClass::getImports, "%" + importClass + "%");
+        ResponseData responseData = ResponseData.ok();
+        IPage<JavaDocClass> classPage = javaDocClassMapper.selectPage(new Page<JavaDocClass>(1,100),wrapper);
+        if (classPage.getSize()>0) {
+            responseData.putData(classPage.getRecords());
+            responseData.setTotal(classPage.getTotal());
+        }
+
+        return responseData;
+    }
 
 }

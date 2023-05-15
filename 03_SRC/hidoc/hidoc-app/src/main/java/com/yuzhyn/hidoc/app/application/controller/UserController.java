@@ -445,7 +445,7 @@ public class UserController {
 
         for (Iterator<Cache.Entry<String, UserInfo>> i = R.Caches.UserInfo.iterator(); i.hasNext(); ) {
             Cache.Entry<String, UserInfo> item = i.next();
-            if (CurrentUserManager.getUser().getId().equals(item.getValue().getUser().getId())) {
+            if (CurrentUserManager.getUser().getId().equals(item.getValue().getUser().getId()) && item.getValue().getExpired() == false) {
                 userInfoList.add(item.getValue());
             }
         }

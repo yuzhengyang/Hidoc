@@ -28,6 +28,14 @@ export function mdFormat(text) {
         }
     }
 
+    // ====== 处理uname资源地址 ======
+    {
+        let quotes = getUnames(newText);
+        for (let i = 0; i < quotes.length; i++) {
+            newText = newText.replaceAll(quotes[i], psUnames(quotes[i]));
+        }
+    }
+
     // ====== 处理超链接 ======
 
     return newText;
@@ -76,4 +84,19 @@ function getUrls(str) {
 function psUrls(str) {
     let baseUrl = config().baseServer + '';
     return str.replaceAll('#hd.url://', baseUrl);
+}
+
+function getUnames(str) {
+    var reg = /#hd.uname:\/\//g;
+    var list = [];
+    var result = null;
+    do {
+        result = reg.exec(str);
+        result && list.push(result[0]);
+    } while (result);
+    return list;
+}
+function psUnames(str) {
+    let baseUrl = config().imageServer + '';
+    return str.replaceAll('#hd.uname://', baseUrl);
 }

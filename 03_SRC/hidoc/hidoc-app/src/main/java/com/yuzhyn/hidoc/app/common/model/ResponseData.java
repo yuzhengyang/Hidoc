@@ -3,6 +3,7 @@ package com.yuzhyn.hidoc.app.common.model;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,6 +75,14 @@ public class ResponseData {
         return this.count;
     }
 
+    public long getTotal() {
+        return total;
+    }
+
+    public void setTotal(long total) {
+        this.total = total;
+    }
+
     public Map<String, Object> getMeta() {
         return this.meta;
     }
@@ -89,6 +98,7 @@ public class ResponseData {
 
     public ResponseData putData(List value) {
         this.data.addAll(value);
+        if (ObjectUtils.isNotEmpty(value)) this.count = value.size();
         return this;
     }
 

@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
  * 视图查询
  */
 @Data
-@TableName("file_cursor")
-public class FileCursorView {
+public class HidocFileView {
     private String id;
     private String bucketId;
     private String fileId;
@@ -21,9 +20,12 @@ public class FileCursorView {
     private LocalDateTime expiryTime;
     private String collectedId;
     private String uname;
-    private String historyCount;
-    private String urlPrefix;
-    private String bucketName;
+    private Boolean isDelete;
+    private String deleteUserId;
+    private LocalDateTime deleteTime;
+    private LocalDateTime downloadTime;
     private Long downloadCount;
+    private String collectedName;
+    private String collectedOwnerName;
     private Long size;
 }

@@ -27,6 +27,7 @@ public class DocCollected {
     private String ownerUserId;
     private LocalDateTime createTime;
     private Boolean isDelete;
+    private Integer docCount;
 
     /**
      * 需登录准入

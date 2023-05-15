@@ -35,7 +35,9 @@
                     <el-row>
                         <el-col :span="20" :offset="2">
                             <el-tabs v-model="activeName" @tab-click="handleTabClick">
-                                <el-tab-pane label="简介" name="first">{{ this.collected.description }}</el-tab-pane>
+                                <el-tab-pane label="简介" name="first">
+                                    <textarea readonly style="border: 0; width: 100%; height: 500px; resize: none; outline: none; font-size: 16px; font-family: Avenir, Helvetica, Arial, sans-serif" v-model="this.collected.description"></textarea>
+                                </el-tab-pane>
                                 <el-tab-pane label="目录" name="second">
                                     <el-table :data="this.collected.docLites" style="width: 100%">
                                         <el-table-column prop="title" label="" width="500"></el-table-column>
@@ -64,11 +66,18 @@
                 <div v-else>
                     <!-- 文档标题 -->
                     <el-row>
-                        <el-col :span="23" style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">
-                            {{ this.doc.title }}
+                        <el-col :span="23" style="text-align: center">
+                            <span style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">{{ this.doc.title }}</span>
                         </el-col>
                         <el-col :span="1"></el-col>
                         <!-- <el-col :span="2" style="cursor:pointer;" @click="docFocus()">🔍</el-col> -->
+                    </el-row>
+                    <el-row>
+                        <el-col :span="23" style="text-align: center">
+                            <span v-if="this.lockUser && this.lockUser.realName">
+                                <el-tag class="ml-2" type="warning" size="small" effect="plain">{{ this.lockUser.realName }} 编辑锁定</el-tag>
+                            </span>
+                        </el-col>
                     </el-row>
 
                     <!-- 文档内容 -->
@@ -299,7 +308,8 @@ export default {
                 edit: false,
                 copy: false,
                 member: false
-            }
+            },
+            lockUser: {}
         };
     },
     components: { DocIlinkRelation },
@@ -408,12 +418,19 @@ export default {
             }).then(res => {
                 if (res.code == 0) {
                     this.doc = res.meta.doc;
+
                     // 预览前对文本进行处理，然后再渲染预览
                     this.doc.content = mdFormat(this.doc.content);
                     document.title = this.doc.title;
                     this.contributors = [];
                     if (res.meta.contributors && res.meta.contributors.length > 0) {
                         this.contributors = res.meta.contributors;
+                    }
+                    if (res.meta.user) {
+                        this.lockUser = res.meta.user;
+                        console.log('lockUser:' + this.lockUser);
+                    } else {
+                        this.lockUser = {};
                     }
                     // 可回复用户列表
                     this.replyUserList = res.meta.replyUserList;
@@ -759,7 +776,7 @@ export default {
     color: #636363;
 }
 .anchor-item:before {
-    transition: all 0.2s linear ;
+    transition: all 0.2s linear;
     content: '';
     width: 0%;
     height: 100%;

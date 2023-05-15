@@ -2,7 +2,13 @@
     <el-container>
         <el-header height="30px">
             <el-row>
-                <el-col :span="16"></el-col>
+                <el-col :span="16" style="text-align: left">
+                    <el-button-group v-if="!(this.$store.state.user.token == undefined || this.$store.state.user.token == '')">
+                        <el-button type="success" size="small" @click="searchByCollectedRole('default')" round :plain="this.collectedRole != 'default'">ALL</el-button>
+                        <el-button type="primary" size="small" @click="searchByCollectedRole('myJoin')" round :plain="this.collectedRole != 'myJoin'">参与</el-button>
+                        <el-button type="danger" size="small" @click="searchByCollectedRole('private')" round :plain="this.collectedRole != 'private'">私有</el-button>
+                    </el-button-group>
+                </el-col>
                 <el-col :span="8" style="text-align: right">
                     <el-input v-model="searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchEnter" clearable>
                         <template #prepend>
@@ -49,7 +55,8 @@ export default {
         return {
             collectedList: [],
             searchText: '',
-            searchMode: ''
+            searchMode: '',
+            collectedRole: 'default'
         };
     },
     mounted() {
@@ -66,12 +73,16 @@ export default {
                 this.search();
             }
         },
+        searchByCollectedRole(collectedRole) {
+            this.collectedRole = collectedRole;
+            this.search();
+        },
         search() {
             console.log('搜索 ' + this.searchMode + ' ' + this.searchText);
             request({
                 url: '/collected/preview',
                 method: 'post',
-                data: { mode: this.searchMode, keyword: this.searchText }
+                data: { mode: this.searchMode, keyword: this.searchText, collectedRole: this.collectedRole }
             }).then(res => {
                 if (res.code == 0) {
                     this.collectedList = res.data;

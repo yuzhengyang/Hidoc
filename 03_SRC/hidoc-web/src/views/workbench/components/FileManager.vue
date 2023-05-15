@@ -8,7 +8,7 @@
                     <el-button round v-if="createDocVisible" type="warning" @click="openEditBucket">编辑文件夹</el-button>
                     <el-button round v-if="createDocVisible" type="danger" @click="deleteBucket">删除文件夹</el-button>
                 </el-button-group>
-                <span style="width:50px"></span>
+                <span style="width: 50px"></span>
                 <el-button-group>
                     <el-button round v-if="createDocVisible" type="success" @click="openUploadDialog">上传文件</el-button>
                 </el-button-group>
@@ -16,8 +16,7 @@
             <el-row>
                 <el-col :span="5">
                     <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id"
-                            @click="selectBucket(item)">{{ item.name }}</el-menu-item>
+                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
                     </el-menu>
                 </el-col>
                 <el-col :span="19">
@@ -26,6 +25,12 @@
                         <el-table-column prop="createTime" label="上传时间"></el-table-column>
                         <el-table-column prop="expiryTime" label="有效期至"></el-table-column>
                         <el-table-column prop="historyCount" label="历史版本"></el-table-column>
+                        <el-table-column prop="downloadCount" label="下载次数"></el-table-column>
+                        <el-table-column label="文件大小">
+                            <template #default="scope">
+                                <span>{{ parseInt(scope.row.size / 1024 / 1024) }} MB</span>
+                            </template>
+                        </el-table-column>
                         <el-table-column fixed="right" label="操作" width="200">
                             <template #default="scope">
                                 <el-button @click="fileHistory(scope.row)" type="text" size="small">历史</el-button>
@@ -34,8 +39,7 @@
                                 <el-popover placement="top-start" :width="200" trigger="click">
                                     <p>删除操作不可撤回，确定删除吗？</p>
                                     <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="fileDelete(scope.row)">确定删除
-                                        </el-button>
+                                        <el-button type="danger" size="mini" @click="fileDelete(scope.row)">确定删除</el-button>
                                     </div>
                                     <template #reference>
                                         <el-button type="text" size="small">删除</el-button>
@@ -232,7 +236,7 @@ export default {
                 }
             });
         },
-        fileHistory() { },
+        fileHistory() {},
         fileDownload(data) {
             window.location.href = config().baseServer + 'f/d/' + data.urlPrefix + '/' + data.bucketName + '/' + data.fileName;
         },

@@ -233,12 +233,13 @@ public class DocController {
                 if (CurrentUserManager.isLogin()) {
 
                     // 判断编辑用户是否具备权限（管理、协作成员）
+                    boolean isCollectedOwner = CurrentUserManager.getUser().getId().equals(collected.getOwnerUserId());
                     boolean isOwner = CurrentUserManager.getUser().getId().equals(doc.getOwnerUserId());
                     DocCollectedMember docCollectedMember = docCollectedMemberMapper.selectOne(new LambdaQueryWrapper<DocCollectedMember>()
                             .eq(DocCollectedMember::getCollectedId, doc.getCollectedId())
                             .eq(DocCollectedMember::getUserId, CurrentUserManager.getUser().getId()));
                     boolean isMember = docCollectedMember != null && StringTool.ok(docCollectedMember.getUserId());
-                    if (isOwner || isMember) {
+                    if (isCollectedOwner || isOwner || isMember) {
 
                         if (StringTool.ok(doc.getLockUserId()) && !CurrentUserManager.getUser().getId().equals(doc.getLockUserId())) {
                             // 已被其他用户锁定
@@ -277,6 +278,7 @@ public class DocController {
             String parentDocId = MapTool.getString(params, "parentDocId", "");
             String mode = MapTool.getString(params, "mode", "");
             String id = MapTool.getString(params, "id", "");
+            boolean unlock = MapTool.getBoolean(params, "unlock", false);
 
             if (StringTool.ok(title, content, tag)) {
                 switch (mode) {
@@ -333,9 +335,11 @@ public class DocController {
                                     docRecord.setContentLength(content.length());
                                     docRecord.setContentType("");
                                     docRecord.setTag(tag);
+                                    if(unlock){
+                                        docRecord.setLockUserId("");
+                                    }
                                     docRecord.setUpdateTime(LocalDateTime.now());
                                     docRecord.setUpdateUserId(CurrentUserManager.getUser().getId());
-                                    docRecord.setLockUserId("");
                                     int flag2 = docMapper.updateById(docRecord);
                                     if (flag2 > 0) {
                                         return ResponseData.ok();
@@ -351,6 +355,9 @@ public class DocController {
                         }
                         break;
                 }
+
+                // 更新文集文档数量
+                docCollectedMapper.updateDocCount(collectedId);
             }
         }
         return ResponseData.error("创建失败，请填写完整信息");

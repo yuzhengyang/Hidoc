@@ -91,7 +91,8 @@ public class DocCollectedController {
                 docCollected.setOwnerUserId(userInfo.getUser().getId());
                 docCollected.setName(name);
                 docCollected.setDescription(description);
-                if (teamIdListObject != null && teamIdListObject instanceof JSONArray) docCollected.setTeamIdList((JSONArray) teamIdListObject);
+                if (teamIdListObject != null && teamIdListObject instanceof JSONArray)
+                    docCollected.setTeamIdList((JSONArray) teamIdListObject);
                 docCollected.setIsOpen(isOpen);
                 docCollected.setIsLoginAccess(isLoginAccess);
                 docCollected.setIsTemplet(isTemplet);
@@ -127,7 +128,8 @@ public class DocCollectedController {
 
                     record.setName(name);
                     record.setDescription(description);
-                    if (teamIdListObject != null && teamIdListObject instanceof JSONArray) record.setTeamIdList((JSONArray) teamIdListObject);
+                    if (teamIdListObject != null && teamIdListObject instanceof JSONArray)
+                        record.setTeamIdList((JSONArray) teamIdListObject);
                     record.setIsOpen(isOpen);
                     record.setIsLoginAccess(isLoginAccess);
                     record.setIsTemplet(isTemplet);
@@ -224,88 +226,7 @@ public class DocCollectedController {
 
     @PostMapping("preview")
     public ResponseData preview(@RequestBody Map<String, Object> params) {
-        // 支撑关键字搜索
-        int pageSize = 5;
-        String keyword = MapTool.get(params, "keyword", "").toString();
-        String from = MapTool.get(params, "from", "").toString();
-        Boolean isTemplet = MapTool.getBoolean(params, "isTemplet", false);
-
-        String[] keywordArray = StringTool.split(keyword, " ", true, true);
-        List<String> collectedIds = new ArrayList<>();
-        List<String> docIds = new ArrayList<>();
-
-        // 根据关键字筛选有效信息
-        if (StringTool.ok(keyword)) {
-            collectedIds.add("*not_exist");
-            docIds.add("*not_exist");
-            pageSize = 20;
-
-            if (from.equals("editor")) pageSize = 100;
-            // 搜索匹配的文档集合
-            {
-                LambdaQueryWrapper<DocLite> preDocWrapper = new LambdaQueryWrapper<DocLite>();
-                preDocWrapper = preDocWrapper.and(q -> q.eq(DocLite::getIsDelete, false));
-                if (ListTool.ok(keywordArray)) {
-                    preDocWrapper = preDocWrapper.and(p -> {
-                        for (String key : keywordArray) {
-                            String keyLike = "%" + key + "%";
-                            p.apply("(COALESCE(title,'') ILIKE {0} OR COALESCE(content,'') ILIKE {0})", keyLike);
-                        }
-                    });
-                    List<DocLite> preDocList = docLiteMapper.selectList(preDocWrapper);
-                    if (ListTool.ok(preDocList)) {
-                        // 整理文档结果id列表
-                        docIds.addAll(preDocList.stream().map(DocLite::getId).distinct().collect(toList()));
-                        // 整理文集结果id列表
-                        collectedIds.addAll(preDocList.stream().map(DocLite::getCollectedId).distinct().collect(toList()));
-                    }
-                }
-            }
-        }
-
-        // 获取当前用户的团队关系
-        List<String> teamIds = new ArrayList<>();
-        if (CurrentUserManager.isLogin()) {
-            List<TeamMember> memberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
-            if (ListTool.ok(memberList)) teamIds.addAll(memberList.stream().map(TeamMember::getTeamId).distinct().collect(toList()));
-        }
-
-        // 此处框定返回内容
-        LambdaQueryWrapper<DocCollected> docCollectedLambdaQueryWrapper = new LambdaQueryWrapper<DocCollected>()
-                .eq(DocCollected::getIsOpen, true)
-                .eq(DocCollected::getIsDelete, false)
-                .eq(DocCollected::getIsTemplet, isTemplet)
-                .and(p -> {
-                    p.or().apply("team_id_list IS NULL OR team_id_list = '[]'");
-                    for (String teamId : teamIds) {
-                        p.or().apply("jsonb_exists(team_id_list, {0})", teamId);
-                    }
-                });
-        if (ListTool.ok(collectedIds)) docCollectedLambdaQueryWrapper = docCollectedLambdaQueryWrapper.in(DocCollected::getId, collectedIds);
-
-        List<DocCollected> collectedList = docCollectedMapper.selectList(docCollectedLambdaQueryWrapper);
-        if (ListTool.ok(collectedList)) {
-            for (DocCollected collected : collectedList) {
-                Page<DocLite> page = new Page<>(1, pageSize);
-                // 此处根据关键字筛选的信息来框定返回内容
-                LambdaQueryWrapper<DocLite> docLiteLambdaQueryWrapper = new LambdaQueryWrapper<DocLite>().eq(DocLite::getCollectedId, collected.getId()).eq(DocLite::getIsDelete, false).orderByDesc(DocLite::getUpdateTime);
-                if (ListTool.ok(docIds))
-                    docLiteLambdaQueryWrapper = docLiteLambdaQueryWrapper.in(DocLite::getId, docIds);
-
-                IPage<DocLite> docLites = docLiteMapper.selectPage(page, docLiteLambdaQueryWrapper);
-                if (docLites.getTotal() > 0) {
-                    collected.setDocLites(docLites.getRecords());
-                    collected.setDocTotal(docLites.getTotal());
-                }
-            }
-            for (int i = collectedList.size() - 1; i >= 0; i--) {
-                if (!ListTool.ok(collectedList.get(i).getDocLites())) {
-                    collectedList.remove(i);
-                }
-            }
-            // 文集格式化名称，并排序
-            docCollectedService.sortByFormatName(collectedList);
-        }
+        List<DocCollected> collectedList = docCollectedService.search(params);
         return ResponseData.okData(collectedList);
     }
 
@@ -346,9 +267,9 @@ public class DocCollectedController {
                 ownerUser.setMemberDesc("管理文集");
                 sysUserLites.add(ownerUser);
                 // 查询文集创建者
-                SysUserLite createUser = sysUserLiteMapper.selectById(collected.getCreateUserId());
-                createUser.setMemberDesc("创建文集");
-                sysUserLites.add(createUser);
+//                SysUserLite createUser = sysUserLiteMapper.selectById(collected.getCreateUserId());
+//                createUser.setMemberDesc("创建文集");
+//                sysUserLites.add(createUser);
                 // 查询文集包含的协作成员
                 List<DocCollectedMember> docCollectedMembers = docCollectedMemberMapper.selectList(new LambdaQueryWrapper<DocCollectedMember>().eq(DocCollectedMember::getCollectedId, id));
                 if (ListTool.ok(docCollectedMembers)) {

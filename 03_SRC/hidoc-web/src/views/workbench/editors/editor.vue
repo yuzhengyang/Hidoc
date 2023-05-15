@@ -7,10 +7,11 @@
                     <el-input v-model="title" placeholder="请输入文档标题" size="small "></el-input>
                 </el-col>
                 <el-col :span="2"></el-col>
-                <el-col :span="6">
+                <el-col :span="6" style="text-align: right">
                     <el-button-group>
-                        <el-button v-if="this.operationStatus" type="success" size="small" @click="save">保存并关闭</el-button>
-                        <el-button type="danger" size="small" @click="close">关闭</el-button>
+                        <el-button v-if="this.docId" type="success" size="small" @click="save" round>　　保存　　</el-button>
+                        <el-button v-if="this.operationStatus" type="primary" size="small" @click="saveAndClose" round>保存并关闭</el-button>
+                        <el-button type="danger" size="small" @click="close" round>　　关闭　　</el-button>
                     </el-button-group>
                 </el-col>
             </el-row>
@@ -23,6 +24,16 @@
                         <el-button size="mini" @click="openIlinkDialog()">引用文档</el-button>
                         <!-- <el-button size="mini">关系图谱</el-button> -->
                     </el-button-group>
+                    <el-button-group style="padding-left: 5px">
+                        <el-button size="mini" @click="openUploadDialog()">插入视频</el-button>
+                        <!-- <el-button size="mini">关系图谱</el-button> -->
+                    </el-button-group>
+                </el-col>
+                <el-col :span="12"></el-col>
+                <el-col :span="6" style="text-align: right">
+                    <span v-if="this.lockUser && this.lockUser.realName">
+                        <el-tag class="ml-2" type="warning" size="small" effect="plain">当前由：{{ this.lockUser.realName }} 编辑锁定</el-tag>
+                    </span>
                 </el-col>
             </el-row>
         </el-header>
@@ -112,6 +123,14 @@
             </template>
         </el-dialog>
 
+        <el-dialog :title="上传文件" v-model="dialogUploadVisible">
+            <video-file-upload v-bind:uploadDataParams="uploadDataParams" :callback="uploadCallback" ref="videoFileUpload"></video-file-upload>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button type="primary" @click="dialogUploadVisible = false">完 成</el-button>
+                </span>
+            </template>
+        </el-dialog>
         <!-- 文档标签 -->
         <!-- <el-footer>
             <el-row>
@@ -128,9 +147,10 @@
 
 <script>
 import { ElMessage, ElMessageBox } from 'element-plus';
-import request from '../../utils/request.js';
+import VideoFileUpload from './VideoFileUpload';
+import request from '../../../utils/request.js';
 import { config } from '@/utils/config';
-import { mdFormat } from '../../utils/mdtools';
+import { mdFormat } from '../../../utils/mdtools';
 import { Search, Share, Guide } from '@element-plus/icons';
 
 export default {
@@ -174,13 +194,6 @@ export default {
             inputValue: '',
             collected: {},
             activeName: 'public',
-            dialogFormVisible: false,
-            collectedForm: {
-                name: '',
-                description: '',
-                isOpen: false
-            },
-            formLabelWidth: '120px',
             content: '',
             contentHtml: '',
             title: '',
@@ -190,7 +203,12 @@ export default {
             mode: '',
             operationStatus: true,
             loadStatus: 'create',
-            createMode: ''
+            createMode: '',
+            dialogUploadVisible: false,
+            uploadDataParams: {
+                bucketName: '.hidoc'
+            },
+            lockUser: {}
         };
     },
     mounted() {
@@ -258,6 +276,7 @@ export default {
             // 标记当前页面为活动状态
             this.loadStatus = 'active';
             this.collected = res.meta.collected;
+            this.uploadDataParams.collectedId = this.collected.id;
 
             switch (docId) {
                 case '_create':
@@ -296,6 +315,22 @@ export default {
                                     break;
                                 }
                                 case 'lock': {
+                                    if (res.meta.doc.isCurrentUserLock) {
+                                        console.log('当前用户获取锁，准许编辑');
+                                        document.title = this.title;
+                                        this.heartbeatTimer = setInterval(this.heartbeat, 60 * 1000);
+                                    } else {
+                                        console.log('文档已被其他成员锁定，不能编辑');
+                                        this.lockUser = res.meta.user;
+
+                                        let msg = '文档已被其他成员锁定，不能编辑，您可以联系：' + res.meta.user.realName + ' ' + res.meta.user.email + ' ' + '，解除锁定。';
+                                        this.$alert(msg, {
+                                            confirmButtonText: '关闭',
+                                            callback: action => {
+                                                window.close();
+                                            }
+                                        });
+                                    }
                                     break;
                                 }
                                 case 'unauth': {
@@ -330,7 +365,7 @@ export default {
             });
         }
     },
-    components: {},
+    components: { VideoFileUpload },
     methods: {
         heartbeat() {
             return request({
@@ -372,6 +407,28 @@ export default {
                     });
                 }
             });
+        },
+        uploadCallback(files) {
+            console.log(files);
+            if (files) {
+                for (let i = 0; i < files.length; i++) {
+                    this.$refs.editor.insert(selected => {
+                        const prefix = '<video width="600" controls="controls" src="#hd.uname://';
+                        const suffix = '"></video>';
+                        const content = selected || files[i].uname;
+
+                        return {
+                            // 要插入的文本
+                            text: `${prefix}${content}${suffix}`
+                        };
+                    });
+                }
+            }
+        },
+        // 打开上传文件窗口
+        openUploadDialog() {
+            this.dialogUploadVisible = true;
+            this.$refs['videoFileUpload'].openPanel();
         },
         // handleClose(tag) {
         //     this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
@@ -417,7 +474,32 @@ export default {
                     tag: 'tag',
                     mode: this.mode,
                     id: this.docId,
-                    parentDocId: this.parentDocId
+                    parentDocId: this.parentDocId,
+                    unlock: false
+                }
+            }).then(res => {
+                if (res.code == 0) {
+                    ElMessage({
+                        message: '保存成功',
+                        type: 'success',
+                        duration: 5 * 1000
+                    });
+                }
+            });
+        },
+        saveAndClose() {
+            return request({
+                url: '/doc/save',
+                method: 'post',
+                data: {
+                    collectedId: this.collected.id,
+                    title: this.title,
+                    content: this.content,
+                    tag: 'tag',
+                    mode: this.mode,
+                    id: this.docId,
+                    parentDocId: this.parentDocId,
+                    unlock: true
                 }
             }).then(res => {
                 if (res.code == 0) {

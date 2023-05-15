@@ -25,37 +25,44 @@
                 <el-menu default-active="2" @open="handleOpen" @close="handleClose" :unique-opened="true">
                     <el-sub-menu index="1">
                         <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的协作（{{ collectedList.myCoop.length ?? 0 }}）</span>
+                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的协作 ({{ collectedList.myCoop.length ?? 0 }})</span>
                         </template>
                         <el-menu-item v-for="item in collectedList.myCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                             {{ item.name }}
+                            <span style="font-size: 10px;color: red;">({{ item.docCount }})</span>
                             <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
+                            <el-tag v-show="item.isLoginAccess" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">登录</el-tag>
                             <!-- <el-tag v-show="item.isOpen" size="mini" style="margin-left: 2px; margin-right: 2px">公开</el-tag> -->
                             <!-- <el-tag v-show="item.isCoop" type="warning" size="mini">协作</el-tag> -->
                         </el-menu-item>
                     </el-sub-menu>
                     <el-sub-menu index="2">
                         <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我参与的协作（{{ collectedList.joinCoop.length ?? 0 }}）</span>
+                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我参与的协作 ({{ collectedList.joinCoop.length ?? 0 }})</span>
                         </template>
-                        <el-menu-item v-for="item in collectedList.joinCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">{{ item.name }}</el-menu-item>
+                        <el-menu-item v-for="item in collectedList.joinCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
+                            {{ item.name }}
+                            <span style="font-size: 10px;color: red;">({{ item.docCount }})</span>
+                        </el-menu-item>
                     </el-sub-menu>
                     <el-sub-menu index="3">
                         <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的文集（{{ collectedList.myOpen.length ?? 0 }}）</span>
+                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的文集 ({{ collectedList.myOpen.length ?? 0 }})</span>
                         </template>
                         <el-menu-item v-for="item in collectedList.myOpen" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                             {{ item.name }}
+                            <span style="font-size: 10px;color: red;">({{ item.docCount }})</span>
                             <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
                             <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
                         </el-menu-item>
                     </el-sub-menu>
                     <el-sub-menu index="4">
                         <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">私有文集（{{ collectedList.myPrivate.length ?? 0 }}）</span>
+                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">私有文集 ({{ collectedList.myPrivate.length ?? 0 }})</span>
                         </template>
                         <el-menu-item v-for="item in collectedList.myPrivate" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                             {{ item.name }}
+                            <span style="font-size: 10px;color: red;">({{ item.docCount }})</span>
                             <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
                             <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
                         </el-menu-item>
@@ -149,7 +156,7 @@
                 <el-input v-model="collectedForm.name" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="描述" :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="collectedForm.description"></el-input>
+                <el-input type="textarea" maxlength="65535" show-word-limit :rows="6" placeholder="请输入内容" v-model="collectedForm.description"></el-input>
             </el-form-item>
             <el-form-item label="公开" :label-width="formLabelWidth">
                 <el-switch v-model="collectedForm.isOpen" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
