@@ -81,12 +81,14 @@ export default {
 }
 .loginMain {
     overflow: hidden;
+    width: 100%
 }
 .loginSection {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    width: 100%;
     /* background: linear-gradient(to bottom, #f1f4f9, #dff1ff); */
     background: linear-gradient(to bottom, #f1f4f9, #df919f);
 }

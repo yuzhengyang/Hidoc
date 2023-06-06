@@ -3,7 +3,7 @@
         <template #header>
             <div class="card-header" @click="viewCollected">
                 <span>{{ data.name }}</span>
-                <span>[{{ data.docTotal }}篇]</span>
+                <span>[{{ data.docCount }}篇]</span>
                 <!-- <el-button class="button" type="text">操作按钮</el-button> -->
             </div>
         </template>

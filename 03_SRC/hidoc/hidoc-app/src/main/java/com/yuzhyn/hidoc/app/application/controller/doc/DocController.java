@@ -195,6 +195,10 @@ public class DocController {
                 List<SysUserLite> replyUserList = sysUserLiteMapper.selectBatchIds(replyUserIds);
                 responseData.putDataMap("replyUserList", replyUserList);
 
+                // 阅读人员列表
+                List<Map> readUserList = docAccessLogMapper.readerList(doc.getId());
+                responseData.putDataMap("readUserList", readUserList);
+
                 return responseData;
             }
         }
@@ -302,6 +306,8 @@ public class DocController {
                         doc.setParentDocId(parentDocId);
                         int flag = docMapper.insert(doc);
                         if (flag > 0) {
+                            // 新增时，更新文集中文档数量
+                            docCollectedMapper.updateDocCount(collectedId);
                             return ResponseData.ok();
                         }
                         break;
@@ -335,7 +341,7 @@ public class DocController {
                                     docRecord.setContentLength(content.length());
                                     docRecord.setContentType("");
                                     docRecord.setTag(tag);
-                                    if(unlock){
+                                    if (unlock) {
                                         docRecord.setLockUserId("");
                                     }
                                     docRecord.setUpdateTime(LocalDateTime.now());
@@ -355,9 +361,6 @@ public class DocController {
                         }
                         break;
                 }
-
-                // 更新文集文档数量
-                docCollectedMapper.updateDocCount(collectedId);
             }
         }
         return ResponseData.error("创建失败，请填写完整信息");

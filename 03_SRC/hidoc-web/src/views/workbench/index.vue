@@ -23,9 +23,9 @@
                     <i class="el-icon-office-building"></i>
                     <template #title>团队信息</template>
                 </el-menu-item>
-                <el-menu-item index="3000" v-if="user.roles.includes('sa')" @click="changeMenu(3000)">
+                <el-menu-item index="3000" @click="changeMenu(3000)">
                     <i class="el-icon-picture-outline"></i>
-                    <template #title>素材库 *</template>
+                    <template #title>素材库</template>
                 </el-menu-item>
                 <el-menu-item index="3010" @click="changeMenu(3010)">
                     <i class="el-icon-files"></i>
@@ -55,6 +55,14 @@
                     <i class="el-icon-lock"></i>
                     <template #title>权限管理 *</template>
                 </el-menu-item>
+                <el-menu-item index="9910" v-if="user.roles.includes('sa')" @click="changeMenu(9910)">
+                    <i class="el-icon-lock"></i>
+                    <template #title>系统设置 *</template>
+                </el-menu-item>
+                <el-menu-item index="9920" v-if="user.roles.includes('sa')" @click="changeMenu(9920)">
+                    <i class="el-icon-lock"></i>
+                    <template #title>系统状态 *</template>
+                </el-menu-item>
                 <el-menu-item index="9999" v-if="user.roles.includes('sa')" @click="changeMenu(9999)">
                     <i class="el-icon-pear"></i>
                     <template #title>实验室 *</template>
@@ -75,6 +83,8 @@
             <server-manager v-if="this.currentMenuIndex == 8020"></server-manager>
             <user-info v-if="this.currentMenuIndex == 9000"></user-info>
             <user-roles v-if="this.currentMenuIndex == 9900"></user-roles>
+            <system-config v-if="this.currentMenuIndex == 9910"></system-config>
+            <system-status v-if="this.currentMenuIndex == 9920"></system-status>
             <laboratory v-if="this.currentMenuIndex == 9999"></laboratory>
         </el-main>
     </el-container>
@@ -98,6 +108,8 @@ import DoseController from './components/DoseController';
 import ServerManager from './components/ServerManager';
 import TeamManager from './components/TeamManager';
 import UserRoles from './components/UserRoles';
+import SystemConfig from './components/SystemConfig';
+import SystemStatus from './components/SystemStatus';
 // import { Delete } from '@element-plus/icons';
 
 export default {
@@ -135,7 +147,7 @@ export default {
         this.user.roles = this.$store.state.user.roles;
         document.title = 'Hidoc-工作台';
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc, ServerManager, DoseController, DocComment, TeamManager,UserRoles },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc, ServerManager, DoseController, DocComment, TeamManager, UserRoles, SystemConfig, SystemStatus },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);

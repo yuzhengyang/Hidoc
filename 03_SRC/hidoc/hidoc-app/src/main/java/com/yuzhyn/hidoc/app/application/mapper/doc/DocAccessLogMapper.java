@@ -46,4 +46,15 @@ public interface DocAccessLogMapper extends BaseMapper<DocAccessLog> {
             "ORDER BY dal.create_time DESC LIMIT 200" +
             "</script>")
     List<Map> myDocReadLog(@Param("userId") String userId, @Param("docId") String docId);
+
+    @Select("SELECT T2.ID AS \"id\",T2.REAL_NAME AS \"realName\",MIN(T2.CREATE_TIME) AS \"readTime\"\n" +
+            "FROM DOC_ACCESS_LOG T1\n" +
+            "LEFT JOIN SYS_USER T2 ON T1.USER_ID = T2.ID\n" +
+            "WHERE T2.IS_FROZEN <> true " +
+            "\tAND T1.DOC_ID = #{docId}\n" +
+            "\tAND T1.USER_ID IS NOT NULL\n" +
+            "\tAND T1.USER_ID <> ''\n" +
+            "GROUP BY T2.ID,T2.REAL_NAME\n" +
+            "ORDER BY \"readTime\" DESC")
+    List<Map> readerList(@Param("docId") String docId);
 }

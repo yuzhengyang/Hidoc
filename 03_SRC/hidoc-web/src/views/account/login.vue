@@ -4,7 +4,7 @@
             <el-row class="login-main">
                 <el-col :span="9">
                     <div class="grid-content" style="text-align: right; cursor: pointer" @click="home">
-                        <img alt="Vue logo" src="../..//assets/logo.png" />
+                        <img alt="logo" src="../..//assets/logo.png" width="96"/>
                         <div style="height: 150px"></div>
                     </div>
                 </el-col>

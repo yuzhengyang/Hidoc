@@ -153,6 +153,13 @@
             <artifactId>h2</artifactId>
         </dependency>
 
+        <!-- 结巴分词工具(jieba For Java) -->
+<!--        <dependency>-->
+<!--            <groupId>com.huaban</groupId>-->
+<!--            <artifactId>jieba-analysis</artifactId>-->
+<!--            <version>1.0.2</version>-->
+<!--        </dependency>-->
+
     </dependencies>
 
     <dependencyManagement>

@@ -15,4 +15,5 @@ public class FileBucket {
     private String userId;
     private String name;
     private Boolean isOpen;
+    private Boolean isDelete;
 }

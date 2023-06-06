@@ -2,10 +2,12 @@
     <div style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">
         {{ this.doc.title }}
     </div>
-    <v-md-editor id="vmdEditor" v-model="this.doc.content" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+    <div>
+        <v-md-editor id="vmdEditor" v-model="this.doc.content" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+    </div>
     <!-- :style="{height: getHeight()}" -->
     <!-- <div style="height: 1000px"></div> -->
-    <!-- <div style="page-break-after:always"></div> -->
+    <!-- <div style="page-break-after: always"></div> -->
     <!-- <p>&nbsp;</p> -->
 </template>
 
@@ -37,7 +39,7 @@ export default {
                 if (res.code == 0) {
                     this.doc = res.meta.doc;
                     // 预览前对文本进行处理，然后再渲染预览
-                    this.doc.content = mdFormat(this.doc.content) + '<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>';
+                    this.doc.content = mdFormat(this.doc.content) + '<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><div style="height: 1000px"></div><div style="page-break-after:always"></div>';
                     document.title = this.doc.title;
                 }
             });
@@ -83,5 +85,10 @@ export default {
 
 ::-webkit-scrollbar-thumb {
     background-color: #bfc1c4;
+}
+@media print {
+    body {
+        height: auto !important;
+    }
 }
 </style>

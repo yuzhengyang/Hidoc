@@ -66,6 +66,8 @@ service.interceptors.response.use(
                     type: 'warning'
                 }).then(() => {
                     router.push({ path: '/login', params: {} });
+                    // 这里把地址暂存住，方便登录之后再跳转回来
+                    localStorage.setItem('loginJumpAddr', window.location.href);
                 });
                 return Promise.reject(new Error(''));
             }

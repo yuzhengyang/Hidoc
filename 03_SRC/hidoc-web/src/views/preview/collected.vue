@@ -145,6 +145,17 @@
                         </el-col>
                     </el-row>
 
+                    <!-- 已读用户列表 -->
+                    <el-row>
+                        <el-col :span="24" :offset="0" style="height: 100px"></el-col>
+                        <el-col :span="17" :offset="4" style="font-size: 14px; text-align: center">
+                            <el-tag v-for="item in readUserList" :key="item" type="" size="small" effect="plain" round style="margin: 2px;border-radius: 30px;">
+                                {{ item.realName }}
+                            </el-tag>
+                            <p>{{ this.readUserList.length }} 人已读~</p>
+                        </el-col>
+                    </el-row>
+
                     <!-- 评论 -->
                     <el-row>
                         <el-col :span="22" :offset="1" style="margin-top: 80px">
@@ -300,6 +311,7 @@ export default {
             readCount: 0,
             myThumb: {},
             thumbUserList: [],
+            readUserList: [],
             collectedPermission: {
                 detail: false,
                 focus: false,
@@ -431,6 +443,12 @@ export default {
                         console.log('lockUser:' + this.lockUser);
                     } else {
                         this.lockUser = {};
+                    }
+                    // 已读用户列表
+                    if (res.meta.readUserList) {
+                        this.readUserList = res.meta.readUserList;
+                    } else {
+                        this.readUserList = [];
                     }
                     // 可回复用户列表
                     this.replyUserList = res.meta.replyUserList;

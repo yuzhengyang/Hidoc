@@ -244,6 +244,13 @@ public class FileController {
             String id = MapTool.getString(params, "id", "");
             FileCursor fileCursor = fileCursorMapper.selectById(id);
             if (fileCursor != null) {
+                // 检查桶还在不在，如果删除了，就还原回来
+                FileBucket bucket = fileBucketMapper.selectById(fileCursor.getBucketId());
+                if (bucket != null && bucket.getIsDelete()) {
+                    bucket.setIsDelete(false);
+                    fileBucketMapper.updateById(bucket);
+                }
+
                 fileCursor.setIsDelete(false);
                 int flag = fileCursorMapper.updateById(fileCursor);
 

@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
 import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -25,6 +26,7 @@ import org.springframework.cache.annotation.EnableCaching;
 @EnableCaching
 @SpringBootApplication
 public class HidocAppApplication {
+
 
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();

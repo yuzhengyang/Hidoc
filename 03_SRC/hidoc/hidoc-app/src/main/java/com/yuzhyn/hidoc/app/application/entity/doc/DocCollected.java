@@ -50,9 +50,6 @@ public class DocCollected {
     private List<SysUserLite> sysUserLites;
 
     @TableField(exist = false)
-    private Long docTotal;
-
-    @TableField(exist = false)
     private Boolean isCoop;
 
     /**

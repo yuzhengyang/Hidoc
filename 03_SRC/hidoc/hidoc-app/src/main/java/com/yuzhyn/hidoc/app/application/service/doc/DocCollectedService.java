@@ -157,7 +157,6 @@ public class DocCollectedService {
                 IPage<DocLite> docLites = docLiteMapper.selectPage(page, docLiteLambdaQueryWrapper);
                 if (docLites.getTotal() > 0) {
                     collected.setDocLites(docLites.getRecords());
-                    collected.setDocTotal(docLites.getTotal());
                 }
             }
             for (int i = collectedList.size() - 1; i >= 0; i--) {

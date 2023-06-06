@@ -64,12 +64,16 @@ export default {
         };
     },
     mounted() {
+        console.log('DashBoard mounted ~');
         this.loadUserBoard();
         this.initChart();
         //this.$root => app
         console.log(this.echarts);
 
         this.loadMyDocReadLog();
+    },
+    created(){
+        console.log('DashBoard created ~');
     },
     methods: {
         loadUserBoard() {

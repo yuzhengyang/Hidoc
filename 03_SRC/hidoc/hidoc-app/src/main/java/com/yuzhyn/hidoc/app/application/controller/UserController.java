@@ -130,7 +130,7 @@ public class UserController {
             user.setName(name);
             user.setRealName(realname);
             user.setAvatar(avatar);
-            user.setEmail(email);
+            user.setEmail(email.trim());
             user.setPassword(MixdeTool.md5Mix(user.getName(), password));
             user.setCreateTime(LocalDateTime.now());
             user.setLoginTime(LocalDateTime.now());
@@ -461,19 +461,21 @@ public class UserController {
      */
     @PostMapping("getUsers")
     public ResponseData getUsers(@RequestBody Map<String, Object> params) {
-        List<SysUserLite> list = sysUserLiteMapper.selectList(new LambdaQueryWrapper<SysUserLite>()
-                .orderByAsc(SysUserLite::getIsFrozen).orderByDesc(SysUserLite::getLoginTime));
+        List<SysUserLite> list = sysUserLiteMapper.selectList(new LambdaQueryWrapper<SysUserLite>().orderByAsc(SysUserLite::getIsFrozen).orderByDesc(SysUserLite::getLoginTime));
         if (ListTool.ok(list)) {
             // 查询用户的空间用量信息
             List<String> userIds = list.stream().map(SysUserLite::getId).collect(Collectors.toList());
-            List<SysUserFileConf> confList = sysUserFileConfMapper.selectList(new LambdaQueryWrapper<SysUserFileConf>()
-                    .in(SysUserFileConf::getUserId, userIds));
+            List<SysUserFileConf> confList = sysUserFileConfMapper.selectList(new LambdaQueryWrapper<SysUserFileConf>().in(SysUserFileConf::getUserId, userIds));
 
             for (SysUserLite liteItem : list) {
                 // 补充用户的空间用量信息
                 for (SysUserFileConf conf : confList) {
                     if (liteItem.getId().equals(conf.getUserId())) {
-                        conf.setUsedSpacePercent(conf.getUsedSpace() * 100 / conf.getSpaceLimit());
+
+                        if (conf.getSpaceLimit() > 0)
+                            conf.setUsedSpacePercent(conf.getUsedSpace() * 100 / conf.getSpaceLimit());
+                        else conf.setUsedSpacePercent(100L);
+
                         liteItem.setSysUserFileConf(conf);
                         break;
                     }
@@ -513,6 +515,34 @@ public class UserController {
             int flag = sysUserMapper.updateById(user);
             if (flag > 0) {
                 return ResponseData.ok("操作成功");
+            }
+        }
+        return ResponseData.error("操作失败，请完善信息");
+    }
+
+
+    @PostMapping("extendFileSpace")
+    public ResponseData extendFileSpace(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "userId", "op")) {
+            // 验证登录用户的身份，必须为超级管理员或管理员
+            if (!CurrentUserManager.getUser().getRoles().contains("sa") && !CurrentUserManager.getUser().getRoles().contains("admin"))
+                return ResponseData.error("您没有权限进行该项操作");
+
+            String userId = MapTool.get(params, "userId", "").toString();
+            boolean op = MapTool.getBoolean(params, "op", "");
+
+            SysUserFileConf sysUserFileConf = sysUserFileConfMapper.selectById(userId);
+            if (sysUserFileConf != null) {
+                if (op) {
+                    sysUserFileConf.setSpaceLimit(sysUserFileConf.getSpaceLimit() + 1073741824);
+                } else {
+                    long spaceLimit = sysUserFileConf.getSpaceLimit() - 1073741824;
+                    if (spaceLimit > 0) sysUserFileConf.setSpaceLimit(spaceLimit);
+                }
+                int flag = sysUserFileConfMapper.updateById(sysUserFileConf);
+                if (flag > 0) {
+                    return ResponseData.ok("操作成功");
+                }
             }
         }
         return ResponseData.error("操作失败，请完善信息");

@@ -135,6 +135,8 @@ public class DocCollectedController {
                     record.setIsTemplet(isTemplet);
                     int flag = docCollectedMapper.updateById(record);
                     if (flag > 0) {
+                        // 更新时，对文档数量为0的文集，进行补偿操作，更新文集中文档数量
+                        if (record.getDocCount() == 0) docCollectedMapper.updateDocCount(id);
                         return ResponseData.okData("docCollected", record);
                     }
                 }
@@ -277,7 +279,7 @@ public class DocCollectedController {
                     List<SysUserLite> _userList = sysUserLiteMapper.selectBatchIds(userIds);
                     if (ListTool.ok(_userList)) {
                         for (SysUserLite item : _userList) {
-                            if (!item.getId().equals(ownerUser.getId())) {
+                            if (!item.getId().equals(ownerUser.getId()) && !item.getIsFrozen()) {
                                 item.setMemberDesc("协作成员");
                                 sysUserLites.add(item);
                             }

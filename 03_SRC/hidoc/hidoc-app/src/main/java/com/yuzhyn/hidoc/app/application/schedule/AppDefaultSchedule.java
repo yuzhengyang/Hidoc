@@ -31,6 +31,7 @@ import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import com.yuzhyn.hidoc.app.utils.ssh.SshClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -62,11 +63,17 @@ public class AppDefaultSchedule {
     ServerManExeLogMapper serverManExeLogMapper;
 
 
+    @Value("${app-custom.env:}")
+    private String CeKey;
 
 
     @Async
     @Scheduled(cron = "0 */2 * * * ?")
     public void job() {
+//        if (CeKey != null) {
+//            System.out.println("CeKey: " + CeKey);
+//        }
+
         // 保存当前各状态信息
         saveStatus();
 

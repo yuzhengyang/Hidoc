@@ -50,7 +50,7 @@ public class FileBucketController {
      */
     @PostMapping({"list"})
     public ResponseData list(@RequestBody Map<String, Object> params) {
-        List<FileBucket> list = fileBucketMapper.selectList(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, CurrentUserManager.getUser().getId()));
+        List<FileBucket> list = fileBucketMapper.selectList(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, CurrentUserManager.getUser().getId()).eq(FileBucket::getIsDelete, false));
         list = list.stream().filter(x -> !x.getName().contains(".")).collect(Collectors.toList());
         return ResponseData.okData(list);
     }
@@ -81,15 +81,24 @@ public class FileBucketController {
                 return ResponseData.error("名称不符合规则，仅支持字母数字下划线组合");
             }
 
-            FileBucket fileBucket = new FileBucket();
-            fileBucket.setId(R.SnowFlake.nexts());
-            fileBucket.setUserId(CurrentUserManager.getUser().getId());
-            fileBucket.setName(name);
-            fileBucket.setIsOpen(isOpen);
+            FileBucket existBucket = fileBucketMapper.selectOne(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, CurrentUserManager.getUserId()).eq(FileBucket::getName, name));
+            if (existBucket != null) {
+                // 如果已存在，则清除删除状态
+                existBucket.setIsDelete(false);
+                fileBucketMapper.updateById(existBucket);
+                return ResponseData.okData("fileBucket", existBucket);
+            } else {
+                // 如果不存在，则创建新的
+                FileBucket fileBucket = new FileBucket();
+                fileBucket.setId(R.SnowFlake.nexts());
+                fileBucket.setUserId(CurrentUserManager.getUser().getId());
+                fileBucket.setName(name);
+                fileBucket.setIsOpen(isOpen);
 
-            int flag = fileBucketMapper.insert(fileBucket);
-            if (flag > 0) {
-                return ResponseData.okData("fileBucket", fileBucket);
+                int flag = fileBucketMapper.insert(fileBucket);
+                if (flag > 0) {
+                    return ResponseData.okData("fileBucket", fileBucket);
+                }
             }
         }
         return ResponseData.error("创建失败，请填写完整信息");
@@ -125,7 +134,7 @@ public class FileBucketController {
             String id = MapTool.get(params, "id", "").toString();
 
             FileBucket fileBucket = fileBucketMapper.selectById(id);
-            long cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getBucketId, id));
+            long cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getBucketId, id).eq(FileCursor::getIsDelete, false));
 
             if (fileBucket != null) {
                 if (!fileBucket.getUserId().equals(CurrentUserManager.getUser().getId())) {
@@ -135,8 +144,8 @@ public class FileBucketController {
                 if (cursorCount > 0) {
                     return ResponseData.error("删除失败，文件桶中存在文件");
                 } else {
-
-                    int flag = fileBucketMapper.deleteById(id);
+                    fileBucket.setIsDelete(true);
+                    int flag = fileBucketMapper.updateById(fileBucket);
                     if (flag > 0) {
                         return ResponseData.okData("fileBucket", fileBucket);
                     }
