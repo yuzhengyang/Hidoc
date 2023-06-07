@@ -4,7 +4,7 @@
             <el-row class="login-main">
                 <el-col :span="9">
                     <div class="grid-content" style="text-align: right; cursor: pointer" @click="home">
-                        <img alt="logo" src="../..//assets/logo.png" width="96"/>
+                        <img alt="logo" src="../..//assets/logo.png" width="96" />
                         <div style="height: 150px"></div>
                     </div>
                 </el-col>
@@ -75,6 +75,7 @@
 </template>
 
 <script>
+import { ref, watch } from 'vue';
 import request from '../../utils/request.js';
 import { ElMessageBox, ElMessage } from 'element-plus';
 export default {
@@ -99,6 +100,7 @@ export default {
             }
         };
     },
+    setup() {},
     mounted() {
         document.title = '登录';
     },
@@ -119,15 +121,19 @@ export default {
                 if (valid) {
                     // alert('submit!');
                     // this.loading = true;
+                    console.log(this.$route);
+                    let redirectSign = 'redirect=';
+                    let redirect = this.$route.fullPath.substring(this.$route.fullPath.indexOf(redirectSign) + redirectSign.length);
+
                     this.$store
                         .dispatch('user/login', this.form)
                         .then(() => {
-                            console.log(1);
-                            this.$router.push({ path: this.redirect || '/', query: this.otherQuery });
+                            console.log('登录成功');
+                            this.$router.push({ path: redirect || '/', params: {} });
                             // this.loading = false;
                         })
                         .catch(() => {
-                            console.log(2);
+                            console.log('登录异常');
                             // this.loading = false;
                         });
                 } else {

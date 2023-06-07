@@ -42,10 +42,13 @@
                 </el-col>
             </el-row>
         </el-main>
+        <!-- <h2>当前求和为：{{ sum }}</h2>
+        <button @click="sum++">点击按钮sum +1</button> -->
     </el-container>
 </template>
 
 <script>
+import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import DocCollectedCard from './components/DocCollectedCard';
 import request from '../../utils/request.js';
@@ -57,6 +60,20 @@ export default {
             searchText: '',
             searchMode: '',
             collectedRole: 'default'
+        };
+    },
+    setup() {
+        // 数据
+        let sum = ref(0);
+
+        //监视属性
+        watch(sum, (newValue, oldValue) => {
+            // 回调函数形式
+            console.log('求和的值变了', '变化后的值是' + newValue, '变化前的值是' + oldValue);
+        });
+        //返回对象
+        return {
+            sum
         };
     },
     mounted() {

@@ -3,6 +3,7 @@ package com.yuzhyn.hidoc.app.common.model;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.yuzhyn.hidoc.app.common.enums.ResponseCode;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
@@ -118,6 +119,16 @@ public class ResponseData {
         this.msg = msg;
     }
 
+    public ResponseData(ResponseCode responseCode) {
+        this.code = responseCode.getCode();
+        this.msg = responseCode.getMsg();
+    }
+
+    public ResponseData(ResponseCode responseCode, String appendMsg) {
+        this.code = responseCode.getCode();
+        this.msg = responseCode.getMsg() + " [" + appendMsg + "]";
+    }
+
     private ResponseData(int code, String msg, long count) {
         this.code = code;
         this.msg = msg;
@@ -125,33 +136,33 @@ public class ResponseData {
     }
 
     public static ResponseData ok() {
-        return new ResponseData(0, "Ok");
+        return new ResponseData(ResponseCode.SUCCESS);
     }
 
     public static ResponseData error() {
-        return new ResponseData(1, "ERROR");
+        return new ResponseData(ResponseCode.ERROR);
     }
 
-    public static ResponseData exist() {
-        return new ResponseData(2, "tip");
-    }
+//    public static ResponseData exist() {
+//        return new ResponseData(2, "tip");
+//    }
 
     public static ResponseData ok(String msg) {
-        return new ResponseData(0, msg);
+        return new ResponseData(ResponseCode.SUCCESS.getCode(), msg);
     }
 
     public static ResponseData error(String msg) {
-        return new ResponseData(1, msg);
+        return new ResponseData(ResponseCode.ERROR.getCode(), msg);
     }
 
     public static ResponseData okData(String key, Object value) {
-        ResponseData data = new ResponseData(0, "Ok");
+        ResponseData data = new ResponseData(ResponseCode.SUCCESS);
         data.putDataMap(key, value);
         return data;
     }
 
     public static ResponseData okData(List value, long count) {
-        ResponseData data = new ResponseData(0, "Ok", count);
+        ResponseData data = new ResponseData(ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getMsg(), count);
         if (value != null) {
             data.putData(value);
         }
@@ -160,7 +171,7 @@ public class ResponseData {
     }
 
     public static ResponseData okData(List value) {
-        ResponseData data = new ResponseData(0, "Ok");
+        ResponseData data = new ResponseData(ResponseCode.SUCCESS);
         if (value != null) {
             data.putData(value);
         }
@@ -169,25 +180,25 @@ public class ResponseData {
     }
 
     public static ResponseData okMap(Map<String, Object> map) {
-        ResponseData data = new ResponseData(0, "Ok");
+        ResponseData data = new ResponseData(ResponseCode.SUCCESS);
         return data.changeMap(map);
     }
 
-    public static ResponseData notFound() {
-        return new ResponseData(404, "暂无相关数据");
-    }
+//    public static ResponseData notFound() {
+//        return new ResponseData(ResponseCode.NO_RESOURCE);
+//    }
 
-    public static ResponseData badRequest() {
-        return new ResponseData(400, "参数有误");
-    }
+//    public static ResponseData badRequest() {
+//        return new ResponseData(ResponseCode.PARAMS_ERROR);
+//    }
 
-    public static ResponseData forbidden() {
-        return new ResponseData(403, "Forbidden");
-    }
+//    public static ResponseData forbidden() {
+//        return new ResponseData(ResponseCode.ACCESS_FORBIDDEN);
+//    }
 
-    public static ResponseData unauthorized() {
-        return new ResponseData(401, "unauthorized");
-    }
+//    public static ResponseData unauthorized() {
+//        return new ResponseData(ResponseCode.UNAUTHORIZED);
+//    }
 
     public static ResponseData serviceException(int code, String msg) {
         return new ResponseData(code, msg);

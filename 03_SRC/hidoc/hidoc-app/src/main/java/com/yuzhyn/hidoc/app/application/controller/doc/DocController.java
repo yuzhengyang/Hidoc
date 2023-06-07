@@ -12,6 +12,7 @@ import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineStatusLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.service.DocAccessLogService;
 import com.yuzhyn.hidoc.app.application.service.doc.DocParseService;
+import com.yuzhyn.hidoc.app.common.enums.ResponseCode;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -98,14 +99,14 @@ public class DocController {
                     // 条件：已配置登录准入控制，并且设置登录可访问，但是用户未登录
                     // 结果：返回失败，提示需要登录才能访问
                     if (collected.getIsLoginAccess() != null && collected.getIsLoginAccess() && !CurrentUserManager.isLogin()) {
-                        return ResponseData.error("本文集内容需登录后访问");
+                        return new ResponseData(ResponseCode.ACCESS_NEED_LOGIN);
                     }
 
                     // 条件：已配置开放控制，但是设置为私有，且登录的用户与拥有者不匹配
                     // 结果：返回失败，提示私有文档不能访问
                     if (collected.getIsOpen() != null && !collected.getIsOpen()) {
-                        if (!collected.getOwnerUserId().equals(CurrentUserManager.getUser().getId())) {
-                            return ResponseData.error("私有文档不能访问");
+                        if (!CurrentUserManager.isLogin() || !collected.getOwnerUserId().equals(CurrentUserManager.getUser().getId())) {
+                            return new ResponseData(ResponseCode.UNAUTHORIZED);
                         }
                     }
                 }

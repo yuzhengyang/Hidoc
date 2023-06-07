@@ -60,14 +60,13 @@ service.interceptors.response.use(
             if (url == '/user/login' || url == '/user/resetPassword' || url == '/openapi/authcode/getForResetPassword' || url == '/user/register' || url == '/openapi/authcode/getForRegister') {
                 console.log('登录或注册中...');
             } else {
+                debugger
                 ElMessageBox.confirm('请先登录再访问内容', '请登录', {
                     confirmButtonText: '马上登录',
                     cancelButtonText: '短暂停留',
                     type: 'warning'
                 }).then(() => {
-                    router.push({ path: '/login', params: {} });
-                    // 这里把地址暂存住，方便登录之后再跳转回来
-                    localStorage.setItem('loginJumpAddr', window.location.href);
+                    router.push({ path: `/login?redirect=${this.$route.path}`, params: {} });
                 });
                 return Promise.reject(new Error(''));
             }
@@ -75,23 +74,27 @@ service.interceptors.response.use(
 
         // if the custom code is not 20000, it is judged as an error.
         if (res.code !== 0) {
-            ElMessage({
-                message: res.msg || 'Error',
-                type: 'error',
-                duration: 5 * 1000
-            });
-
-            // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-            if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
+            // 10 您的账号已登出或状态过期，请重新登录
+            // 11 您访问的内容需要登录才能查看，请先登录系统
+            if (res.code === 10 || res.code === 11 || res.code === 12) {
                 // to re-login
-                ElMessageBox.confirm('您的账号已登出，你可以选择保持在当前页面，或者选择重新登录系统。', '登出确认', {
+                ElMessageBox.confirm(res.msg, '登出确认', {
                     confirmButtonText: '重新登录',
                     cancelButtonText: '短暂停留',
                     type: 'warning'
                 }).then(() => {
+                    // router.push({ path: `/login?redirect=${redirect}`, params: {} });
                     store.dispatch('user/resetToken').then(() => {
-                        location.reload();
+                        // location.reload();
+                        router.push(`/login?redirect=` + location.pathname);
                     });
+                    
+                });
+            } else {
+                ElMessage({
+                    message: res.msg || 'Error',
+                    type: 'error',
+                    duration: 5 * 1000
                 });
             }
             return Promise.reject(new Error(res.message || 'Error'));

@@ -39,16 +39,16 @@ public class LimitApiController {
 
     @PostMapping("access")
     public ResponseData access(@RequestBody Map<String, Object> params) {
-        if (!MapTool.ok(params, "id", "token")) return new ResponseData(9001, "请求缺少关键参数，如：id、token");
+        if (!MapTool.ok(params, "id", "token")) return new ResponseData(19001, "请求缺少关键参数，如：id、token");
 
         String id = MapTool.get(params, "id", "").toString();
         String token = MapTool.get(params, "token", "").toString();
         LimitAccess acc = limitAccessMapper.selectById(id);
 
-        if (acc == null) return new ResponseData(9002, "没有对应的限制规则");
-        if (!acc.getToken().equals(token)) return new ResponseData(9003, "限制规则token认证失败");
-        if (!acc.getIsEnable()) return new ResponseData(8001, "限制规则未启用");
-        if (acc.getIsDelete()) return new ResponseData(8002, "限制规则已删除");
+        if (acc == null) return new ResponseData(19002, "没有对应的限制规则");
+        if (!acc.getToken().equals(token)) return new ResponseData(19003, "限制规则token认证失败");
+        if (!acc.getIsEnable()) return new ResponseData(18001, "限制规则未启用");
+        if (acc.getIsDelete()) return new ResponseData(18002, "限制规则已删除");
 
         Tuple3<Boolean, Integer, String> result = doAccess(acc, params);
         String hour = MapTool.get(params, "hour", "").toString();

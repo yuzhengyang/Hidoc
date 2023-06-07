@@ -4,6 +4,7 @@ import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.common.constant.UrlAccess;
+import com.yuzhyn.hidoc.app.common.enums.ResponseCode;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +76,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
                     } else {
                         response.setCharacterEncoding("UTF-8");
                         response.setContentType("application/json; charset=utf-8");
-                        ResponseData rs = new ResponseData(50014, "登录身份过期，请重新登录！");
+                        ResponseData rs = new ResponseData();
                         response.setContentLength(rs.toJSONString().getBytes().length);
                         response.getOutputStream().write(rs.toJSONString().getBytes());
                         return false;
@@ -104,7 +105,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
             log.info("未登录用户，访问受限内容，已拒绝");
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json; charset=utf-8");
-            ResponseData rs = new ResponseData(50008, "拒绝访问受限内容，请登录访问！");
+            ResponseData rs = new ResponseData(ResponseCode.ACCESS_NEED_LOGIN);
             response.setContentLength(rs.toJSONString().getBytes().length);
             response.getOutputStream().write(rs.toJSONString().getBytes());
             return false;
