@@ -54,21 +54,41 @@ service.interceptors.response.use(
         // 目前是为了在外网访问时，前端要求登录，数据仍可访问并返回，但是前端不予展示
         // 后续完善组织或团队的概念后，可由后端进行数据保护
         if (config().mastLogin && (store.getters.token == undefined || store.getters.token == '')) {
+            debugger;
             var url = response.config.url;
 
             // 登录、重置密码、注册，不受登录限制，可以正常提交进行
-            if (url == '/user/login' || url == '/user/resetPassword' || url == '/openapi/authcode/getForResetPassword' || url == '/user/register' || url == '/openapi/authcode/getForRegister') {
-                console.log('登录或注册中...');
-            } else {
-                debugger
-                ElMessageBox.confirm('请先登录再访问内容', '请登录', {
-                    confirmButtonText: '马上登录',
-                    cancelButtonText: '短暂停留',
-                    type: 'warning'
-                }).then(() => {
-                    router.push({ path: `/login?redirect=${this.$route.path}`, params: {} });
-                });
-                return Promise.reject(new Error(''));
+            switch (url) {
+                case '/user/login':
+                case '/user/register':
+                case '/openapi/authcode/getForRegister':
+                    {
+                        console.log('正在登录/注册');
+                    }
+                    break;
+                case '/user/resetPassword':
+                case '/openapi/authcode/getForResetPassword':
+                    {
+                        console.log('正在重置密码');
+                    }
+                    break;
+                case '/openapi/heartbeat/base':
+                    {
+                        console.log('心跳信息');
+                    }
+                    break;
+                default: {
+                    // debugger;
+                    ElMessageBox.confirm('系统已设置为登录访问，请先登录账号', '请登录', {
+                        confirmButtonText: '马上登录',
+                        cancelButtonText: '短暂停留',
+                        type: 'warning'
+                    }).then(() => {
+                        // router.push({ path: `/login?redirect=${this.$route.path}`, params: {} });
+                        router.push(`/login?redirect=` + location.pathname);
+                    });
+                    return Promise.reject(new Error(''));
+                }
             }
         }
 
@@ -76,26 +96,47 @@ service.interceptors.response.use(
         if (res.code !== 0) {
             // 10 您的账号已登出或状态过期，请重新登录
             // 11 您访问的内容需要登录才能查看，请先登录系统
-            if (res.code === 10 || res.code === 11 || res.code === 12) {
-                // to re-login
-                ElMessageBox.confirm(res.msg, '登出确认', {
-                    confirmButtonText: '重新登录',
-                    cancelButtonText: '短暂停留',
-                    type: 'warning'
-                }).then(() => {
-                    // router.push({ path: `/login?redirect=${redirect}`, params: {} });
-                    store.dispatch('user/resetToken').then(() => {
-                        // location.reload();
-                        router.push(`/login?redirect=` + location.pathname);
-                    });
-                    
-                });
-            } else {
-                ElMessage({
-                    message: res.msg || 'Error',
-                    type: 'error',
-                    duration: 5 * 1000
-                });
+            // 12 您正在访问未经授权的内容，具体请联系内容发布方
+            switch (res.code) {
+                case 10:
+                case 11:
+                    {
+                        // 需要登录才能查看的内容，直接跳转到登录页面
+                        store.dispatch('user/resetToken').then(() => {
+                            // location.reload();
+                            router.push(`/login?redirect=` + location.pathname);
+                        });
+                    }
+                    break;
+                case 12:
+                    {
+                        // http://localhost:8080/collected/262975768051580929/275951135947227136
+                        router.push(`/unauthorized`);
+
+                        // 提示信息，可自行选择是否登录
+                        // ElMessageBox.confirm(res.msg, '登出确认', {
+                        //     confirmButtonText: '重新登录',
+                        //     cancelButtonText: '短暂停留',
+                        //     type: 'warning'
+                        // }).then(() => {
+                        //     // router.push({ path: `/login?redirect=${redirect}`, params: {} });
+                        //     store.dispatch('user/resetToken').then(() => {
+                        //         // location.reload();
+                        //         router.push(`/login?redirect=` + location.pathname);
+                        //     });
+                        // });
+                    }
+                    break;
+                default:
+                    {
+                        // 仅提示信息
+                        ElMessage({
+                            message: res.msg || 'Error',
+                            type: 'error',
+                            duration: 5 * 1000
+                        });
+                    }
+                    break;
             }
             return Promise.reject(new Error(res.message || 'Error'));
         } else {

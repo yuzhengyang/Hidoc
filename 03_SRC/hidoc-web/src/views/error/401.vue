@@ -9,7 +9,6 @@
           Oops!
         </h1>
         <h2>你没有权限去该页面</h2>
-        <h6>如有不满请联系你领导</h6>
         <ul class="list-unstyled">
           <li>或者你可以去:</li>
           <li class="link-type">

@@ -30,6 +30,11 @@ const router = createRouter({
                 {
                     path: '/workbench',
                     component: () => import('@/views/workbench')
+                },
+                {
+                    name: 'workbench_history',
+                    path: '/workbench/history/:collectedId/:docId',
+                    component: () => import('@/views/workbench/editors/history')
                 }
             ]
         },
@@ -52,7 +57,12 @@ const router = createRouter({
             name: 'docfocus',
             path: '/docfocus/:docId',
             component: () => import('@/views/preview/docfocus')
-        }
+        },
+        {
+            name: 'unauthorized',
+            path: '/unauthorized',
+            component: () => import('@/views/error/unauthorized')
+        },
     ]
 });
 
