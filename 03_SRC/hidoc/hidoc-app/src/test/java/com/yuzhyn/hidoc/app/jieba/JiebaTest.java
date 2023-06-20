@@ -1,6 +1,5 @@
 package com.yuzhyn.hidoc.app.jieba;
 
-import com.huaban.analysis.jieba.JiebaSegmenter;
 
 public class JiebaTest {
     public static void main(String[] args) {
