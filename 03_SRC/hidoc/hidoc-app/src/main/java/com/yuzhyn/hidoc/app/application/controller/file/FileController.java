@@ -105,8 +105,10 @@ public class FileController {
         int current = MapTool.getInt(params, "current", 1);
         int size = MapTool.getInt(params, "size", 100);
         ResponseData responseData = ResponseData.ok();
-        List<HidocFileView> hidocFiles = hidocFileViewMapper.selectFiles(CurrentUserManager.getUserId());
+        Long hidocFilesCount = hidocFileViewMapper.selectFilesCount(CurrentUserManager.getUserId());
+        List<HidocFileView> hidocFiles = hidocFileViewMapper.selectFiles(CurrentUserManager.getUserId(), current, size);
         responseData.putData(hidocFiles);
+        responseData.setTotal(hidocFilesCount);
         return responseData;
     }
 

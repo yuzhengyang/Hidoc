@@ -14,6 +14,7 @@ public interface HidocFileViewMapper extends BaseMapper<HidocFileView> {
 
     /**
      * 查询Hidoc资源的列表信息
+     *
      * @param userId
      * @return
      */
@@ -30,6 +31,19 @@ public interface HidocFileViewMapper extends BaseMapper<HidocFileView> {
             "\t\t\tFROM FILE_BUCKET\n" +
             "\t\t\tWHERE NAME = '.hidoc'\n" +
             "\t\t\t\tAND USER_ID = #{userId})\n" +
-            "\tAND T1.IS_DELETE = FALSE ORDER BY T1.CREATE_TIME DESC")
-    List<HidocFileView> selectFiles(@Param("userId") String userId);
+            "\tAND T1.IS_DELETE = FALSE ORDER BY T1.CREATE_TIME DESC LIMIT #{size} OFFSET (#{current}-1)*#{size}")
+    List<HidocFileView> selectFiles(@Param("userId") String userId, @Param("current") int current, @Param("size") int size);
+
+    @Select("SELECT COUNT(1) AS count " +
+            "FROM FILE_CURSOR T1\n" +
+            "LEFT JOIN DOC_COLLECTED T2 ON T1.COLLECTED_ID = T2.ID\n" +
+            "LEFT JOIN SYS_USER T3 ON T2.OWNER_USER_ID = T3.ID\n" +
+            "LEFT JOIN FILE T4 ON T1.FILE_ID = T4.ID\n" +
+            "WHERE BUCKET_ID =\n" +
+            "\t\t(SELECT ID\n" +
+            "\t\t\tFROM FILE_BUCKET\n" +
+            "\t\t\tWHERE NAME = '.hidoc'\n" +
+            "\t\t\t\tAND USER_ID = #{userId})\n" +
+            "\tAND T1.IS_DELETE = FALSE")
+    Long selectFilesCount(@Param("userId") String userId);
 }
