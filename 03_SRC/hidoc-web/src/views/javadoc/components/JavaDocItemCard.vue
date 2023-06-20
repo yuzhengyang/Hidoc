@@ -255,6 +255,11 @@ export default {
     methods: {
         copy(s) {
             copy(s);
+            ElMessage({
+                message: '复制成功',
+                type: 'success',
+                duration: 1 * 1000
+            });
         },
         setHighlightKeys(text, key, bgColor) {
             var sText = text;

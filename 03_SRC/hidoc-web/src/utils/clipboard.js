@@ -9,9 +9,4 @@ export function copy(text) {
     document.getElementById('at___cp_input').select();
     document.execCommand('copy');
     document.getElementById('at___cp_input').remove();
-    ElMessage({
-        message: '复制成功',
-        type: 'success',
-        duration: 1 * 1000
-    });
 }
