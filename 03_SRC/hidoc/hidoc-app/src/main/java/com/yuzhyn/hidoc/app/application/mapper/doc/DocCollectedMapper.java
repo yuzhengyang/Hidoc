@@ -19,7 +19,7 @@ public interface DocCollectedMapper extends BaseMapper<DocCollected> {
      * @return
      */
     @Update("<script>" +
-            "UPDATE doc_collected SET doc_count = (SELECT COUNT(1) FROM doc WHERE collected_id = #{collectedId}) WHERE id = #{collectedId}" +
+            "UPDATE doc_collected SET doc_count = (SELECT COUNT(1) FROM doc WHERE is_delete = false AND collected_id = #{collectedId}) WHERE id = #{collectedId}" +
             "</script>")
     Integer updateDocCount(@Param("collectedId") String collectedId);
 }
