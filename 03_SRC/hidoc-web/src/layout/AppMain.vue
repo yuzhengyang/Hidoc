@@ -12,7 +12,7 @@
                     </div>
                 </el-col>
                 <el-col :span="6">
-                    <div class="grid-content bg-purple-light">
+                    <div class="grid-content">
                         <!-- <el-input placeholder="搜索一下" v-model="keyword">
                             <template #suffix>
                                 <i class="el-input__icon el-icon-search" style="cursor:pointer;" @click="search"></i>
@@ -24,7 +24,7 @@
                     <div class="grid-content bg-purple"></div>
                 </el-col>
                 <el-col :span="4">
-                    <div v-if="this.$store.state.user.token == undefined || this.$store.state.user.token == ''" class="grid-content bg-purple-light">
+                    <div v-if="this.$store.state.user.token == undefined || this.$store.state.user.token == ''" class="grid-content">
                         <el-button type="text" size="small" @click="register">
                             <i class="el-icon-user"></i>
                             注册
@@ -51,25 +51,25 @@
                             </template>
                         </el-dropdown> -->
                     </div>
-                    <div v-else class="grid-content bg-purple-light">
+                    <div v-else class="grid-content">
                         <el-button type="text" size="small" @click="workbench">
-                            <i class="el-icon-monitor"></i>
-                            工作台
+                            <el-icon><Monitor /></el-icon>
+                            <span>工作台</span>
                         </el-button>
                         <el-button type="text">|</el-button>
-                        <el-dropdown>
+                        <el-dropdown style="vertical-align: middle">
                             <el-button type="text" size="small" style="padding-left: 8px">
                                 {{ this.$store.state.user.name }}
-                                <i class="el-icon-arrow-down el-icon--right"></i>
+                                <el-icon><ArrowDown /></el-icon>
                             </el-button>
                             <template #dropdown>
                                 <el-dropdown-menu>
                                     <el-dropdown-item @click="changePasswordDialogVisible = true">
-                                        <i class="el-icon-key"></i>
+                                        <el-icon><Key /></el-icon>
                                         修改密码
                                     </el-dropdown-item>
                                     <el-dropdown-item @click="logout">
-                                        <i class="el-icon-circle-close"></i>
+                                        <el-icon><CircleClose /></el-icon>
                                         退出
                                     </el-dropdown-item>
                                 </el-dropdown-menu>
@@ -228,11 +228,11 @@ body,
     padding: 10px;
     text-align: left;
 }
-.el-footer {
+/* .el-footer {
     font-size: 10px;
     padding: 5px;
     background-color: #d1d3d4;
     color: #333;
     text-align: center;
-}
+} */
 </style>

@@ -4,28 +4,49 @@
             <el-row style="line-height: 40px">
                 <el-col :span="8" style="text-align: right; padding-right: 20px">{{ this.collected.name + '：' + this.parentDocPath }}</el-col>
                 <el-col :span="8">
-                    <el-input v-model="title" placeholder="请输入文档标题" size="small "></el-input>
+                    <el-input v-model="title" placeholder="请输入文档标题"></el-input>
                 </el-col>
                 <el-col :span="2"></el-col>
                 <el-col :span="6" style="text-align: right">
                     <el-button-group>
-                        <el-button v-if="this.docId" type="success" size="small" @click="save" round>　　保存　　</el-button>
-                        <el-button v-if="this.operationStatus" type="primary" size="small" @click="saveAndClose" round>保存并关闭</el-button>
-                        <el-button type="danger" size="small" @click="close" round>　　关闭　　</el-button>
+                        <el-button v-if="this.docId" type="success" @click="save" round>　　保存　　</el-button>
+                        <el-button v-if="this.operationStatus" type="primary" @click="saveAndClose" round>保存并关闭</el-button>
+                        <el-button type="danger" @click="close" round>　　关闭　　</el-button>
                     </el-button-group>
                 </el-col>
             </el-row>
             <el-row style="padding: 5px">
-                <el-col :span="6">
-                    <el-button-group>
-                        <el-button size="mini" @click="openTempletDialog()">使用模板</el-button>
+                <el-col :span="12">
+                    <el-button-group style="padding-left: 5px">
+                        <el-button size="small" @click="openTempletDialog()">
+                            <el-icon style="padding-right: 3px"><Notebook /></el-icon>
+                            使用模板
+                        </el-button>
                     </el-button-group>
                     <el-button-group style="padding-left: 5px">
-                        <el-button size="mini" @click="openIlinkDialog()">引用文档</el-button>
+                        <el-button size="small">
+                            <el-icon style="padding-right: 3px"><Document /></el-icon>
+                            使用文档
+                        </el-button>
+                    </el-button-group>
+                    <el-button-group style="padding-left: 5px">
+                        <el-button size="small" @click="openIlinkDialog()">
+                            <el-icon style="padding-right: 3px"><Link /></el-icon>
+                            引用文档
+                        </el-button>
                         <!-- <el-button size="mini">关系图谱</el-button> -->
                     </el-button-group>
                     <el-button-group style="padding-left: 5px">
-                        <el-button size="mini" @click="openUploadDialog()">插入视频</el-button>
+                        <el-button size="small">
+                            <el-icon style="padding-right: 3px"><FolderOpened /></el-icon>
+                            插入文件
+                        </el-button>
+                    </el-button-group>
+                    <el-button-group style="padding-left: 5px">
+                        <el-button size="small" @click="openUploadDialog()">
+                            <el-icon style="padding-right: 3px"><VideoPlay /></el-icon>
+                            插入视频
+                        </el-button>
                         <!-- <el-button size="mini">关系图谱</el-button> -->
                     </el-button-group>
                 </el-col>
@@ -151,6 +172,7 @@ import VideoFileUpload from './VideoFileUpload';
 import request from '../../../utils/request.js';
 import { config } from '@/utils/config';
 import { mdFormat } from '../../../utils/mdtools';
+import { uiRefresh } from '../../../utils/uimsg';
 import { Search, Share, Guide } from '@element-plus/icons';
 
 export default {
@@ -212,6 +234,7 @@ export default {
         };
     },
     mounted() {
+        document.title = 'Hidoc-文档编辑器';
         // 标记当前页面为加载状态
         this.loadStatus = 'mounted';
         // 默认开启目录导航
@@ -484,6 +507,7 @@ export default {
                         type: 'success',
                         duration: 5 * 1000
                     });
+                    uiRefresh('editor', 'doc', this.docId);
                 }
             });
         },
@@ -503,6 +527,7 @@ export default {
                 }
             }).then(res => {
                 if (res.code == 0) {
+                    uiRefresh('editor', 'doc', this.docId);
                     window.isCloseHint = false;
                     window.close();
                 }
@@ -519,6 +544,7 @@ export default {
                     // 关闭编辑器的浏览器界面
                     if (this.mode == 'create') {
                         console.log('创建时关闭，无需解锁');
+                        window.isCloseHint = false;
                         window.close();
                     } else {
                         return request({

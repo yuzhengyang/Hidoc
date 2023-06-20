@@ -328,7 +328,7 @@ public class DocController {
                                 docHistory.setContentType(docRecord.getContentType());
                                 docHistory.setTag(docRecord.getTag());
                                 docHistory.setSerialNumber(docRecord.getSerialNumber());
-                                docHistory.setCreateTime(LocalDateTime.now()); // 历史记录的创建时间是当前时间
+                                docHistory.setCreateTime(docRecord.getUpdateTime()); // 历史记录的创建时间是上次文档的更新时间
                                 docHistory.setCreateUserId(docRecord.getCreateUserId());
                                 docHistory.setUpdateUserId(CurrentUserManager.getUser().getId());
                                 int flagHistory = docHistoryMapper.insert(docHistory);
@@ -411,6 +411,8 @@ public class DocController {
                     docLite.setIsDelete(true);
                     int flag = docLiteMapper.updateById(docLite);
                     if (flag > 0) {
+                        // 新增时，更新文集中文档数量
+                        docCollectedMapper.updateDocCount(docLite.getCollectedId());
                         return ResponseData.ok();
                     }
                 }

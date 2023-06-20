@@ -4,67 +4,67 @@
         <el-aside width="180px" style="height: 100%; border-right: 1px solid #ccc">
             <el-menu default-active="1000" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
                 <el-menu-item index="1000" @click="changeMenu(1000)">
-                    <i class="el-icon-data-analysis"></i>
+                    <el-icon><DataAnalysis /></el-icon>
                     <template #title>信息看板</template>
                 </el-menu-item>
                 <el-menu-item index="2000" @click="changeMenu(2000)">
-                    <i class="el-icon-collection"></i>
+                    <el-icon><Collection /></el-icon>
                     <template #title>文集文档</template>
                 </el-menu-item>
                 <el-menu-item index="2010" @click="changeMenu(2010)">
-                    <i class="el-icon-delete"></i>
+                    <el-icon><Delete /></el-icon>
                     <template #title>回收站</template>
                 </el-menu-item>
                 <el-menu-item index="2020" @click="changeMenu(2020)">
-                    <i class="el-icon-chat-line-square"></i>
+                    <el-icon><ChatLineSquare /></el-icon>
                     <template #title>互动评论</template>
                 </el-menu-item>
                 <el-menu-item index="2030" @click="changeMenu(2030)">
-                    <i class="el-icon-office-building"></i>
+                    <el-icon><OfficeBuilding /></el-icon>
                     <template #title>团队信息</template>
                 </el-menu-item>
                 <el-menu-item index="3000" @click="changeMenu(3000)">
-                    <i class="el-icon-picture-outline"></i>
+                    <el-icon><Picture /></el-icon>
                     <template #title>素材库</template>
                 </el-menu-item>
                 <el-menu-item index="3010" @click="changeMenu(3010)">
-                    <i class="el-icon-files"></i>
+                    <el-icon><Files /></el-icon>
                     <template #title>我的文件</template>
                 </el-menu-item>
                 <el-menu-item index="7000" v-if="user.roles.includes('sa')" @click="changeMenu(7000)">
-                    <i class="el-icon-notebook-2"></i>
+                    <el-icon><Memo /></el-icon>
                     <template #title>代码注释 *</template>
                 </el-menu-item>
                 <el-menu-item index="8000" v-if="user.roles.includes('sa')" @click="changeMenu(8000)">
-                    <i class="el-icon-box"></i>
+                    <el-icon><Box /></el-icon>
                     <template #title>数据收集器 *</template>
                 </el-menu-item>
                 <el-menu-item index="8010" v-if="user.roles.includes('sa')" @click="changeMenu(8010)">
-                    <i class="el-icon-odometer"></i>
+                    <el-icon><Odometer /></el-icon>
                     <template #title>剂量控制器 *</template>
                 </el-menu-item>
                 <el-menu-item index="8020" v-if="user.roles.includes('sa')" @click="changeMenu(8020)">
-                    <i class="el-icon-news"></i>
+                    <el-icon><Notification /></el-icon>
                     <template #title>服务管理 *</template>
                 </el-menu-item>
                 <el-menu-item index="9000" @click="changeMenu(9000)">
-                    <i class="el-icon-user"></i>
+                    <el-icon><User /></el-icon>
                     <template #title>个人信息</template>
                 </el-menu-item>
                 <el-menu-item index="9900" v-if="user.roles.includes('sa')" @click="changeMenu(9900)">
-                    <i class="el-icon-lock"></i>
+                    <el-icon><Lock /></el-icon>
                     <template #title>权限管理 *</template>
                 </el-menu-item>
                 <el-menu-item index="9910" v-if="user.roles.includes('sa')" @click="changeMenu(9910)">
-                    <i class="el-icon-lock"></i>
+                    <el-icon><Lock /></el-icon>
                     <template #title>系统设置 *</template>
                 </el-menu-item>
                 <el-menu-item index="9920" v-if="user.roles.includes('sa')" @click="changeMenu(9920)">
-                    <i class="el-icon-lock"></i>
+                    <el-icon><Lock /></el-icon>
                     <template #title>系统状态 *</template>
                 </el-menu-item>
                 <el-menu-item index="9999" v-if="user.roles.includes('sa')" @click="changeMenu(9999)">
-                    <i class="el-icon-pear"></i>
+                    <el-icon><Pear /></el-icon>
                     <template #title>实验室 *</template>
                 </el-menu-item>
             </el-menu>

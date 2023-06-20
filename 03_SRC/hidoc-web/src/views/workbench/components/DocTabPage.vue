@@ -25,11 +25,11 @@
                 <el-menu default-active="2" @open="handleOpen" @close="handleClose" :unique-opened="true">
                     <el-sub-menu index="1">
                         <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的协作 ({{ collectedList.myCoop.length ?? 0 }})</span>
+                            <span style="font-size: 14px; font-weight: bold">我公开的协作 ({{ collectedList.myCoop.length ?? 0 }})</span>
                         </template>
                         <el-menu-item v-for="item in collectedList.myCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                             {{ item.name }}
-                            <span style="font-size: 10px;color: red;">({{ item.docCount }})</span>
+                            <span style="font-size: 10px; color: red">({{ item.docCount }})</span>
                             <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
                             <el-tag v-show="item.isLoginAccess" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">登录</el-tag>
                             <!-- <el-tag v-show="item.isOpen" size="mini" style="margin-left: 2px; margin-right: 2px">公开</el-tag> -->
@@ -38,31 +38,31 @@
                     </el-sub-menu>
                     <el-sub-menu index="2">
                         <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我参与的协作 ({{ collectedList.joinCoop.length ?? 0 }})</span>
+                            <span style="font-size: 14px; font-weight: bold">我参与的协作 ({{ collectedList.joinCoop.length ?? 0 }})</span>
                         </template>
                         <el-menu-item v-for="item in collectedList.joinCoop" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                             {{ item.name }}
-                            <span style="font-size: 10px;color: red;">({{ item.docCount }})</span>
+                            <span style="font-size: 10px; color: red">({{ item.docCount }})</span>
                         </el-menu-item>
                     </el-sub-menu>
                     <el-sub-menu index="3">
                         <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">我公开的文集 ({{ collectedList.myOpen.length ?? 0 }})</span>
+                            <span style="font-size: 14px; font-weight: bold">我公开的文集 ({{ collectedList.myOpen.length ?? 0 }})</span>
                         </template>
                         <el-menu-item v-for="item in collectedList.myOpen" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                             {{ item.name }}
-                            <span style="font-size: 10px;color: red;">({{ item.docCount }})</span>
+                            <span style="font-size: 10px; color: red">({{ item.docCount }})</span>
                             <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
                             <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
                         </el-menu-item>
                     </el-sub-menu>
                     <el-sub-menu index="4">
                         <template #title>
-                            <span style="font-size: 14px; font-weight: bold; border-bottom: 1px solid black">私有文集 ({{ collectedList.myPrivate.length ?? 0 }})</span>
+                            <span style="font-size: 14px; font-weight: bold">私有文集 ({{ collectedList.myPrivate.length ?? 0 }})</span>
                         </template>
                         <el-menu-item v-for="item in collectedList.myPrivate" :key="item.id.toString()" :index="item.id" @click="selectCollected(item)">
                             {{ item.name }}
-                            <span style="font-size: 10px;color: red;">({{ item.docCount }})</span>
+                            <span style="font-size: 10px; color: red">({{ item.docCount }})</span>
                             <el-tag v-show="item.isCoop" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">协作</el-tag>
                             <el-tag v-show="item.isTemplet" type="warning" size="mini" style="margin-left: 2px; margin-right: 2px">模板</el-tag>
                         </el-menu-item>
@@ -86,7 +86,9 @@
                     <template #default="{ data }">
                         <el-row style="width: 100%">
                             <el-col :span="8">
-                                <span v-if="docNodeDragEnable"><i class="el-icon-rank" style="padding-left: 4px; padding-right: 4px"></i></span>
+                                <span v-if="docNodeDragEnable">
+                                    <el-icon style="padding-left: 4px; padding-right: 4px"><Rank /></el-icon>
+                                </span>
                                 <span @click="previewDoc(data)">{{ data.title }}</span>
                                 <!-- <el-button @click="previewDoc(data)" type="text" size="medium">{{ data.title }}</el-button> -->
                             </el-col>
@@ -270,9 +272,24 @@ export default {
         console.log('name: ' + name);
 
         this.loadCollected();
+
+        window.addEventListener('storage', this.HandleUiMsg);
+    },
+    beforeUnmount() {
+        window.removeEventListener('storage', this.HandleUiMsg);
     },
     components: {},
     methods: {
+        HandleUiMsg(e) {
+            if (e.key == 'ui-msg') {
+                debugger;
+                console.log(e.key, e.newValue, e.oldValue);
+                if (JSON.parse(e.newValue).element == 'doc') {
+                    this.loadCollected();
+                    this.refreshDocList();
+                }
+            }
+        },
         loadMyJoinTeam() {
             return request({
                 url: '/team/getMyJoinTeams',

@@ -5,7 +5,7 @@
                 <el-col :span="24">
                     <el-input placeholder="请输入内容" v-model="keyword" @keydown="searchEnter">
                         <template #suffix>
-                            <i class="el-input__icon el-icon-search" style="cursor: pointer" @click="search"></i>
+                            <el-icon><Search style="cursor: pointer" @click="search" /></el-icon>
                         </template>
                     </el-input>
                 </el-col>
@@ -149,10 +149,10 @@
                     <el-row>
                         <el-col :span="24" :offset="0" style="height: 100px"></el-col>
                         <el-col :span="17" :offset="4" style="font-size: 14px; text-align: center">
-                            <el-tag v-for="item in readUserList" :key="item" type="" size="small" effect="plain" round style="margin: 2px;border-radius: 30px;">
+                            <el-tag v-for="item in readUserList" :key="item" type="" size="small" effect="plain" round style="margin: 2px; border-radius: 30px">
                                 {{ item.realName }}
                             </el-tag>
-                            <p>{{ this.readUserList.length }} 人已读~</p>
+                            <p>{{ this.readUserList.length }} 人已读</p>
                         </el-col>
                     </el-row>
 
@@ -212,17 +212,28 @@
         <!-- ========== ========== ========== 右下角快捷按钮组 ========== ========== ==========  -->
         <div style="position: fixed; bottom: 50px; right: 20px; z-index: 9999">
             <el-badge :value="this.commentCount" class="item" :hidden="this.commentCount == 0">
-                <el-button icon="el-icon-chat-dot-square" circle @click="this.scrollToBlock('comment')" style="box-shadow: 0px 0px 5px 5px #ddd"></el-button>
+                <el-button circle @click="this.scrollToBlock('comment')" style="box-shadow: 0px 0px 3px 3px #ddd">
+                    <el-icon><ChatDotSquare /></el-icon>
+                </el-button>
             </el-badge>
         </div>
         <div style="position: fixed; bottom: 100px; right: 20px; z-index: 9999">
             <el-badge :value="this.thumbCount" class="item" :hidden="this.thumbCount == 0">
-                <el-button v-if="this.myThumb.isSupporter" type="primary" icon="el-icon-thumb" circle @click="createThumb" style="box-shadow: 0px 0px 5px 5px #ddd"></el-button>
-                <el-button v-else icon="el-icon-thumb" circle @click="createThumb" style="box-shadow: 0px 0px 5px 5px #ddd"></el-button>
+                <el-button v-if="this.myThumb.isSupporter" type="primary" icon="el-icon-thumb" circle @click="createThumb" style="box-shadow: 0px 0px 3px 3px #ddd"></el-button>
+                <el-button v-else circle @click="createThumb" style="box-shadow: 0px 0px 3px 3px #ddd">
+                    <el-icon><Pointer /></el-icon>
+                </el-button>
             </el-badge>
         </div>
         <div style="position: fixed; bottom: 150px; right: 20px; z-index: 9999">
-            <el-button icon="el-icon-caret-top" circle @click="this.scrollToBlock('top')" style="box-shadow: 0px 0px 5px 5px #ddd"></el-button>
+            <el-button circle @click="this.scrollToBlock('top')" style="box-shadow: 0px 0px 3px 3px #ddd">
+                <el-icon><CaretTop /></el-icon>
+            </el-button>
+        </div>
+        <div style="position: fixed; bottom: 200px; right: 20px; z-index: 9999">
+            <el-button circle @click="this.copyShareUrl()" style="box-shadow: 0px 0px 3px 3px #ddd">
+                <el-icon><Share /></el-icon>
+            </el-button>
         </div>
         <!-- ========== ========== ========== 右侧快捷按钮：工具条 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
@@ -233,35 +244,61 @@
             </el-popover> -->
             <el-popover placement="left" :width="360" trigger="click">
                 <template #reference>
-                    <el-button type="primary" icon="el-icon-menu" circle></el-button>
+                    <el-button type="primary" circle>
+                        <el-icon><Menu /></el-icon>
+                    </el-button>
                 </template>
                 <div style="font-size: 14px">
                     <el-row>
                         <el-col :span="6" v-if="this.collectedPermission.detail" style="color: red">
-                            <i class="el-icon-warning-outline" style="cursor: pointer">-详情</i>
+                            <span style="cursor: pointer">
+                                <el-icon><Warning /></el-icon>
+                                -详情
+                            </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.focus">
-                            <i class="el-icon-full-screen" style="cursor: pointer" @click="docFocus()">-演示</i>
+                            <span style="cursor: pointer" @click="docFocus()">
+                                <el-icon><FullScreen /></el-icon>
+                                -演示
+                            </span>
                         </el-col>
-                        <el-col :span="6" v-if="this.collectedPermission.his" style="color: red">
-                            <i class="el-icon-receiving" style="cursor: pointer">-历史</i>
+                        <el-col :span="6" v-if="this.collectedPermission.his">
+                            <span style="cursor: pointer" @click="history()">
+                                <el-icon><TakeawayBox /></el-icon>
+                                -历史
+                            </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.member" style="color: red">
-                            <i class="el-icon-user" style="cursor: pointer">-协作</i>
+                            <span style="cursor: pointer">
+                                <el-icon><User /></el-icon>
+                                -协作
+                            </span>
                         </el-col>
                     </el-row>
                     <el-row style="padding-top: 14px">
                         <el-col :span="6" v-if="this.collectedPermission.create">
-                            <i class="el-icon-plus" style="cursor: pointer" @click="createDoc()">-新建</i>
+                            <span style="cursor: pointer" @click="createDoc()">
+                                <el-icon><CirclePlus /></el-icon>
+                                -新建
+                            </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.create">
-                            <i class="el-icon-plus" style="cursor: pointer" @click="createChildDoc()">-子文档</i>
+                            <span style="cursor: pointer" @click="createChildDoc()">
+                                <el-icon><CirclePlus /></el-icon>
+                                -子文档
+                            </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.edit">
-                            <i class="el-icon-edit" style="cursor: pointer" @click="editDoc()">-编辑</i>
+                            <span style="cursor: pointer" @click="editDoc()">
+                                <el-icon><Edit /></el-icon>
+                                -编辑
+                            </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.copy">
-                            <i class="el-icon-document-copy" style="cursor: pointer" @click="copyDoc()">-复制</i>
+                            <span style="cursor: pointer" @click="copyDoc()">
+                                <el-icon><DocumentCopy /></el-icon>
+                                -复制
+                            </span>
                         </el-col>
                     </el-row>
                 </div>
@@ -271,7 +308,9 @@
         <!-- ========== ========== ========== 右侧快捷按钮：大纲导航 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
         <div style="position: fixed; top: 50px; right: 20px; z-index: 9999">
-            <el-button type="success" icon="el-icon-tickets" circle @click="isShowAnchor = !isShowAnchor"></el-button>
+            <el-button type="success" circle @click="isShowAnchor = !isShowAnchor">
+                <el-icon><Tickets /></el-icon>
+            </el-button>
         </div>
     </div>
 </template>
@@ -284,6 +323,7 @@ import { mdFormat } from '../../utils/mdtools';
 import { length } from '../../utils/strings';
 import { avatarImage } from '../../utils/users.js';
 import DocIlinkRelation from './components/DocIlinkRelation';
+import { copy } from '../../utils/clipboard.js';
 
 export default {
     data() {
@@ -304,6 +344,7 @@ export default {
             collected: {},
             docId: '',
             doc: {},
+            url: '',
             contributors: [],
             titles: [],
             thumbCount: 0,
@@ -342,6 +383,15 @@ export default {
         this.docId = this.$route.params.docId;
     },
     methods: {
+        copyShareUrl() {
+            let s = '[' + this.collected.name + ' / ' + this.doc.title + '] ' + location.href;
+            copy(s);
+            ElMessage({
+                message: '复制成功',
+                type: 'success',
+                duration: 1 * 1000
+            });
+        },
         length(s) {
             return length(s);
         },
@@ -697,6 +747,15 @@ export default {
             });
             window.open(routeData.path, '_blank');
         },
+        history() {
+            console.log('查看历史');
+
+            let routeData = this.$router.resolve({
+                name: 'workbench_history',
+                params: { collectedId: this.collected.id, docId: this.doc.id }
+            });
+            window.open(routeData.path, '_blank');
+        },
         createDoc() {
             console.log('创建文档');
 
@@ -708,6 +767,7 @@ export default {
                 params: { collectedId: this.collected.id, docId: '_create', parentDocId: parentDocId, copyDocId: '_none' }
             });
             window.open(routeData.path, '_blank');
+            // this.$router.push(routeData.path);
         },
         createChildDoc() {
             console.log('创建子文档');
@@ -717,6 +777,7 @@ export default {
                 params: { collectedId: this.collected.id, docId: '_create', parentDocId: this.doc.id, copyDocId: '_none' }
             });
             window.open(routeData.path, '_blank');
+            // this.$router.push(routeData.path);
         },
         // 编辑
         editDoc() {
@@ -776,11 +837,11 @@ export default {
 
 /* 树自定义样式 */
 .el-tree-node__content {
-    width: 240px;
-    height: 40px;
+    width: 269px;
+    height: 35px;
     font-size: 14px;
-    line-height: 50px;
-    border-bottom: 1px dashed lightgrey;
+    line-height: 35px;
+    /* border-bottom: 1px dashed lightgrey; */
     overflow: hidden;
     text-overflow: ellipsis;
 }

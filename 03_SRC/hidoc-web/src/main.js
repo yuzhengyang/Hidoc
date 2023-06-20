@@ -100,6 +100,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 // import mermaid from 'mermaid';
 // mermaid.initialize({ startOnLoad: true });
 
+
 const app = createApp(App);
 app.use(router);
 app.use(store);
