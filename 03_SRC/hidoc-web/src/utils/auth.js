@@ -4,6 +4,7 @@ const TokenKey = 'Admin-Token';
 const RealNameKey = 'User-RealName';
 const VipLevel = 'User-VipLevel';
 const Roles = 'User-Roles';
+const Avatar = 'User-Avatar';
 
 export function getToken() {
     return Cookies.get(TokenKey);
@@ -25,6 +26,14 @@ export function getRealName() {
 export function setRealName(name) {
     console.log('name: ' + name);
     return Cookies.set(RealNameKey, name);
+}
+
+export function setAvatar(avatar) { 
+    return Cookies.set(Avatar, avatar);
+}
+
+export function getAvatar() {
+    return Cookies.get(Avatar);
 }
 
 export function removeRealName() {

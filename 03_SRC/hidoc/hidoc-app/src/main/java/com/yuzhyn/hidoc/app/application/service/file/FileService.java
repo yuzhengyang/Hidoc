@@ -1,4 +1,4 @@
-package com.yuzhyn.hidoc.app.application.service;
+package com.yuzhyn.hidoc.app.application.service.file;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
@@ -41,33 +41,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <div javadoc="info" javadoc-cn="一句话精简概括">
- *     文件处理
- * </div>
- *
- * <div javadoc="scene" javadoc-cn="使用场景说明">
- *     操作文件时，使用文件处理服务，可快速完成响应操作
- * </div>
- *
- * <div javadoc="limit" javadoc-cn="使用限制说明">
- *     暂无限制
- * </div>
- *
- * <div javadoc="code" javadoc-cn="使用代码示例">
- *     声明
- *     ```java
- *     @Autowired
- *     FileService fileService;
- *     ```
- * </div>
- *
- * <div javadoc="log" javadoc-cn="修改日志">
- * 版本         修改时间       修改人           修改内容
- * 1.0.0.0     2021-11-17     yuzhengyang     增加注释内容
- * </div>
- *
- * @author yuzhengyang
- * @version 1.0
+ * 件处理
+ * 操作文件时，使用文件处理服务，可快速完成响应操作
  */
 @Slf4j
 @Service

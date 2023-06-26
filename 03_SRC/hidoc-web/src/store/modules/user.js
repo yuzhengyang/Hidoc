@@ -1,12 +1,12 @@
-import { register, login, logout, getInfo } from '@/api/user';
-import { getToken, setToken, removeToken, getRealName, setRealName, removeRealName, getVipLevel, setVipLevel, removeVipLevel, getRoles, setRoles, removeRoles } from '@/utils/auth';
+import { register, login, logout  } from '@/api/user';
+import { getToken, setToken, removeToken, getRealName, setRealName, removeRealName, setAvatar, getAvatar, getVipLevel, setVipLevel, removeVipLevel, getRoles, setRoles, removeRoles } from '@/utils/auth';
 import router from '@/router';
 
 const state = {
     token: getToken(),
     realName: getRealName(),
     name: getRealName(),
-    avatar: '',
+    avatar: getAvatar(),
     introduction: '',
     roles: getRoles(),
     id: '',
@@ -64,9 +64,11 @@ const actions = {
                     commit('SET_ROLES', response.meta.sysUser.roles);
                     commit('SET_ID', response.meta.sysUser.id);
                     commit('SET_VIP_LEVEL', response.meta.sysUser.vipLevel);
+                    commit('SET_AVATAR', response.meta.sysUser.avatar); // 有效
                     setToken(response.token);
                     setRoles(response.meta.sysUser.roles);
                     setRealName(response.meta.sysUser.realName);
+                    setAvatar(response.meta.sysUser.avatar);
                     resolve();
                 })
                 .catch(error => {
@@ -75,38 +77,38 @@ const actions = {
         });
     },
 
-    // get user info
-    getInfo({ commit, state }) {
-        debugger;
-        return new Promise((resolve, reject) => {
-            getInfo(state.token)
-                .then(response => {
-                    debugger;
+    // // get user info
+    // getInfo({ commit, state }) {
+    //     debugger;
+    //     return new Promise((resolve, reject) => {
+    //         getInfo(state.token)
+    //             .then(response => {
+    //                 debugger;
 
-                    const { data } = response;
+    //                 const { data } = response;
 
-                    if (!data) {
-                        reject('Verification failed, please Login again.');
-                    }
+    //                 if (!data) {
+    //                     reject('Verification failed, please Login again.');
+    //                 }
 
-                    const { roles, name, avatar, introduction } = data;
+    //                 const { roles, name, avatar, introduction } = data;
 
-                    // roles must be a non-empty array
-                    if (!roles || roles.length <= 0) {
-                        reject('getInfo: roles must be a non-null array!');
-                    }
+    //                 // roles must be a non-empty array
+    //                 if (!roles || roles.length <= 0) {
+    //                     reject('getInfo: roles must be a non-null array!');
+    //                 }
 
-                    commit('SET_ROLES', roles);
-                    commit('SET_NAME', name);
-                    commit('SET_AVATAR', avatar);
-                    commit('SET_INTRODUCTION', introduction);
-                    resolve(data);
-                })
-                .catch(error => {
-                    reject(error);
-                });
-        });
-    },
+    //                 commit('SET_ROLES', roles);
+    //                 commit('SET_NAME', name);
+    //                 commit('SET_AVATAR', avatar);
+    //                 commit('SET_INTRODUCTION', introduction);
+    //                 resolve(data);
+    //             })
+    //             .catch(error => {
+    //                 reject(error);
+    //             });
+    //     });
+    // },
 
     // user logout
     logout({ commit, state, dispatch }) {
@@ -143,25 +145,25 @@ const actions = {
         });
     },
 
-    // dynamically modify permissions
-    async changeRoles({ commit, dispatch }, role) {
-        const token = role + '-token';
-        debugger;
-        commit('SET_TOKEN', token);
-        setToken(token);
+    // // dynamically modify permissions
+    // async changeRoles({ commit, dispatch }, role) {
+    //     const token = role + '-token';
+    //     debugger;
+    //     commit('SET_TOKEN', token);
+    //     setToken(token);
 
-        const { roles } = await dispatch('getInfo');
+    //     const { roles } = await dispatch('getInfo');
 
-        // resetRouter();
+    //     // resetRouter();
 
-        // generate accessible routes map based on roles
-        const accessRoutes = await dispatch('permission/generateRoutes', roles, { root: true });
-        // dynamically add accessible routes
-        router.addRoutes(accessRoutes);
+    //     // generate accessible routes map based on roles
+    //     const accessRoutes = await dispatch('permission/generateRoutes', roles, { root: true });
+    //     // dynamically add accessible routes
+    //     router.addRoutes(accessRoutes);
 
-        // reset visited views and cached views
-        dispatch('tagsView/delAllViews', null, { root: true });
-    }
+    //     // reset visited views and cached views
+    //     dispatch('tagsView/delAllViews', null, { root: true });
+    // }
 };
 
 export default {

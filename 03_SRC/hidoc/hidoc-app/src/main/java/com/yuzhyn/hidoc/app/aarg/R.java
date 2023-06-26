@@ -28,10 +28,6 @@ public final class R {
     public static final String AppNameCH = "Hidoc文档";
     public static final String AppNameCHShort = "文档";
     public static final String AppId = "";
-    /**
-     * 文档素材文件夹名称
-     */
-    public static final String HidocFileBucket  = ".hidoc";
     public static final LocalDateTime StartTime = LocalDateTime.now();
     public static String MachineId = "";
     public static int WorkerId = -1;
@@ -90,5 +86,17 @@ public final class R {
         public static final String MachineInfo = DirTool.combine(Paths.Properties, "machine_info.properties");
         public static final String AccessInfo = DirTool.combine(Paths.Properties, "access_info.properties");
         public static final String StatusInfo = DirTool.combine(Paths.Properties, "status_info.properties");
+    }
+
+    public static class Buckets {
+
+        /**
+         * 文档素材文件夹名称
+         */
+        public static final String HidocFile = ".hidoc";
+        /**
+         * 头像文件夹
+         */
+        public static final String Avatar = ".avatar";
     }
 }

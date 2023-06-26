@@ -39,10 +39,6 @@
                     <el-icon><Box /></el-icon>
                     <template #title>数据收集器 *</template>
                 </el-menu-item>
-                <el-menu-item index="8010" v-if="user.roles.includes('sa')" @click="changeMenu(8010)">
-                    <el-icon><Odometer /></el-icon>
-                    <template #title>剂量控制器 *</template>
-                </el-menu-item>
                 <el-menu-item index="8020" v-if="user.roles.includes('sa')" @click="changeMenu(8020)">
                     <el-icon><Notification /></el-icon>
                     <template #title>服务管理 *</template>
@@ -79,7 +75,6 @@
             <file-manager v-if="this.currentMenuIndex == 3010"></file-manager>
             <java-doc v-if="this.currentMenuIndex == 7000"></java-doc>
             <data-collector v-if="this.currentMenuIndex == 8000"></data-collector>
-            <dose-controller v-if="this.currentMenuIndex == 8010"></dose-controller>
             <server-manager v-if="this.currentMenuIndex == 8020"></server-manager>
             <user-info v-if="this.currentMenuIndex == 9000"></user-info>
             <user-roles v-if="this.currentMenuIndex == 9900"></user-roles>
@@ -104,7 +99,6 @@ import Laboratory from './components/Laboratory';
 import DataCollector from './components/DataCollector';
 import RecycleBin from './components/RecycleBin';
 import JavaDoc from './components/JavaDoc';
-import DoseController from './components/DoseController';
 import ServerManager from './components/ServerManager';
 import TeamManager from './components/TeamManager';
 import UserRoles from './components/UserRoles';
@@ -147,7 +141,7 @@ export default {
         this.user.roles = this.$store.state.user.roles;
         document.title = 'Hidoc-工作台';
     },
-    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc, ServerManager, DoseController, DocComment, TeamManager, UserRoles, SystemConfig, SystemStatus },
+    components: { DashBoard, DocTabPage, FileManager, UserInfo, MaterialLibrary, Laboratory, DataCollector, RecycleBin, JavaDoc, ServerManager, DocComment, TeamManager, UserRoles, SystemConfig, SystemStatus },
     methods: {
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);
@@ -190,9 +184,6 @@ export default {
                     break;
                 case 8000:
                     document.title = 'Hidoc-数据收集器';
-                    break;
-                case 8010:
-                    document.title = 'Hidoc-剂量控制器';
                     break;
                 case 8020:
                     document.title = 'Hidoc-服务管理';

@@ -1,6 +1,6 @@
 <template>
     <el-row style="padding: 50px">
-        <el-col :span="16">系统状态</el-col>
+        <el-col :span="16">系统状态，提供访问状态，资源状态反馈系统的运行情况</el-col>
     </el-row>
     <el-row style="margin-top: 20px; margin-bottom: 20px">
         <el-col :span="24">

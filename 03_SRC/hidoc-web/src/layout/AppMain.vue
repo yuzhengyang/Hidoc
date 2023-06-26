@@ -20,17 +20,18 @@
                         </el-input> -->
                     </div>
                 </el-col>
-                <el-col :span="6">
+                <el-col :span="5">
                     <div class="grid-content bg-purple"></div>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="5">
                     <div v-if="this.$store.state.user.token == undefined || this.$store.state.user.token == ''" class="grid-content">
-                        <el-button type="text" size="small" @click="register">
-                            <i class="el-icon-user"></i>
-                            注册
-                        </el-button>
-                        <el-button type="text">|</el-button>
-                        <el-button type="text" size="small" @click="login">登录</el-button>
+                        <el-link :underline="false" @click="register" style="font-size: 12px">
+                            <el-icon><User /></el-icon>
+                            <span>&nbsp;注册</span>
+                        </el-link>
+                        <el-link :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
+                        <el-link :underline="false" @click="login" style="font-size: 12px">登录</el-link>
+
                         <!-- <el-dropdown>
                             <el-button type="text">
                                 <i class="el-icon-ship"></i>
@@ -52,16 +53,17 @@
                         </el-dropdown> -->
                     </div>
                     <div v-else class="grid-content">
-                        <el-button type="text" size="small" @click="workbench">
+                        <el-link :underline="false" @click="workbench" style="font-size: 12px">
                             <el-icon><Monitor /></el-icon>
-                            <span>工作台</span>
-                        </el-button>
-                        <el-button type="text">|</el-button>
+                            <span>&nbsp;工作台</span>
+                        </el-link>
+                        <el-link :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
                         <el-dropdown style="vertical-align: middle">
-                            <el-button type="text" size="small" style="padding-left: 8px">
+                            <el-link :underline="false" style="font-size: 12px">
+                                <el-avatar :size="22" :src="currentAvatar(this.$store.state.user.avatar)" style="margin: 5px" shape="square" />
                                 {{ this.$store.state.user.name }}
                                 <el-icon><ArrowDown /></el-icon>
-                            </el-button>
+                            </el-link>
                             <template #dropdown>
                                 <el-dropdown-menu>
                                     <el-dropdown-item @click="changePasswordDialogVisible = true">
@@ -129,6 +131,7 @@ export default {
     },
     mounted() {
         var user = this.$store.state.user;
+        console.log(user);
     },
     methods: {
         gotoPage(page) {

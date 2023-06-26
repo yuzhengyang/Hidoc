@@ -29,6 +29,7 @@ import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteOnlineMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserMapper;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
+import com.yuzhyn.hidoc.app.application.service.file.FileBucketService;
 import com.yuzhyn.hidoc.app.application.service.sys.AuthCodeService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
@@ -80,6 +81,9 @@ public class UserController {
 
     @Autowired
     AuthCodeService authCodeService;
+
+    @Autowired
+    FileBucketService fileBucketService;
 
     /**
      * 用户注册
@@ -147,12 +151,8 @@ public class UserController {
                 conf.setUsedSpace(0L);
                 sysUserFileConfMapper.insert(conf);
 
-                FileBucket fileBucket = new FileBucket();
-                fileBucket.setId(R.SnowFlake.nexts());
-                fileBucket.setIsOpen(true);
-                fileBucket.setName(R.HidocFileBucket);
-                fileBucket.setUserId(user.getId());
-                fileBucketMapper.insert(fileBucket);
+                fileBucketService.createSystemDefaultBucket(R.Buckets.HidocFile, user.getId());
+                fileBucketService.createSystemDefaultBucket(R.Buckets.Avatar, user.getId());
 
                 return ResponseData.okData("sysUser", user);
             }
@@ -392,14 +392,24 @@ public class UserController {
     }
 
     /**
-     * ！未使用！更新当前用户信息
+     * 更新当前用户信息
      *
      * @return
      */
     @PostMapping("updateCurrentUserInfo")
-    public ResponseData updateCurrentUserInfo() {
-        ResponseData responseData = ResponseData.ok();
-        return responseData;
+    public ResponseData updateCurrentUserInfo(@RequestBody Map<String, Object> params) {
+        String type = MapTool.get(params, "type", "").toString();
+        String value = MapTool.get(params, "value", "").toString();
+        if (StringTool.ok(type, value)) {
+            SysUser sysUser = sysUserMapper.selectById(CurrentUserManager.getUserId());
+            if (sysUser == null) return ResponseData.error();
+
+            if ("realName".equals(type)) sysUser.setRealName(value);
+            if ("avatar".equals(type)) sysUser.setAvatar(value);
+
+            if (sysUserMapper.updateById(sysUser) > 0) return ResponseData.ok();
+        }
+        return ResponseData.error();
     }
 
     /**

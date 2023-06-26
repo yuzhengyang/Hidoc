@@ -1,19 +1,7 @@
 <template>
     <el-row style="padding: 50px">
         <el-col :span="16">
-            <el-form ref="form" :model="form" label-width="180px">
-                <el-form-item label="姓名（中文）">
-                    <el-input v-model="form.name"></el-input>
-                </el-form-item>
-
-                <el-form-item label="邮箱">
-                    <el-input v-model="form.email"></el-input>
-                </el-form-item>
-
-                <el-form-item label="文件空间">
-                    <el-progress :stroke-width="30" :text-inside="true" :percentage="100 - this.fileConf.spaceUsage" :format="format"></el-progress>
-                </el-form-item>
-            </el-form>
+            系统设置，提供对系统设置参数进行修改
         </el-col>
     </el-row>
 </template>

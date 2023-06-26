@@ -1,19 +1,63 @@
 <template>
-    <el-tabs type="card" @tab-click="handleClick" style="padding: 10px">
+    <el-tabs type="card" style="padding: 10px">
         <el-tab-pane label="基础信息">
-            <el-row style="padding: 50px">
-                <el-col :span="16">
-                    <el-form ref="form" :model="form" label-width="180px">
-                        <el-form-item label="姓名（中文）">
-                            <el-input v-model="form.name"></el-input>
-                        </el-form-item>
+            <!-- <el-row>
+                <el-col :span="9">
+                    <div style="text-align: center; margin-bottom: 20px">
+                        <el-popover placement="bottom" trigger="manual" :width="400" v-model:visible="selectAvatarPanelVisible">
+                            <template #reference>
+                                
+                            </template>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-row>
+                                        <el-col :span="4" v-for="item in systemAvatarList" :key="item">
+                                            <el-avatar :src="require('../../../assets/avatar/' + item.name)" :size="40" style="cursor: pointer" @click="selectAvatar(item.name)"></el-avatar>
+                                        </el-col>
+                                    </el-row>
+                                </el-col>
+                            </el-row>
+                        </el-popover>
+                    </div>
+                </el-col>
+            </el-row>
+            <hr /> -->
 
+            <el-row>
+                <el-col :span="16" :offset="2" style="text-align: center; padding: 30px">
+                    <el-upload :action="fileUploadUrl" :data="{ bucketName: '.avatar' }" :headers="headers" :show-file-list="false" :on-success="uploadAvatarSuccess" accept="image/*">
+                        <div v-if="user.avatar == undefined || user.avatar == ''">
+                            <el-avatar :size="200" style="cursor: pointer">
+                                <el-icon style="font-size: 60px"><UserFilled /></el-icon>
+                            </el-avatar>
+                        </div>
+                        <div v-else>
+                            <el-avatar :size="200" style="cursor: pointer" :src="currentAvatar()"></el-avatar>
+                        </div>
+
+                        <template #tip>
+                            <div class="el-upload__tip">点击头像上传图片</div>
+                        </template>
+                    </el-upload>
+                </el-col>
+            </el-row>
+
+            <el-row>
+                <el-col :span="16" :offset="2">
+                    <el-form label-width="120px">
+                        <el-form-item label="姓名">
+                            <el-col :span="16">
+                                <el-input v-model="user.realName" maxlength="20" show-word-limit />
+                            </el-col>
+                            <el-col :span="4" :offset="1">
+                                <!-- <button>更新姓名</button> -->
+                            </el-col>
+                        </el-form-item>
                         <el-form-item label="邮箱">
-                            <el-input v-model="form.email"></el-input>
+                            <el-input v-model="user.email" disabled />
                         </el-form-item>
-
                         <el-form-item label="文件空间">
-                            <el-progress :stroke-width="30" :text-inside="true" :percentage="100 - this.fileConf.spaceUsage" :format="format"></el-progress>
+                            <div style="width: 100%; text-align: left"><el-progress :stroke-width="30" :text-inside="true" :percentage="fileConf.spaceUsage ? 100 - fileConf.spaceUsage : 0" :format="format"></el-progress></div>
                         </el-form-item>
                     </el-form>
                 </el-col>
@@ -30,10 +74,10 @@
                             <template #default="scope">
                                 <div class="name-wrapper">
                                     <div v-if="scope.row.expired">
-                                        <el-tag size="medium" type="danger">已过期</el-tag>
+                                        <el-tag size="small" type="danger">已过期</el-tag>
                                     </div>
                                     <div v-else>
-                                        <el-tag size="medium">正常</el-tag>
+                                        <el-tag size="small">正常</el-tag>
                                     </div>
                                 </div>
                             </template>
@@ -42,10 +86,10 @@
                             <template #default="scope">
                                 <div class="name-wrapper">
                                     <div v-if="this.$store.state.user.token == scope.row.token">
-                                        <el-tag size="medium">是</el-tag>
+                                        <el-tag size="small">是</el-tag>
                                     </div>
                                     <div v-else>
-                                        <!-- <el-tag size="medium" type="danger">-</el-tag> -->
+                                        <!-- <el-tag size="small" type="danger">-</el-tag> -->
                                     </div>
                                 </div>
                             </template>
@@ -55,7 +99,7 @@
                                 <el-popover placement="top-start" :width="200" trigger="click">
                                     <p>拉黑IP将导致无法通过该IP登录，确认继续吗？</p>
                                     <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="blockIp(scope.row)">确定</el-button>
+                                        <el-button type="danger" size="small" @click="blockIp(scope.row)">确定</el-button>
                                     </div>
                                     <template #reference>
                                         <el-button type="text" size="small">拉黑IP</el-button>
@@ -65,7 +109,7 @@
                                 <el-popover placement="top-start" :width="200" trigger="click">
                                     <p>确定下线该设备吗？</p>
                                     <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="forceLogout(scope.row)">确定</el-button>
+                                        <el-button type="danger" size="small" @click="forceLogout(scope.row)">确定</el-button>
                                     </div>
                                     <template #reference>
                                         <el-button type="text" size="small">强制下线</el-button>
@@ -83,35 +127,54 @@
 <script>
 import { ElMessage } from 'element-plus';
 import request from '../../../utils/request.js';
+import { avatarImage } from '../../../utils/users.js';
+import { config } from '@/utils/config';
+import { getToken } from '@/utils/auth';
 export default {
     data() {
         return {
-            form: {
-                name: '',
-                email: ''
-            },
+            headers: [],
+            fileUploadUrl: '',
             user: {},
             fileConf: {},
             tableData: []
         };
     },
     mounted() {
-        request({
-            url: '/user/currentUserInfo',
-            method: 'post'
-        }).then(res => {
-            if (res.code == 0) {
-                this.user = res.meta.user;
-                this.fileConf = res.meta.fileConf;
-
-                this.form.name = this.user.realName;
-                this.form.email = this.user.email;
-            }
-        });
-
+        this.headers['Access-Token'] = getToken();
+        this.fileUploadUrl = config().baseServer + 'f/u';
+        this.getCurrentUserInfo();
         this.getLoginUserInfo();
     },
     methods: {
+        currentAvatar() {
+            return avatarImage(this.user.avatar);
+        },
+        uploadAvatarSuccess(response, file, fileList) {
+            debugger;
+            if (response.code == 0) {
+                request({
+                    url: '/user/updateCurrentUserInfo',
+                    method: 'post',
+                    data: { type: 'avatar', value: response.data[0].uname }
+                }).then(res => {
+                    if (res.code == 0) {
+                        this.getCurrentUserInfo();
+                    }
+                });
+            }
+        },
+        getCurrentUserInfo() {
+            request({
+                url: '/user/currentUserInfo',
+                method: 'post'
+            }).then(res => {
+                if (res.code == 0) {
+                    this.user = res.meta.user;
+                    this.fileConf = res.meta.fileConf;
+                }
+            });
+        },
         getLoginUserInfo() {
             request({
                 url: '/user/getLoginUserInfo',
