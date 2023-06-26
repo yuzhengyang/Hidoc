@@ -5,10 +5,10 @@
                 <el-alert title="您可以在此查看文档中上传使用的素材，包括图片、视频。" type="success" :closable="false" />
             </el-row>
         </el-header>
-        <el-main style="height: 100%">
+        <el-main style="height: 100%" id="fileContainer">
             <el-row>
-                <el-col :span="4" v-for="item in hidocFileList" :key="item">
-                    <el-card style="padding-left: 5px; padding-right: 5px">
+                <el-col :span="6" v-for="item in hidocFileList" :key="item">
+                    <el-card>
                         <div style="font-size: 14px">
                             <p>{{ item.collectedName }} [{{ item.collectedOwnerName }}]</p>
                         </div>
@@ -39,7 +39,7 @@
                             <div style="padding-top: 2px">查看：{{ item.downloadTime }}</div>
                             <div style="padding-top: 2px; height: 20px">
                                 <div style="float: left">查看次数：{{ item.downloadCount }}</div>
-                                <div style="float: right; padding-right: 10px ;">{{ parseInt(item.size / 1024 / 1024) }} MB</div>
+                                <div style="float: right; padding-right: 10px">{{ parseInt(item.size / 1024 / 1024) }} MB</div>
                             </div>
                         </div>
                     </el-card>
@@ -47,7 +47,7 @@
             </el-row>
         </el-main>
         <el-footer style="height: 30px; width: 100%; text-align: center">
-            <el-pagination background layout="prev, pager, next" :currentPage="this.currentPage" :pageSize="this.pageSize" :total="this.dataTotal" @currentChange="getHidocFileList" style="text-align: center" />
+            <el-pagination background layout="total, prev, pager, next, jumper" :currentPage="this.currentPage" :pageSize="this.pageSize" :total="this.dataTotal" @currentChange="getHidocFileList" style="margin-top: 5px" />
         </el-footer>
     </el-container>
     <!-- <template #default="scope">
@@ -74,7 +74,7 @@ export default {
     data() {
         return {
             currentPage: 1,
-            pageSize: 100,
+            pageSize: 40,
             dataTotal: 0,
             hidocFileList: []
         };
@@ -120,6 +120,7 @@ export default {
                 if (res.code == 0) {
                     this.hidocFileList = res.data;
                     this.dataTotal = res.total;
+                    document.getElementById('fileContainer').scrollTop = 0;
                 }
             });
         },
