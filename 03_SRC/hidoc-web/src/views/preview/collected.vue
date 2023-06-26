@@ -88,19 +88,23 @@
                         <el-col :span="24" :offset="0" style="height: 100px"></el-col>
                         <el-col :span="24" :offset="0" style="font-size: 14px; text-align: center">
                             <p>
-                                <el-button v-if="this.myThumb.isSupporter" type="primary" icon="el-icon-thumb" circle @click="createThumb"></el-button>
-                                <el-button v-else icon="el-icon-thumb" circle @click="createThumb"></el-button>
+                                <el-button :type="this.myThumb.isSupporter ? 'primary' : ''" circle style="width: 60px; height: 60px" @click="createThumb">
+                                    <el-icon style="font-size: 28px"><Pointer /></el-icon>
+                                </el-button>
+                                <!-- <el-button v-else circle style="width: 80px; height: 80px" @click="createThumb">
+                                    <el-icon><Pointer /></el-icon>
+                                </el-button> -->
                             </p>
                             <p>{{ this.thumbCount }} 人点赞</p>
                         </el-col>
                         <el-col :span="24" :offset="0" style="text-align: center">
                             <el-popover :width="300" placement="top" trigger="hover" v-for="item in thumbUserList" :key="item">
                                 <template #reference>
-                                    <el-avatar :size="35" :src="currentAvatar(item.avatar)" style="margin: 10px" />
+                                    <el-avatar :size="60" :src="currentAvatar(item.avatar)" style="margin: 10px" />
                                 </template>
                                 <template #default>
                                     <div class="demo-rich-conent" style="display: flex; gap: 16px; flex-direction: column; padding: 20px">
-                                        <el-avatar :size="60" :src="currentAvatar(item.avatar)" style="margin-bottom: 8px" />
+                                        <el-avatar :size="120" :src="currentAvatar(item.avatar)" style="margin-bottom: 8px" />
                                         <div>
                                             <p class="demo-rich-content__name" style="margin: 0; font-weight: 500">{{ item.realName }}</p>
                                             <p class="demo-rich-content__mention" style="margin: 0; font-size: 14px; color: var(--el-color-info)">{{ item.email }}</p>
@@ -118,7 +122,7 @@
                         <el-col :span="22" :offset="1" style="font-size: 14px; color: #8a8f8d; text-align: left">
                             <el-tooltip class="item" effect="dark" content="参与编辑" placement="top">
                                 <span>
-                                    <i class="el-icon-user" style="padding-right: 3px"></i>
+                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px"><User /></el-icon>
                                     <span v-for="ctor in contributors" :key="ctor" style="padding-right: 8px">
                                         {{ ctor.realName }}
                                     </span>
@@ -126,19 +130,19 @@
                             </el-tooltip>
                             <el-tooltip class="item" effect="dark" :content="'更新于 ' + this.doc.updateTime + ''" placement="top">
                                 <span style="padding-left: 20px">
-                                    <i class="el-icon-time" style="padding-right: 3px"></i>
+                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px"><Clock /></el-icon>
                                     <span>{{ this.doc.updateTime }}</span>
                                 </span>
                             </el-tooltip>
                             <el-tooltip class="item" effect="dark" :content="'浏览次数：' + this.readCount" placement="top">
                                 <span style="padding-left: 20px">
-                                    <i class="el-icon-reading" style="padding-right: 3px"></i>
+                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px"><Reading /></el-icon>
                                     <span>{{ this.readCount }}</span>
                                 </span>
                             </el-tooltip>
                             <el-tooltip class="item" effect="dark" :content="'评论：' + this.commentCount" placement="top">
                                 <span style="padding-left: 20px">
-                                    <i class="el-icon-chat-dot-square" style="padding-right: 3px"></i>
+                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px"><ChatDotSquare /></el-icon>
                                     <span>{{ this.commentCount }}</span>
                                 </span>
                             </el-tooltip>
@@ -148,7 +152,7 @@
                     <!-- 已读用户列表 -->
                     <el-row>
                         <el-col :span="24" :offset="0" style="height: 100px"></el-col>
-                        <el-col :span="17" :offset="4" style="font-size: 14px; text-align: center">
+                        <el-col :span="24" :offset="0" style="font-size: 14px; text-align: center">
                             <el-tag v-for="item in readUserList" :key="item" type="" size="small" effect="plain" round style="margin: 2px; border-radius: 30px">
                                 {{ item.realName }}
                             </el-tag>
@@ -219,7 +223,9 @@
         </div>
         <div style="position: fixed; bottom: 100px; right: 20px; z-index: 9999">
             <el-badge :value="this.thumbCount" class="item" :hidden="this.thumbCount == 0">
-                <el-button v-if="this.myThumb.isSupporter" type="primary" icon="el-icon-thumb" circle @click="createThumb" style="box-shadow: 0px 0px 3px 3px #ddd"></el-button>
+                <el-button v-if="this.myThumb.isSupporter" type="primary" circle @click="createThumb" style="box-shadow: 0px 0px 3px 3px #ddd">
+                    <el-icon><Pointer /></el-icon>
+                </el-button>
                 <el-button v-else circle @click="createThumb" style="box-shadow: 0px 0px 3px 3px #ddd">
                     <el-icon><Pointer /></el-icon>
                 </el-button>
@@ -381,8 +387,21 @@ export default {
         this.getCollected();
 
         this.docId = this.$route.params.docId;
+        window.addEventListener('storage', this.HandleUiMsg);
+    },
+    beforeUnmount() {
+        window.removeEventListener('storage', this.HandleUiMsg);
     },
     methods: {
+        HandleUiMsg(e) {
+            if (e.key == 'ui-msg') {
+                debugger;
+                console.log(e.key, e.newValue, e.oldValue);
+                if (JSON.parse(e.newValue).element == 'doc' && JSON.parse(e.newValue).id == this.docId) {
+                    this.getDoc(this.docId);
+                }
+            }
+        },
         copyShareUrl() {
             let s = '[' + this.collected.name + ' / ' + this.doc.title + '] ' + location.href;
             copy(s);
