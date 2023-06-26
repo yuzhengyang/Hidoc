@@ -66,31 +66,27 @@ public class TeamJoinSchedule {
     @Scheduled(cron = "0 */10 * * * ?")
     public void job() {
         List<Team> teamList = teamMapper.selectList(null);
-        List<SysUserLite> userList = sysUserLiteMapper.selectList(null);
-        if (ListTool.ok(teamList, userList)) {
-            for (Team teamItem : teamList) {
-                for (SysUserLite userItem : userList) {
+        if (!ListTool.ok(teamList)) return;
 
-                    if (teamItem.getJoinRule() == null) break;
-                    if (!teamItem.getJoinRule().containsKey("autoJoinEmailSuffix")) break;
-                    if (!StringTool.ok(teamItem.getJoinRule().getString("autoJoinEmailSuffix"))) break;
+        for (Team teamItem : teamList) {
 
-                    String teamId = teamItem.getId();
-                    String userId = userItem.getId();
-                    String type = "autoJoinEmailSuffix";
-                    String value = "";
-                    String email = userItem.getEmail();
-                    String action = "加入团队-JOB";
+            List<SysUserLite> userList = teamMemberMapper.selectUnJoinUsers(teamItem.getId());
+            if (!ListTool.ok(userList)) return;
 
-                    // 判断用户是否在团队中
-                    Long isJoinTeam = teamMemberMapper.selectCount(new LambdaQueryWrapper<TeamMember>()
-                            .eq(TeamMember::getTeamId, teamId)
-                            .eq(TeamMember::getUserId, userId));
+            for (SysUserLite userItem : userList) {
 
-                    if (isJoinTeam == 0) {
-                        teamMemberService.create(teamId, userId, type, value, email, action, "1");
-                    }
-                }
+                if (teamItem.getJoinRule() == null) break;
+                if (!teamItem.getJoinRule().containsKey("autoJoinEmailSuffix")) break;
+                if (!StringTool.ok(teamItem.getJoinRule().getString("autoJoinEmailSuffix"))) break;
+
+                String teamId = teamItem.getId();
+                String userId = userItem.getId();
+                String type = "autoJoinEmailSuffix";
+                String value = "";
+                String email = userItem.getEmail();
+                String action = "加入团队-JOB";
+
+                teamMemberService.create(teamId, userId, type, value, email, action, "1");
             }
         }
     }
