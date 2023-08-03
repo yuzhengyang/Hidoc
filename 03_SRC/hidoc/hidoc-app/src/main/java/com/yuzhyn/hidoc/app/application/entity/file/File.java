@@ -62,6 +62,9 @@ public class File {
     private LocalDateTime downloadTime;
     private Long downloadCount;
 
+    private String checkStatus;
+    private LocalDateTime checkTime;
+
     /**
      * 根据系统类型，返回处理后的路径
      *

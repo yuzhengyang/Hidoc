@@ -14,40 +14,62 @@
                 </el-button-group>
             </el-row>
             <el-row>
-                <el-col :span="5">
+                <el-col :span="3">
                     <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
                         <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
                     </el-menu>
                 </el-col>
-                <el-col :span="19">
-                    <el-table :data="tableData" style="width: 100%">
-                        <el-table-column prop="fileName" label="标题"></el-table-column>
-                        <el-table-column prop="createTime" label="上传时间"></el-table-column>
-                        <el-table-column prop="expiryTime" label="有效期至"></el-table-column>
-                        <el-table-column prop="historyCount" label="历史版本"></el-table-column>
-                        <el-table-column prop="downloadCount" label="下载次数"></el-table-column>
-                        <el-table-column label="文件大小">
-                            <template #default="scope">
-                                <span>{{ parseInt(scope.row.size / 1024 / 1024) }} MB</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column fixed="right" label="操作" width="200">
-                            <template #default="scope">
-                                <el-button @click="fileHistory(scope.row)" type="text" size="small">历史</el-button>
-                                <el-button @click="fileDownload(scope.row)" type="text" size="small">下载</el-button>
-
-                                <el-popover placement="top-start" :width="200" trigger="click">
-                                    <p>删除操作不可撤回，确定删除吗？</p>
-                                    <div style="text-align: right; margin: 0">
-                                        <el-button type="danger" size="mini" @click="fileDelete(scope.row)">确定删除</el-button>
+                <el-col :span="21">
+                    <el-row>
+                        <el-col :span="4" v-for="item in tableData" :key="item">
+                            <el-card>
+                                <div style="font-size: 14px">
+                                    <p>{{ item.fileName }}</p>
+                                </div>
+                                <div v-if="this.fileType(item.uname) == 'image'">
+                                    <el-image :src="formatImageUrl(item.uname)" style="width: 100%; height: 100px" fit="cover" :preview-src-list="[formatImageUrl(item.uname)]" lazy />
+                                </div>
+                                <div v-else-if="this.fileType(item.uname) == 'video'">
+                                    <el-image style="width: 100%; height: 100px; background-color: rgba(0, 166, 255, 0.786); text-align: center">
+                                        <template #error>
+                                            <div class="image-slot">
+                                                <el-icon style="font-size: 50px; margin-top: 20px; color: antiquewhite"><VideoPlay /></el-icon>
+                                            </div>
+                                        </template>
+                                    </el-image>
+                                </div>
+                                <div v-else>
+                                    <el-image style="width: 100%; height: 100px; background-color: rgba(81, 81, 81, 0.786); text-align: center">
+                                        <template #error>
+                                            <div class="image-slot">
+                                                <el-icon style="font-size: 50px; margin-top: 20px; color: rgb(255, 255, 255)"><Document /></el-icon>
+                                            </div>
+                                        </template>
+                                    </el-image>
+                                </div>
+                                <div style="font-size: 12px">
+                                    <div style="padding-top: 2px">{{ item.createTime }}</div>
+                                    <div style="padding-top: 2px">{{ item.expiryTime }}</div>
+                                    <div style="padding-top: 2px">历史：{{ item.historyCount }}</div>
+                                    <div style="padding-top: 2px">大小：{{ parseInt(item.size / 1024 / 1024) }} MB</div>
+                                    <div style="padding-top: 2px">下载：{{ item.downloadCount }}</div>
+                                    <div style="padding-top: 2px">
+                                        <el-button @click="fileHistory(item)" type="text" size="mini">历史</el-button>
+                                        <el-button @click="fileDownload(item)" type="text" size="mini">下载</el-button>
+                                        <el-popover placement="top-start" :width="200" trigger="click">
+                                            <p>删除操作不可撤回，确定删除吗？</p>
+                                            <div style="text-align: right; margin: 0">
+                                                <el-button type="danger" size="mini" @click="fileDelete(item)">确定删除</el-button>
+                                            </div>
+                                            <template #reference>
+                                                <el-button type="text" size="mini">删除</el-button>
+                                            </template>
+                                        </el-popover>
                                     </div>
-                                    <template #reference>
-                                        <el-button type="text" size="small">删除</el-button>
-                                    </template>
-                                </el-popover>
-                            </template>
-                        </el-table-column>
-                    </el-table>
+                                </div>
+                            </el-card>
+                        </el-col>
+                    </el-row>
                 </el-col>
             </el-row>
         </el-main>
@@ -271,6 +293,39 @@ export default {
             console.log('uploadCallback');
             console.log(data);
             this.getBucketFiles();
+        },
+        fileType(name) {
+            let extName = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
+            switch (extName) {
+                case 'png':
+                case 'jpg':
+                case 'gif':
+                    return 'image';
+                case 'mp4':
+                    return 'video';
+            }
+            return '';
+        },
+        formatImageUrl(uname) {
+            return config().imageServer + uname;
+        },
+        getHidocFileList(current) {
+            this.currentPage = current;
+            request({
+                url: '/file/hidocList',
+                method: 'post',
+                data: {
+                    token: this.$store.state.user.token,
+                    current: this.currentPage,
+                    size: this.pageSize
+                }
+            }).then(res => {
+                if (res.code == 0) {
+                    this.hidocFileList = res.data;
+                    this.dataTotal = res.total;
+                    document.getElementById('fileContainer').scrollTop = 0;
+                }
+            });
         }
     }
 };

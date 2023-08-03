@@ -1,5 +1,5 @@
-import { register, login, logout  } from '@/api/user';
-import { getToken, setToken, removeToken, getRealName, setRealName, removeRealName, setAvatar, getAvatar, getVipLevel, setVipLevel, removeVipLevel, getRoles, setRoles, removeRoles } from '@/utils/auth';
+import { register, login, logout } from '@/api/user';
+import { getToken, setToken, removeToken, getRealName, setRealName, removeRealName, setAvatar, getAvatar, getVipLevel, setVipLevel, removeVipLevel, getRoles, setRoles, removeRoles, setEmail, getEmail } from '@/utils/auth';
 import router from '@/router';
 
 const state = {
@@ -10,7 +10,8 @@ const state = {
     introduction: '',
     roles: getRoles(),
     id: '',
-    vipLevel: 0
+    vipLevel: 0,
+    email: getEmail()
 };
 
 const mutations = {
@@ -34,6 +35,12 @@ const mutations = {
     },
     SET_VIP_LEVEL: (state, vipLevel) => {
         state.vipLevel = vipLevel;
+    },
+    SET_REAL_NAME: (state, realName) => {
+        state.realName = realName;
+    },
+    SET_EMAIL: (state, email) => {
+        state.email = email;
     }
 };
 
@@ -65,10 +72,15 @@ const actions = {
                     commit('SET_ID', response.meta.sysUser.id);
                     commit('SET_VIP_LEVEL', response.meta.sysUser.vipLevel);
                     commit('SET_AVATAR', response.meta.sysUser.avatar); // 有效
+                    commit('SET_REAL_NAME', response.meta.sysUser.realName);
                     setToken(response.token);
                     setRoles(response.meta.sysUser.roles);
                     setRealName(response.meta.sysUser.realName);
                     setAvatar(response.meta.sysUser.avatar);
+
+                    commit('SET_EMAIL', response.meta.sysUser.email);
+                    setEmail(response.meta.sysUser.email);
+
                     resolve();
                 })
                 .catch(error => {
@@ -143,7 +155,7 @@ const actions = {
             removeToken();
             resolve();
         });
-    },
+    }
 
     // // dynamically modify permissions
     // async changeRoles({ commit, dispatch }, role) {

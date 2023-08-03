@@ -116,6 +116,8 @@
 <script>
 import request from '../utils/request.js';
 import { avatarImage } from '../utils/users.js';
+import watermark from '../utils/watermark';
+
 export default {
     name: 'AppMain',
     components: {},
@@ -132,6 +134,9 @@ export default {
     mounted() {
         var user = this.$store.state.user;
         console.log(user);
+        if (user) {
+            watermark.set(user.realName, user.email);
+        }
     },
     methods: {
         gotoPage(page) {

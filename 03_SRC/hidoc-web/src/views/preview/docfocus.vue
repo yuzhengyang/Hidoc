@@ -15,6 +15,8 @@
 import request from '../../utils/request.js';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { mdFormat } from '../../utils/mdtools';
+import watermark from '../../utils/watermark';
+
 export default {
     data() {
         return {
@@ -26,6 +28,12 @@ export default {
 
         console.log('docId:' + this.$route.params.docId);
         this.getDoc(this.$route.params.docId);
+
+        var user = this.$store.state.user;
+        console.log(user);
+        if (user) {
+            watermark.set(user.realName, user.email);
+        }
     },
     methods: {
         getDoc(id) {

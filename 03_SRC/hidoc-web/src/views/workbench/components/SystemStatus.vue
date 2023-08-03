@@ -1,12 +1,19 @@
 <template>
     <el-row style="padding: 50px">
-        <el-col :span="16">系统状态，提供访问状态，资源状态反馈系统的运行情况</el-col>
+        <el-col :span="16">展示系统实时状态和检查状态，了解系统健康情况</el-col>
     </el-row>
-    <el-row style="margin-top: 20px; margin-bottom: 20px">
-        <el-col :span="24">
-            <div id="elapsedTimeChart" :style="{ width: '100%', height: '600px' }"></div>
-        </el-col>
-    </el-row>
+    <el-tabs tab-position="left">
+        <el-tab-pane label="系统状态">
+            <el-row style="margin-top: 20px; margin-bottom: 20px">
+                <el-col :span="24">
+                    <div id="elapsedTimeChart" :style="{ width: '100%', height: '600px' }"></div>
+                </el-col>
+            </el-row>
+        </el-tab-pane>
+        <el-tab-pane label="访问状态">Config</el-tab-pane>
+        <el-tab-pane label="资源状态">Role</el-tab-pane>
+        <el-tab-pane label="文件检查">Role</el-tab-pane>
+    </el-tabs>
 </template>
 
 <script>
@@ -54,7 +61,7 @@ export default {
             let option = {
                 xAxis: {
                     type: 'time',
-                    name: '时间轴',
+                    name: '时间轴'
                 },
                 yAxis: {
                     type: 'value',

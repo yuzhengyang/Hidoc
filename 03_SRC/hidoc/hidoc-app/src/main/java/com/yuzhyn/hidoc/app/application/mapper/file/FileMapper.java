@@ -15,6 +15,7 @@ public interface FileMapper extends BaseMapper<File> {
 
     /**
      * 查询CURSOR已经删除，并且该文件所有引用都已删除
+     *
      * @param deleteTime
      * @return
      */
@@ -24,4 +25,7 @@ public interface FileMapper extends BaseMapper<File> {
             "LEFT JOIN ( SELECT * FROM file WHERE is_delete = false ) f ON t1.file_id = f.id\n" +
             "WHERE f.id IS NOT NULL AND t1.delete_count = t2.cursor_count AND t1.delete_time <= #{deleteTime}")
     List<File> selectNoCursorFileList(@Param("deleteTime") LocalDateTime deleteTime);
+
+    @Select("SELECT * FROM file WHERE is_delete = false AND ( check_time IS NULL OR check_time < #{checkTime} ) LIMIT #{limit}")
+    List<File> selectNeedCheckFileList(@Param("checkTime") LocalDateTime checkTime, @Param("limit") int limit);
 }

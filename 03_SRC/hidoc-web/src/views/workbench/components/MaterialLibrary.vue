@@ -50,19 +50,6 @@
             <el-pagination background layout="total, prev, pager, next, jumper" :currentPage="this.currentPage" :pageSize="this.pageSize" :total="this.dataTotal" @currentChange="getHidocFileList" style="margin-top: 5px" />
         </el-footer>
     </el-container>
-    <!-- <template #default="scope">
-        <el-button @click="previewDoc(scope.row)" type="text" size="small">下载</el-button>
-
-        <el-popover placement="top-start" :width="200" trigger="click">
-            <p>删除操作不可撤回，确定删除吗？</p>
-            <div style="text-align: right; margin: 0">
-                <el-button type="danger" size="mini" @click="docDelete(scope.row)">确定删除</el-button>
-            </div>
-            <template #reference>
-                <el-button type="text" size="small">删除</el-button>
-            </template>
-        </el-popover>
-    </template> -->
 </template>
 
 <script>
@@ -121,33 +108,6 @@ export default {
                     this.hidocFileList = res.data;
                     this.dataTotal = res.total;
                     document.getElementById('fileContainer').scrollTop = 0;
-                }
-            });
-        },
-        // 删除
-        docDelete(row) {
-            console.log('删除');
-            return request({
-                url: '/doc/delete',
-                method: 'post',
-                data: {
-                    id: row.id.toString()
-                }
-            }).then(res => {
-                if (res.code == 0) {
-                    ElMessage({
-                        message: res.msg || '操作成功',
-                        type: 'success',
-                        duration: 5 * 1000
-                    });
-
-                    this.selectCollected(this.currentCollected);
-                } else {
-                    ElMessage({
-                        message: res.msg || 'Error',
-                        type: 'error',
-                        duration: 5 * 1000
-                    });
                 }
             });
         }

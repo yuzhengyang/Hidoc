@@ -5,6 +5,7 @@ const RealNameKey = 'User-RealName';
 const VipLevel = 'User-VipLevel';
 const Roles = 'User-Roles';
 const Avatar = 'User-Avatar';
+const EmailKey = 'User-Email';
 
 export function getToken() {
     return Cookies.get(TokenKey);
@@ -23,12 +24,21 @@ export function getRealName() {
     return Cookies.get(RealNameKey);
 }
 
+export function getEmail() {
+    return Cookies.get(EmailKey);
+}
+
+export function setEmail(email) {
+    console.log('email: ' + email);
+    return Cookies.set(EmailKey, email);
+}
+
 export function setRealName(name) {
     console.log('name: ' + name);
     return Cookies.set(RealNameKey, name);
 }
 
-export function setAvatar(avatar) { 
+export function setAvatar(avatar) {
     return Cookies.set(Avatar, avatar);
 }
 
