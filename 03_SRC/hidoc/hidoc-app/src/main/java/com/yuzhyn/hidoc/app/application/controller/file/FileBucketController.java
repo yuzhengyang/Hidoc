@@ -51,7 +51,6 @@ public class FileBucketController {
     @PostMapping({"list"})
     public ResponseData list(@RequestBody Map<String, Object> params) {
         List<FileBucket> list = fileBucketMapper.selectList(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, CurrentUserManager.getUser().getId()).eq(FileBucket::getIsDelete, false));
-        list = list.stream().filter(x -> !x.getName().contains(".")).collect(Collectors.toList());
         return ResponseData.okData(list);
     }
 
@@ -139,6 +138,9 @@ public class FileBucketController {
             if (fileBucket != null) {
                 if (!fileBucket.getUserId().equals(CurrentUserManager.getUser().getId())) {
                     return ResponseData.error("删除失败，不能删除其他用户数据");
+                }
+                if (!fileBucket.getName().contains(".")) {
+                    return ResponseData.error("删除失败，不能删除系统预置数据");
                 }
 
                 if (cursorCount > 0) {

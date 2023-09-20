@@ -98,5 +98,6 @@ public final class R {
          * 头像文件夹
          */
         public static final String Avatar = ".avatar";
+        public static final String Share = ".share";
     }
 }

@@ -82,11 +82,7 @@ public class FileController {
     public ResponseData deletedList(@RequestBody Map<String, Object> params) {
         ResponseData responseData = ResponseData.ok();
         LocalDateTime expireTime = LocalDateTime.now().minusDays(180);
-        List<FileCursor> list = fileCursorMapper.selectList(new LambdaQueryWrapper<FileCursor>()
-                .eq(FileCursor::getUserId, CurrentUserManager.getUser().getId())
-                .eq(FileCursor::getIsDelete, true)
-                .ge(FileCursor::getDeleteTime, expireTime)
-                .orderByDesc(FileCursor::getDeleteTime));
+        List<FileCursor> list = fileCursorMapper.selectList(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, CurrentUserManager.getUser().getId()).eq(FileCursor::getIsDelete, true).ge(FileCursor::getDeleteTime, expireTime).orderByDesc(FileCursor::getDeleteTime));
         responseData.putData(list);
         return responseData;
     }
@@ -119,10 +115,7 @@ public class FileController {
      * @return
      */
     @PostMapping({"upload", "u"})
-    public ResponseData upload(@RequestParam(value = "collectedId", required = false) String collectedId,
-                               @RequestParam(value = "expiryTime", required = false) LocalDateTime expiryTime,
-                               @RequestParam(value = "bucketName", required = false) String bucketName,
-                               @RequestParam("file") MultipartFile[] files) {
+    public ResponseData upload(@RequestParam(value = "collectedId", required = false) String collectedId, @RequestParam(value = "expiryTime", required = false) LocalDateTime expiryTime, @RequestParam(value = "bucketName", required = false) String bucketName, @RequestParam("file") MultipartFile[] files) {
         if (ListTool.ok(files)) {
             SysUser curUser = CurrentUserManager.getUser();
             if (curUser != null && fileService.checkSpaceLimit(curUser.getId(), files[0].getSize())) {
@@ -163,6 +156,52 @@ public class FileController {
             }
         }
         return ResponseData.ok();
+    }
+
+    @Transactional
+    @PostMapping("share")
+    public ResponseData share(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "cursorId", "fileId")) {
+            String cursorId = MapTool.get(params, "cursorId", "").toString();
+            String fileId = MapTool.get(params, "fileId", "").toString();
+            String userId = CurrentUserManager.getUserId();
+
+            // 检查share目录是否存在，不存在则创建
+            boolean bucketReady = false;
+            FileBucket shareBucket = fileBucketMapper.selectOne(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getName, R.Buckets.Share));
+            bucketReady = shareBucket != null;
+            if (null == shareBucket) {
+                shareBucket = new FileBucket();
+                shareBucket.setId(R.SnowFlake.nexts());
+                shareBucket.setName(R.Buckets.Share);
+                shareBucket.setUserId(userId);
+                shareBucket.setIsOpen(true);
+                int flag = fileBucketMapper.insert(shareBucket);
+                if (flag > 0) bucketReady = true;
+            }
+
+            if (bucketReady) {
+                if (StringTool.ok(cursorId, fileId)) {
+                    FileCursor cursor = fileCursorMapper.selectById(cursorId);
+                    File file = fileMapper.selectById(fileId);
+
+                    if (file != null && cursor != null) {
+                        cursor.setId(R.SnowFlake.nexts());
+                        cursor.setBucketId(shareBucket.getId());
+                        cursor.setCreateTime(LocalDateTime.now());
+                        cursor.setVersion(String.valueOf(System.currentTimeMillis()));
+                        cursor.setDownloadTime(null);
+                        cursor.setDownloadCount(0L);
+                        cursor.setUname(cursor.getId() + "." + file.getExt());
+                        if (fileCursorMapper.insert(cursor) > 0)
+                            return ResponseData.ok();
+                    }
+                }
+            }else{
+                return ResponseData.error("未能创建系统目录");
+            }
+        }
+        return ResponseData.error("未能创建到share公共文件");
     }
     //endregion
 

@@ -191,6 +191,9 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.3.7.RELEASE</version>
                 <configuration>
+                    <!-- 默认值是${artifactId}-${project.version} -->
+                    <!-- 改为如下设置，即可去除jar包的版本号 -->
+                    <finalName>${artifactId}</finalName>
                     <mainClass>com.yuzhyn.hidoc.app.HidocAppApplication</mainClass>
                 </configuration>
                 <executions>

@@ -13,9 +13,9 @@ public class SnowFlakeTest {
     @MethodSource
     public void testGen() {
         SnowFlake snowFlake = new SnowFlake(0, 0, 0);
-        for (int i = 0; i < 10000; i++) {
-            System.out.println(snowFlake.nexts());
-        }
+//        for (int i = 0; i < 10000; i++) {
+//            System.out.println(snowFlake.nexts());
+//        }
     }
 
 

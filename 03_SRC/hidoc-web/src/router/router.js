@@ -18,6 +18,11 @@ const router = createRouter({
                     name: 'preview'
                 },
                 {
+                    path: '/fileshare',
+                    component: () => import('@/views/fileshare'),
+                    name: 'fileshare'
+                },
+                {
                     path: '/javadoc',
                     component: () => import('@/views/javadoc'),
                     name: 'javadoc'

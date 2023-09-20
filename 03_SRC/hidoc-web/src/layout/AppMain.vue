@@ -8,6 +8,8 @@
                     <div style="float: left; font: 14px">
                         <el-button type="text" size="small" @click="gotoPage('preview')">文集</el-button>
                         <el-button type="text">|</el-button>
+                        <el-button type="text" size="small" @click="gotoPage('fileshare')">共享文件</el-button>
+                        <el-button type="text">|</el-button>
                         <el-button type="text" size="small" @click="gotoPage('javadoc')">代码注释</el-button>
                     </div>
                 </el-col>
@@ -134,7 +136,7 @@ export default {
     mounted() {
         var user = this.$store.state.user;
         console.log(user);
-        if (user) {
+        if (user && user.realName && user.email) {
             watermark.set(user.realName, user.email);
         }
     },
@@ -155,6 +157,9 @@ export default {
                 // });
                 // window.open(routeData.path, '_blank');
                 this.$router.push({ path: '/javadoc', params: {} });
+            }
+            if (page == 'fileshare') {
+                this.$router.push({ path: '/fileshare', params: {} });
             }
         },
         handleOpen(key, keyPath) {

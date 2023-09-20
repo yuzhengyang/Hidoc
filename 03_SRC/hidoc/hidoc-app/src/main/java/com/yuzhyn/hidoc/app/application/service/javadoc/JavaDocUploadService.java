@@ -56,7 +56,7 @@ public class JavaDocUploadService {
 
                 step.add("打扫现场，删除临时文件");
                 if (tempFilePath.startsWith(R.Paths.Temp)) FileTool.delete(tempFilePath);
-                if (tempPath.startsWith(R.Paths.Temp)) FileTool.delete(DirTool.combine(tempPath, fileNameNoExt));
+                if (tempPath.startsWith(R.Paths.Temp)) DirTool.delete(DirTool.combine(tempPath, fileNameNoExt));
 
                 step.add("完成所有工作");
                 responseData.putDataMap("step", step);

@@ -14,9 +14,14 @@
                 </el-button-group>
             </el-row>
             <el-row>
-                <el-col :span="3">
-                    <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-                        <el-menu-item v-for="item in bucketList" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
+                <el-col :span="3" style="margin-top: 10px">
+                    <el-menu class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+                        <el-menu-item-group title="系统预置">
+                            <el-menu-item v-for="item in filterBucketList('sys')" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
+                        </el-menu-item-group>
+                        <el-menu-item-group title="用户自定义">
+                            <el-menu-item v-for="item in filterBucketList('user')" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
+                        </el-menu-item-group>
                     </el-menu>
                 </el-col>
                 <el-col :span="21">
@@ -56,7 +61,8 @@
                                     <div style="padding-top: 2px">
                                         <el-button @click="fileHistory(item)" type="text" size="mini">历史</el-button>
                                         <el-button @click="fileDownload(item)" type="text" size="mini">下载</el-button>
-                                        <el-popover placement="top-start" :width="200" trigger="click">
+                                        <el-button @click="fileShare(item)" type="text" size="mini" v-if="this.currentBucket.name.indexOf('.') < 0">share</el-button>
+                                        <el-popover placement="top-start" :width="200" trigger="click" v-if="this.currentBucket.name.indexOf('.') < 0">
                                             <p>删除操作不可撤回，确定删除吗？</p>
                                             <div style="text-align: right; margin: 0">
                                                 <el-button type="danger" size="mini" @click="fileDelete(item)">确定删除</el-button>
@@ -109,6 +115,7 @@ import { ElMessage } from 'element-plus';
 import request from '../../../utils/request.js';
 import { config } from '@/utils/config';
 import FileUpload from '../components/FileUpload';
+import _ from 'lodash';
 export default {
     data() {
         return {
@@ -150,6 +157,20 @@ export default {
                     console.log(this.bucketList);
                 }
             });
+        },
+        filterBucketList(type) {
+            switch (type) {
+                case 'sys':
+                    return _.filter(this.bucketList, function (o) {
+                        return o.name.indexOf('.') >= 0;
+                    });
+                case 'user':
+                    return _.filter(this.bucketList, function (o) {
+                        return o.name.indexOf('.') < 0;
+                    });
+                default:
+                    return this.bucketList;
+            }
         },
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);
@@ -261,6 +282,30 @@ export default {
         fileHistory() {},
         fileDownload(data) {
             window.location.href = config().baseServer + 'f/d/' + data.urlPrefix + '/' + data.bucketName + '/' + data.fileName;
+        },
+        fileShare(row) {
+            return request({
+                url: '/file/share',
+                method: 'post',
+                data: {
+                    cursorId: row.id,
+                    fileId: row.fileId
+                }
+            }).then(res => {
+                if (res.code == 0) {
+                    ElMessage({
+                        message: res.msg || '操作成功',
+                        type: 'success',
+                        duration: 5 * 1000
+                    });
+                } else {
+                    ElMessage({
+                        message: res.msg || 'Error',
+                        type: 'error',
+                        duration: 5 * 1000
+                    });
+                }
+            });
         },
         fileDelete(row) {
             console.log('删除');
