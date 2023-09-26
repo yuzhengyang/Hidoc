@@ -7,12 +7,12 @@ import com.yuzhyn.hidoc.app.common.constant.UrlAccess;
 import com.yuzhyn.hidoc.app.common.enums.ResponseCode;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
 
@@ -63,7 +63,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
             String value = request.getHeader(name);
 //            log.info("header: " + name + " = " + value);
             if (name.equals("access-token")) {
-                UserInfo userInfo = R.Caches.UserInfo.get(value);
+                UserInfo userInfo = R.Caches.UserInfo.getIfPresent(value);
                 if (userInfo != null) {
 
                     // 判断登录身份有效期
@@ -72,7 +72,8 @@ public class SecurityInterceptor implements HandlerInterceptor {
                         CurrentUserManager.set(userInfo);
                         // 给用户续期有效期
                         userInfo.setExpiryTime(LocalDateTime.now().plusHours(24));
-                        R.Caches.UserInfo.replace(value, userInfo);
+                        R.Caches.UserInfo.invalidate(value);
+                        R.Caches.UserInfo.put(value, userInfo);
                     } else {
                         response.setCharacterEncoding("UTF-8");
                         response.setContentType("application/json; charset=utf-8");

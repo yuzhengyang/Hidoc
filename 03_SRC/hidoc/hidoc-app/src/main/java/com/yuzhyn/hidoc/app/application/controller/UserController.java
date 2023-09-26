@@ -34,7 +34,6 @@ import com.yuzhyn.hidoc.app.application.service.sys.AuthCodeService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
-import org.ehcache.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -246,7 +245,7 @@ public class UserController {
                 userInfo.setLoginTime(LocalDateTime.now());
                 userInfo.setExpiryTime(LocalDateTime.now().plusHours(8));
                 R.Caches.UserInfo.put(userInfo.getToken(), userInfo);
-                UserInfo userinfoCache = R.Caches.UserInfo.get(userInfo.getToken());
+                UserInfo userinfoCache = R.Caches.UserInfo.getIfPresent(userInfo.getToken());
 
                 rs.setToken(userInfo.getToken());
                 return rs;
@@ -426,9 +425,9 @@ public class UserController {
 
         if (StringTool.ok(ip, token)) {
             // 注销指定token的用户
-            UserInfo user = R.Caches.UserInfo.get(token);
+            UserInfo user = R.Caches.UserInfo.getIfPresent(token);
             if (user != null && StringTool.ok(user.getIp()) && user.getIp().equals(ip)) {
-                R.Caches.UserInfo.remove(token);
+                R.Caches.UserInfo.invalidate(token);
             }
 
         } else {
@@ -453,10 +452,10 @@ public class UserController {
 
         List<UserInfo> userInfoList = new ArrayList<>();
 
-        for (Iterator<Cache.Entry<String, UserInfo>> i = R.Caches.UserInfo.iterator(); i.hasNext(); ) {
-            Cache.Entry<String, UserInfo> item = i.next();
-            if (CurrentUserManager.getUser().getId().equals(item.getValue().getUser().getId()) && item.getValue().getExpired() == false) {
-                userInfoList.add(item.getValue());
+        for (String key : R.Caches.UserInfo.asMap().keySet()) {
+            UserInfo item = R.Caches.UserInfo.asMap().get(key);
+            if (CurrentUserManager.getUser().getId().equals(item.getUser().getId()) && item.getExpired() == false) {
+                userInfoList.add(item);
             }
         }
         return ResponseData.okData(userInfoList);
@@ -492,9 +491,9 @@ public class UserController {
                 }
 
                 // 补充用户的在线状态
-                for (Iterator<Cache.Entry<String, UserInfo>> i = R.Caches.UserInfo.iterator(); i.hasNext(); ) {
-                    Cache.Entry<String, UserInfo> cacheItem = i.next();
-                    if (liteItem.getId().equals(cacheItem.getValue().getUser().getId())) {
+                for (String key : R.Caches.UserInfo.asMap().keySet()) {
+                    UserInfo item = R.Caches.UserInfo.getIfPresent(key);
+                    if (liteItem.getId().equals(item.getUser().getId())) {
                         liteItem.setIsOnline(true);
                         break;
                     }

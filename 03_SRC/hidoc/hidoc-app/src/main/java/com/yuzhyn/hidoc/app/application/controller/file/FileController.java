@@ -27,8 +27,9 @@ import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import reactor.util.function.Tuple2;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -197,7 +198,7 @@ public class FileController {
                             return ResponseData.ok();
                     }
                 }
-            }else{
+            } else {
                 return ResponseData.error("未能创建系统目录");
             }
         }
@@ -251,8 +252,8 @@ public class FileController {
     @GetMapping({"download/uname/{uname}", "d/u/{uname}"})
     @ResponseBody
     public void downloadByUname(@PathVariable String uname, HttpServletRequest request, HttpServletResponse response) {
-        FileCursor cacheCursor = R.Caches.SysFileCursor.get(uname);
-        File cacheFile = R.Caches.SysFile.get(uname);
+        FileCursor cacheCursor = R.Caches.SysFileCursor.getIfPresent(uname);
+        File cacheFile = R.Caches.SysFile.getIfPresent(uname);
 
         if (cacheCursor != null && cacheFile != null) {
             // 存在缓存直接走缓存

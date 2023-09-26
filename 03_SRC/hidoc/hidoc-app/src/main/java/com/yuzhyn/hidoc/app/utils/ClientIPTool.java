@@ -3,7 +3,7 @@ package com.yuzhyn.hidoc.app.utils;
 import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
 import com.yuzhyn.azylee.core.logs.Alog;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class ClientIPTool {
     /**

@@ -1,23 +1,11 @@
 package com.yuzhyn.hidoc.app;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
-import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemPropertyTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemStatusTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemTypeTool;
 import com.yuzhyn.azylee.ext.web.apis.taobao.TaobaoTime;
-import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.file.File;
-import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
-import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.manager.CurrentEnvironmentManager;
 import lombok.extern.slf4j.Slf4j;
-import org.ehcache.config.builders.CacheConfigurationBuilder;
-import org.ehcache.config.builders.CacheManagerBuilder;
-import org.ehcache.config.builders.ResourcePoolsBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -30,14 +18,6 @@ public class HidocAppApplication {
 
     public static void main(String[] args) throws Exception {
         long startTime = System.currentTimeMillis();
-        R.Caches.CacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
-        R.Caches.CacheManager.init();
-        R.Caches.UserInfo = R.Caches.CacheManager.createCache("UserInfo",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, UserInfo.class, ResourcePoolsBuilder.heap(1024)));
-        R.Caches.SysFile = R.Caches.CacheManager.createCache("SysFile",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, File.class, ResourcePoolsBuilder.heap(1024)));
-        R.Caches.SysFileCursor = R.Caches.CacheManager.createCache("SysFileCursor",
-                CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, FileCursor.class, ResourcePoolsBuilder.heap(1024)));
 
         System.out.println("~");
         SpringApplication app = new SpringApplication(HidocAppApplication.class);

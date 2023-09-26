@@ -6,6 +6,8 @@ import com.yuzhyn.hidoc.app.application.entity.app.AppConf;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysMachine;
 import com.yuzhyn.hidoc.app.application.mapper.app.AppConfMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineMapper;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,8 +23,6 @@ import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.ios.dirs.DirTool;
 import com.yuzhyn.azylee.core.ios.txts.PropertyTool;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -119,8 +119,6 @@ public class AppLiveManager {
         log.info("==============================================");
 
 //        Sleep.s(10);
-
-        R.Caches.CacheManager.close();
 
         log.info("==============================================");
         log.info("======== ShutdownManager 已经关闭 =============");

@@ -1,5 +1,7 @@
 package com.yuzhyn.hidoc.app.aarg;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.yuzhyn.azylee.core.datas.ids.SnowFlake;
 import com.yuzhyn.azylee.core.ios.dirs.DirTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemPropertyTool;
@@ -13,7 +15,6 @@ import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.utils.ssh.SshManager;
-import org.ehcache.CacheManager;
 import reactor.util.function.Tuple3;
 
 import java.time.LocalDateTime;
@@ -45,10 +46,9 @@ public final class R {
     }
 
     public static class Caches {
-        public static CacheManager CacheManager;
-        public static org.ehcache.Cache<String, UserInfo> UserInfo;
-        public static org.ehcache.Cache<String, FileCursor> SysFileCursor;
-        public static org.ehcache.Cache<String, File> SysFile;
+        public static Cache<String, UserInfo> UserInfo = CacheBuilder.newBuilder().build();
+        public static Cache<String, FileCursor> SysFileCursor = CacheBuilder.newBuilder().build();
+        public static Cache<String, File> SysFile = CacheBuilder.newBuilder().build();
     }
 
     public static class Queues {
