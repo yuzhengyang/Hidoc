@@ -1,4 +1,6 @@
 import { config } from '@/utils/config';
+import { nextTick } from 'vue';
+import _, { includes } from 'lodash';
 
 export function mdFormat(text) {
     console.log('mdtools 预览预处理');
@@ -37,6 +39,11 @@ export function mdFormat(text) {
     }
 
     // ====== 处理超链接 ======
+
+    // ====== 处理章节序号 ======
+    {
+        newText = setChapterNumber(newText);
+    }
 
     return newText;
 }
@@ -99,4 +106,38 @@ function getUnames(str) {
 function psUnames(str) {
     let baseUrl = config().imageServer + '';
     return str.replaceAll('#hd.uname://', baseUrl);
+}
+function setChapterNumber(text) {
+    if (text.indexOf('# @ ') < 0) return text;
+
+    let number = [0, 0, 0, 0, 0, 0];
+    let array = _.split(text, '\n');
+    for (let i = 0; i < array.length; i++) {
+        if (array[i].startsWith('# @ ')) {
+            array[i] = array[i].replace('# @ ', `# ${++number[0]} `);
+            number = [number[0], 0, 0, 0, 0, 0];
+        }
+        if (array[i].startsWith('## @ ')) {
+            array[i] = array[i].replace('## @ ', `## ${number[0]}.${++number[1]} `);
+            number = [number[0], number[1], 0, 0, 0, 0];
+        }
+        if (array[i].startsWith('### @ ')) {
+            array[i] = array[i].replace('### @ ', `### ${number[0]}.${number[1]}.${++number[2]} `);
+            number = [number[0], number[1], number[2], 0, 0, 0];
+        }
+        if (array[i].startsWith('#### @ ')) {
+            array[i] = array[i].replace('#### @ ', `#### ${number[0]}.${number[1]}.${number[2]}.${++number[3]} `);
+            number = [number[0], number[1], number[2], number[3], 0, 0];
+        }
+        if (array[i].startsWith('##### @ ')) {
+            array[i] = array[i].replace('##### @ ', `##### ${number[0]}.${number[1]}.${number[2]}.${number[3]}.${++number[4]} `);
+            number = [number[0], number[1], number[2], number[3], number[4], 0];
+        }
+        if (array[i].startsWith('###### @ ')) {
+            array[i] = array[i].replace('###### @ ', `###### ${number[0]}.${number[1]}.${number[2]}.${number[3]}.${number[4]}.${++number[5]} `);
+            number = [number[0], number[1], number[2], number[3], number[4], number[5]];
+        }
+    }
+
+    return _.join(array, '\n');
 }

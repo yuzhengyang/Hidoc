@@ -50,7 +50,14 @@
                         <!-- <el-button size="mini">关系图谱</el-button> -->
                     </el-button-group>
                 </el-col>
-                <el-col :span="12"></el-col>
+                <el-col :span="12" style="text-align: right">
+                    <!-- <el-button-group style="padding-left: 5px">
+                        <el-button size="small" @click="formatContent('chapterNumber')">
+                            <el-icon style="padding-right: 3px"><SetUp /></el-icon>
+                            格式化章节编号
+                        </el-button>
+                    </el-button-group> -->
+                </el-col>
                 <el-col :span="6" style="text-align: right">
                     <span v-if="this.lockUser && this.lockUser.realName">
                         <el-tag class="ml-2" type="warning" size="small" effect="plain">当前由：{{ this.lockUser.realName }} 编辑锁定</el-tag>
@@ -173,7 +180,7 @@ import request from '../../../utils/request.js';
 import { config } from '@/utils/config';
 import { mdFormat } from '../../../utils/mdtools';
 import { uiRefresh } from '../../../utils/uimsg';
-import { Search, Share, Guide } from '@element-plus/icons';
+import _, { includes } from 'lodash';
 
 export default {
     name: 'editor',
@@ -646,6 +653,26 @@ export default {
                     this.templetDialog.show = false;
                 }
             });
+        },
+        formatContent(type) {
+            // switch (type) {
+            //     case 'chapterNumber':
+            //         {
+            //             let contentArray = _.split(this.content, '\n');
+            //             console.log(contentArray);
+            //             let inCodeBlock = false;
+            //             _(contentArray).forEach(function (value) {
+            //                 if(value.startsWith('```')) includes = true;
+
+
+            //                 console.log(value);
+            //             });
+            //         }
+            //         break;
+            //     case '':
+            //     default:
+            //         break;
+            // }
         }
     }
 };
