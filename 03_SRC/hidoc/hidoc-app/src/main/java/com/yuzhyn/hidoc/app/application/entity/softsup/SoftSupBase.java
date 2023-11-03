@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 @Data
 @TableName(value = "soft_sup_base")
-public class SoftSupBase extends Model<SoftSupBase> {
+public class SoftSupBase {
 
     @TableId("id")
     private String id;

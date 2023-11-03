@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @TableName(value = "soft_sup_limit")
-public class SoftSupLimit extends Model<SoftSupLimit> {
+public class SoftSupLimit {
     @TableId("id")
     private String id;
     private String baseId;

@@ -15,5 +15,6 @@ CREATE TABLE IF NOT EXISTS public.soft_sup_version (
 	url_third varchar(512) NULL,
 	md5 varchar(64) NULL,
 	release_path varchar(512) NULL,
+	num int8 NULL,
 	CONSTRAINT pk_soft_sup_version PRIMARY KEY (id)
 );

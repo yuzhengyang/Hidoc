@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @TableName(value = "soft_sup_version")
-public class SoftSupVersion extends Model<SoftSupVersion> {
+public class SoftSupVersion {
 
     @TableId("id")
     private String id;
@@ -29,4 +29,5 @@ public class SoftSupVersion extends Model<SoftSupVersion> {
     private String urlThird;
     private String md5;
     private String releasePath;
+    private Long num;
 }

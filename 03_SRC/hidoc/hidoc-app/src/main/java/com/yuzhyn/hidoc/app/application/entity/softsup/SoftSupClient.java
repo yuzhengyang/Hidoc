@@ -9,14 +9,14 @@ import java.time.LocalDateTime;
 
 @Data
 @TableName(value = "soft_sup_client")
-public class SoftSupClient extends Model<SoftSupClient> {
+public class SoftSupClient {
 
     @TableId("id")
     private String id;
     private String baseId;
+    private String machine;
+    private String account;
     private String clientType;
-    private String name;
-    private String email;
     private String ip;
     private String ipLocation;
     private String mapLocation;
