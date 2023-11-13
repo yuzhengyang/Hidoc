@@ -18,17 +18,14 @@ spring:
   # 数据库相关配置
   datasource:
     driverClassName: org.postgresql.Driver
-#    url: jdbc:postgresql://127.0.0.1:5432/smart_dev_assistant
-#    username: postgres
-#    password: password
-    url: jdbc:postgresql://192.168.14.155:5432/hidoc
+    url: jdbc:postgresql://127.0.0.1:5432/hidoc
     username: postgres
-    password: HIdev210704
+    password: yuzhyn
     type: com.alibaba.druid.pool.DruidDataSource
     # 初始化大小，最小，最大
-    initialSize: 2
-    minIdle: 2
-    maxActive: 4
+    initialSize: 10
+    minIdle: 10
+    maxActive: 20
     keepAlive: true
     # 配置获取连接等待超时的时间
     maxWait: 5000
