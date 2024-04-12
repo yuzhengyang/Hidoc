@@ -3,8 +3,8 @@ package com.yuzhyn.hidoc.app.common.model;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.hidoc.app.common.enums.ResponseCode;
-import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,7 +99,7 @@ public class ResponseData {
 
     public ResponseData putData(List value) {
         this.data.addAll(value);
-        if (ObjectUtils.isNotEmpty(value)) this.count = value.size();
+        if (ListTool.ok(value)) this.count = value.size();
         return this;
     }
 
