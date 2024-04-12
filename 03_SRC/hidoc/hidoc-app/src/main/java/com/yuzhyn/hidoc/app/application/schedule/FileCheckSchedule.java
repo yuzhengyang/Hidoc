@@ -41,7 +41,7 @@ public class FileCheckSchedule {
 
     @Scheduled(cron = "0 */1 * * * ?")
     public void job() {
-        // 查询100个没有删除的并且没有进行检查或者最近1天没进行检查的文件
+        // 查询1000个没有删除的并且没有进行检查或者最近1天没进行检查的文件
         LocalDateTime localDateTime = LocalDateTime.now().minusDays(1);
         List<File> fileList = fileMapper.selectNeedCheckFileList(localDateTime, 1000);
         if (ListTool.ok(fileList)) {

@@ -14,7 +14,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>3.0.2</spring-boot.version>
         <lombok.version>1.18.20</lombok.version>
-        <azylee.version>1.0.6</azylee.version>
+        <azylee.version>1.0.8</azylee.version>
         <fastjson.version>1.2.74</fastjson.version>
         <mybatisplus.version>3.5.3.2</mybatisplus.version>
         <druid.version>1.2.15</druid.version>
@@ -56,12 +56,6 @@
         <dependency>
             <groupId>top.yuzhyn</groupId>
             <artifactId>azylee-core</artifactId>
-            <version>${azylee.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>top.yuzhyn</groupId>
-            <artifactId>azylee-ext-web</artifactId>
             <version>${azylee.version}</version>
         </dependency>
 
@@ -119,12 +113,6 @@
             <version>1.14.3</version>
         </dependency>
 
-        <!-- 邮件发送 -->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.6.2</version>
-        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -143,11 +131,66 @@
         </dependency>
 
         <!-- 结巴分词工具(jieba For Java) -->
-<!--        <dependency>-->
-<!--            <groupId>com.huaban</groupId>-->
-<!--            <artifactId>jieba-analysis</artifactId>-->
-<!--            <version>1.0.2</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.huaban</groupId>-->
+        <!--            <artifactId>jieba-analysis</artifactId>-->
+        <!--            <version>1.0.2</version>-->
+        <!--        </dependency>-->
+
+        <!--        <dependency>-->
+        <!--            <groupId>com.sun.activation</groupId>-->
+        <!--            <artifactId>javax.activation</artifactId>-->
+        <!--            <version>1.2.0</version>-->
+        <!--        </dependency>-->
+
+        <!-- java 连接ssh工具 -->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+        </dependency>
+
+        <!-- 发送邮件 -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+
+        <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.10.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+            <version>8.12.2</version>
+        </dependency>
+
+<!--        com.fasterxml.jackson.databind.exc.InvalidDefinitionException: -->
+<!--        Java 8 date/time type `java.time.LocalDateTime` not supported by default: -->
+<!--        add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling -->
+<!--        (through reference chain: com.yuzhyn.hidoc.app.application.entity.sys.SysStatusLog["createTime"])-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
     </dependencies>
 

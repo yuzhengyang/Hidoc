@@ -32,7 +32,7 @@ public class FileDownloadLogSchedule {
     FileCursorMapper fileCursorMapper;
 
     @Async
-    @Scheduled(cron = "0 */10 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     public void job() {
         // 保存文件下载日志
         saveFileDownloadLog();
