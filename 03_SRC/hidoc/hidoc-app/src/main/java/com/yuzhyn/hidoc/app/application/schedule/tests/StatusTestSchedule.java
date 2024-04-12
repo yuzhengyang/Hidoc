@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.schedule.tests;
 
+import com.yuzhyn.hidoc.app.utils.EsTool;
 import org.springframework.scheduling.annotation.Scheduled;
 import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 

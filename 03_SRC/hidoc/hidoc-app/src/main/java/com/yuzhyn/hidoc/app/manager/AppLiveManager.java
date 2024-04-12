@@ -1,11 +1,16 @@
 package com.yuzhyn.hidoc.app.manager;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.app.AppConf;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysMachine;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.mapper.app.AppConfMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserMapper;
+import com.yuzhyn.hidoc.app.application.service.sys.EmailService;
+import com.yuzhyn.hidoc.app.utils.EsTool;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +43,12 @@ public class AppLiveManager {
 
     @Autowired
     private AppConfMapper appConfMapper;
+
+    @Autowired
+    private SysUserMapper sysUserMapper;
+
+    @Autowired
+    private EmailService emailService;
 
     @PostConstruct
     public void init() throws Exception {
@@ -101,8 +112,35 @@ public class AppLiveManager {
         log.info("********** 加载通知邮箱配置 **********");
         R.Maps.emailConfig = AppConf.toMap(appConfList, "notice-email");
 
+        log.info("********** 检索用户信息 **********");
+        List<SysUser> userList = sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>());
+        if (ListTool.ok(userList)) {
+            log.info("********** 启动时发送邮件 **********");
+            for (SysUser user : userList) {
+                if (user.getRoles() != null && user.getRoles().contains("sa")) {
+                    if (emailService.sendStartServerMessage(user.getEmail()))
+                        log.info("已发送至：" + user.getRealName() + "，（" + user.getEmail() + "）");
+                    else
+                        log.info("发送提醒邮件失败，至：" + user.getRealName() + "，（" + user.getEmail() + "）");
+                }
+            }
+        }
+
         log.info("********** 加载注册管理配置 **********");
         R.Maps.registerConfig = AppConf.toMap(appConfList, "register");
+
+        log.info("********** 加载elastic管理配置 **********");
+        R.Maps.elasticConfig = AppConf.toMap(appConfList, "elastic");
+        String enable = MapTool.getString(R.Maps.elasticConfig, "enable", "");
+        String hosts = MapTool.getString(R.Maps.elasticConfig, "hosts", "");
+        String username = MapTool.getString(R.Maps.elasticConfig, "username", "");
+        String password = MapTool.getString(R.Maps.elasticConfig, "password", "");
+        String indexPrefix = MapTool.getString(R.Maps.elasticConfig, "index-prefix", "");
+        if ("1".equals(enable)) {
+            R.EsTool = new EsTool(hosts, username, password, indexPrefix);
+            R.EsTool.createClient();
+        }
+
 
         log.info("********** 配置加载完毕 **********");
     }

@@ -1,5 +1,7 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
@@ -28,6 +30,8 @@ import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManExeLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysStatusLogMapper;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
+import com.yuzhyn.hidoc.app.utils.EsTool;
+import com.yuzhyn.hidoc.app.utils.TimeZoneTool;
 import com.yuzhyn.hidoc.app.utils.ssh.SshClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +43,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +73,7 @@ public class AppDefaultSchedule {
 
 
     @Async
-    @Scheduled(cron = "0 */2 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     public void job() {
 //        if (CeKey != null) {
 //            System.out.println("CeKey: " + CeKey);
@@ -100,6 +105,8 @@ public class AppDefaultSchedule {
                 try {
                     sysAccessLog.setMachineId(R.MachineId);
                     sysAccessLogMapper.insert(sysAccessLog);
+
+                    if (R.EsTool != null) R.EsTool.createDocument("sys.access", sysAccessLog.getId(), sysAccessLog);
                 } catch (Exception ex) {
                     log.error(ExceptionTool.getStackTrace(ex));
                 }
@@ -166,6 +173,8 @@ public class AppDefaultSchedule {
             record.setProcessCpuTime(statusInfo.getProcessCpuTime());
             record.setSystemLoadAverage(statusInfo.getSystemLoadAverage());
             sysStatusLogMapper.insert(record);
+
+            if (R.EsTool != null) R.EsTool.createDocument("sys.status", record.getId(), record);
         } catch (Exception ex) {
         }
     }

@@ -3,16 +3,18 @@ package com.yuzhyn.hidoc.app;
 import com.yuzhyn.azylee.core.systems.bases.SystemPropertyTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemStatusTool;
 import com.yuzhyn.azylee.core.systems.bases.SystemTypeTool;
-import com.yuzhyn.azylee.ext.web.apis.taobao.TaobaoTime;
 import com.yuzhyn.hidoc.app.manager.CurrentEnvironmentManager;
+import com.yuzhyn.hidoc.app.utils.TaobaoTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
 
 @Slf4j
 @EnableCaching
-@SpringBootApplication
+@SpringBootApplication(exclude = {ElasticsearchClientAutoConfiguration.class})
 public class HidocAppApplication {
 
 
@@ -29,6 +31,11 @@ public class HidocAppApplication {
                 (log.isWarnEnabled() ? "warn," : "") + (log.isErrorEnabled() ? "error" : ""));
         CurrentEnvironmentManager.add("system", SystemTypeTool.getOSname());
         CurrentEnvironmentManager.add("user.dir", SystemPropertyTool.userDir());
+        log.trace("log.trace");
+        log.debug("log.debug");
+        log.info("log.info");
+        log.warn("log.warn");
+        log.error("log.error");
 
         log.info("/");
         log.info("============================================================");

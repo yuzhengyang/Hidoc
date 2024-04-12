@@ -1,7 +1,10 @@
 package com.yuzhyn.hidoc.app.application.controller.datacoll;
 
+import co.elastic.clients.elasticsearch._types.mapping.GeoPointProperty;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -18,6 +21,8 @@ import com.yuzhyn.hidoc.app.application.mapper.datacoll.DataCollMapper;
 import com.yuzhyn.hidoc.app.application.mapper.datacoll.DataCollPlanMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import com.yuzhyn.hidoc.app.utils.EsTool;
+import com.yuzhyn.hidoc.app.utils.TimeZoneTool;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.util.PGobject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -83,6 +89,31 @@ public class DataCollController {
                     dataColl.setDataType(dataType);
 
                     int flag = dataCollMapper.insert(dataColl);
+
+
+                    // 设置保存到es的数据信息
+                    if (R.EsTool != null) {
+                        jsonObject.put("ax.createTime", createTime);
+                        jsonObject.put("ax.dataSource", dataSource);
+                        jsonObject.put("ax.clientType", clientType);
+                        jsonObject.put("ax.mac", mac);
+                        jsonObject.put("ax.senderId", senderId);
+                        jsonObject.put("ax.senderName", senderName);
+                        jsonObject.put("ax.dataType", dataType);
+
+                        if (jsonObject.containsKey("Latitude") && jsonObject.containsKey("Longitude")) {
+                            Double lat = jsonObject.getDouble("Latitude");
+                            Double lon = jsonObject.getDouble("Longitude");
+                            jsonObject.put("ax.location", "POINT (" + lon + " " + lat + ")");
+
+                            Map<String, Property> properties = new HashMap<>();
+                            properties.put("ax.location", Property.of(p -> p.geoPoint(GeoPointProperty.of(g -> g))));
+                            if (R.EsTool != null) R.EsTool.createIndex("datacoll." + plan.getName(), properties);
+                        }
+
+                        R.EsTool.createDocument("datacoll." + plan.getName(), dataColl.getId(), jsonObject);
+                    }
+
                     if (flag > 0) {
 
                         plan.setDataCount(plan.getDataCount() + 1);

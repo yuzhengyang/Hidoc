@@ -14,6 +14,7 @@ import com.yuzhyn.hidoc.app.application.entity.file.FileDownloadLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
+import com.yuzhyn.hidoc.app.utils.EsTool;
 import com.yuzhyn.hidoc.app.utils.ssh.SshManager;
 import reactor.util.function.Tuple3;
 
@@ -45,6 +46,8 @@ public final class R {
         return LocalDateTime.now();
     }
 
+    public static EsTool EsTool = null;
+
     public static class Caches {
         public static Cache<String, UserInfo> UserInfo = CacheBuilder.newBuilder().build();
         public static Cache<String, FileCursor> SysFileCursor = CacheBuilder.newBuilder().build();
@@ -67,6 +70,7 @@ public final class R {
 
         public static Map<String, String> emailConfig = new HashMap<>();
         public static Map<String, String> registerConfig = new HashMap<>();
+        public static Map<String, String> elasticConfig = new HashMap<>();
     }
 
     public static class Paths {
