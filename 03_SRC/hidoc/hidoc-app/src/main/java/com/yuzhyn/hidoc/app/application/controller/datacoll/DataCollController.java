@@ -58,6 +58,8 @@ public class DataCollController {
             String mac = MapTool.get(params, "mac", "").toString();
             String senderId = MapTool.get(params, "senderId", "").toString();
             String senderName = MapTool.get(params, "senderName", "").toString();
+            String senderMachine = MapTool.get(params, "senderMachine", "").toString();
+            String senderAccount = MapTool.get(params, "senderAccount", "").toString();
             String data = MapTool.get(params, "data", "").toString();
             String dataType = MapTool.get(params, "dataType", "").toString();
             LocalDateTime createTime = MapTool.getLocalDateTime(params, "createTime", "");
@@ -99,6 +101,8 @@ public class DataCollController {
                         jsonObject.put("ax.mac", mac);
                         jsonObject.put("ax.senderId", senderId);
                         jsonObject.put("ax.senderName", senderName);
+                        jsonObject.put("ax.senderMachine", senderMachine);
+                        jsonObject.put("ax.senderAccount", senderAccount);
                         jsonObject.put("ax.dataType", dataType);
 
                         if (jsonObject.containsKey("Latitude") && jsonObject.containsKey("Longitude")) {

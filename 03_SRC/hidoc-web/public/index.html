@@ -8,6 +8,8 @@
         <title><%= htmlWebpackPlugin.options.title %></title>
         <script src="/config.js"></script>
 
+        <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+
         <!-- katex 渲染公式，使用meraid的npm方式引入，还没测试 -->
         <!-- <link rel="stylesheet" href="./static/katex.min.css" />
         <script src="./static/katex.min.js"></script> -->
@@ -74,6 +76,9 @@
             console.log('pointId: ' + pointId);
             localStorage.setItem('pointId', pointId);
             console.log('--------------------------------------');
+
+            // 反调试
+            // setInterval(function () { debugger }, 100);
         </script>
     </head>
     <body>

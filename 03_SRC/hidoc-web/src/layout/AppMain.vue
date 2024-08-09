@@ -5,6 +5,7 @@
             <el-row>
                 <el-col :span="8">
                     <div class="grid-content bg-purple" @click="home" style="cursor: pointer; height: 40px; width: 55px; float: left"><img alt="Vue logo" src="../assets/logo.png" height="40" /></div>
+                    <div style="cursor: pointer; height: 40px; width: 55px; float: left; font-weight: bold; font-size: 14px">hidoc</div>
                     <div style="float: left; font: 14px">
                         <el-button type="text" size="small" @click="gotoPage('preview')">文集</el-button>
                         <el-button type="text">|</el-button>

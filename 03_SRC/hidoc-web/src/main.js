@@ -65,9 +65,13 @@ VMdPreview.use(vuepressTheme, {
 import createKatexPlugin from '@kangc/v-md-editor/lib/plugins/katex/npm';
 VMdEditor.use(createKatexPlugin());
 // 流程图
-import createMermaidPlugin from '@kangc/v-md-editor/lib/plugins/mermaid/npm';
+// import createMermaidPlugin from '@kangc/v-md-editor/lib/plugins/mermaid/npm';
+// import '@kangc/v-md-editor/lib/plugins/mermaid/mermaid.css';
+// VMdEditor.use(createMermaidPlugin());
+import createMermaidPlugin from '@kangc/v-md-editor/lib/plugins/mermaid/cdn';
 import '@kangc/v-md-editor/lib/plugins/mermaid/mermaid.css';
 VMdEditor.use(createMermaidPlugin());
+
 // TodoList
 import createTodoListPlugin from '@kangc/v-md-editor/lib/plugins/todo-list/index';
 import '@kangc/v-md-editor/lib/plugins/todo-list/todo-list.css';

@@ -887,4 +887,7 @@ export default {
     background: #59a1ff46;
     width: 100%;
 }
+.vuepress-markdown-body{
+    overflow: hidden;
+}
 </style>

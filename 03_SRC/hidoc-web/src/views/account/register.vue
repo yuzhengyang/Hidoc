@@ -4,8 +4,10 @@
             <el-row class="login-main">
                 <el-col :span="9">
                     <div class="grid-content" style="text-align: right; cursor: pointer" @click="home">
-                        <img alt="Vue logo" src="../../assets/logo.png" />
-                        <div style="height: 150px"></div>
+                        <img alt="Vue logo" src="../../assets/logo.png" width="96" />
+                        <div style="height: 150px;">
+                            <div style="width: 100px;float: right; text-align: center;font-weight: bold;">hidoc</div>
+                        </div>
                     </div>
                 </el-col>
                 <el-col :span="1"></el-col>

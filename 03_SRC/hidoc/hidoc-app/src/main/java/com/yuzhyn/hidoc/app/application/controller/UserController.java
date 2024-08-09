@@ -247,6 +247,8 @@ public class UserController {
                 R.Caches.UserInfo.put(userInfo.getToken(), userInfo);
                 UserInfo userinfoCache = R.Caches.UserInfo.getIfPresent(userInfo.getToken());
 
+                // 登录成功根据个人通知配置，发送登录通知信息到邮箱
+
                 rs.setToken(userInfo.getToken());
                 return rs;
             }
