@@ -20,12 +20,14 @@ import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileDownloadLog;
+import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocQueryLog;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManExeLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysStatusLog;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileDownloadLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
+import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocQueryLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManExeLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysStatusLogMapper;
@@ -67,6 +69,9 @@ public class AppDefaultSchedule {
     @Autowired
     ServerManExeLogMapper serverManExeLogMapper;
 
+    @Autowired
+    JavaDocQueryLogMapper javaDocQueryLogMapper;
+
 
     @Value("${app-custom.env:}")
     private String CeKey;
@@ -88,6 +93,9 @@ public class AppDefaultSchedule {
         // 保存访问接口日志
         saveSysAccessLog();
 
+        // 保存查询javadoc日志
+        saveJavaDocQueryLog();
+
         // 保存文章阅读日志
         saveDocAccessLog();
 
@@ -107,6 +115,23 @@ public class AppDefaultSchedule {
                     sysAccessLogMapper.insert(sysAccessLog);
 
                     if (R.EsTool != null) R.EsTool.createDocument("sys.access", sysAccessLog.getId(), sysAccessLog);
+                } catch (Exception ex) {
+                    log.error(ExceptionTool.getStackTrace(ex));
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    public void saveJavaDocQueryLog() {
+        for (int i = 0; i < 1000 * 60; i++) {
+            JavaDocQueryLog javaDocQueryLog = R.Queues.JavaDocQueryLogQueue.poll();
+            if (javaDocQueryLog != null) {
+                try {
+                    javaDocQueryLogMapper.insert(javaDocQueryLog);
+
+                    if (R.EsTool != null) R.EsTool.createDocument("javadoc.query", javaDocQueryLog.getId(), javaDocQueryLog);
                 } catch (Exception ex) {
                     log.error(ExceptionTool.getStackTrace(ex));
                 }
