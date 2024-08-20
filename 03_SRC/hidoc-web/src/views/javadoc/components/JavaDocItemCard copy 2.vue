@@ -1,6 +1,6 @@
 <template>
     <!-- 新的卡片设计 -->
-    <div style="padding: 20px; border: 2px solid #aaf; border-radius: 20px; margin: 20px 21px 20px 21px">
+    <div style="padding: 20px; border: 2px solid #aaf; border-radius: 20px; margin: 20px">
         <el-row>
             <el-col :span="2">
                 <div style="background-color: lightgrey; border-radius: 0px; font-size: 14px; width: 40px; height: 32px; text-align: center; line-height: 32px">
@@ -11,12 +11,6 @@
             <el-col :span="16" style="line-height: 32px; text-align: left">
                 <el-tag :type="this.dataObj._isPublic ? 'primary' : 'info'" style="margin: 5px" effect="dark">{{ this.dataObj.qualifier }}</el-tag>
                 <span style="font-size: 14px; color: #333; cursor: pointer; font-weight: bold" @click="copy(this.dataObj.name)">{{ this.dataObj.name }}</span>
-                <el-tooltip class="box-item" effect="dark" content="👍🏻 有帮助的" placement="top">
-                    <span style="cursor: pointer; margin-left: 40px" @click="helpful(true)">👍🏻</span>
-                </el-tooltip>
-                <el-tooltip class="box-item" effect="dark" content="👎🏾 没有用" placement="top">
-                    <span style="cursor: pointer" @click="helpful(false)">👎🏾</span>
-                </el-tooltip>
             </el-col>
             <el-col :span="6">
                 <div style="text-align: right; font-size: 14px; font-weight: bold">
@@ -36,6 +30,7 @@
                 </div>
                 <div v-if="this.dataObj._class == 'JavaDocMethod'" style="float: right">
                     <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" @click="showDialog('commentExampleDialog')">示例</el-button>
+                    <el-button type="success" size="small" round v-if="this.dataObj.javaDocClassLite ? true : false" @click="showDialog('classDetailsDialog')">类</el-button>
                     <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('sourceCodeDialog')">Code</el-button>
                 </div>
             </el-col>
@@ -51,23 +46,26 @@
         </el-row>
         <el-row v-if="this.dataObj._class == 'JavaDocMethod'">
             <el-col :span="22" style="margin: 5px; padding: 5px">
-                <div style="border: 2px dotted #aaa; border-radius: 10px; padding: 10px">
-                    <div>
-                        ➡️ 传入
+                <el-descriptions :column="1" size="medium" border>
+                    <el-descriptions-item>
+                        <template #label>➡️ 传入</template>
                         <el-table :data="this.dataObj.paramsJson" stripe :show-header="false">
                             <el-table-column prop="type" label="类型" />
                             <el-table-column prop="desc" label="描述" />
                         </el-table>
-                    </div>
-                    <div>↩️ 返回：{{ this.dataObj.returnType }} {{ this.dataObj.returnDesc }}</div>
-                    <div v-if="this.dataObj.throwses != ''">
-                        🐞 异常
+                    </el-descriptions-item>
+                    <el-descriptions-item :min-width="120">
+                        <template #label>↩️ 返回</template>
+                        <div>{{ this.dataObj.returnType }} {{ this.dataObj.returnDesc }}</div>
+                    </el-descriptions-item>
+                    <el-descriptions-item v-if="this.dataObj.throwses != ''">
+                        <template #label>🐞 异常</template>
                         <el-table :data="this.dataObj.throwsesJson" stripe :show-header="false">
                             <el-table-column prop="type" label="类型" />
                             <el-table-column prop="desc" label="描述" />
                         </el-table>
-                    </div>
-                </div>
+                    </el-descriptions-item>
+                </el-descriptions>
             </el-col>
         </el-row>
         <el-row v-if="this.dataObj.commentLimit != ''">
@@ -82,10 +80,10 @@
                 <el-tag v-for="keyword in dataObj._commentKeywordArray" :key="keyword" type="warning" style="margin: 5px">{{ keyword }}</el-tag>
             </el-col>
         </el-row>
-        <el-row v-if="this.dataObj.javaDocClassLite">
+        <el-row>
             <el-col :span="24">
                 <div style="text-align: right; font-size: 14px; font-weight: bold">
-                    <span @click="showDialog('classDetailsDialog')" style="cursor: pointer; color: blue">类：{{ this.dataObj.javaDocClassLite.name }}</span>
+                    <span v-html="this.dataObj.javaDocClassLite ? '类：' + this.dataObj.javaDocClassLite.name : ''" />
                 </div>
             </el-col>
         </el-row>
@@ -273,26 +271,6 @@ export default {
         }
     },
     methods: {
-        helpful(isHelpful) {
-            request({
-                url: '/openapi/javadoc/helpful',
-                method: 'post',
-                data: {
-                    metaId: this.dataObj.id,
-                    classId: this.dataObj._class == 'JavaDocClass' ? this.dataObj.id : this.dataObj.classId,
-                    projectId: this.dataObj.projectId,
-                    isHelpful: isHelpful
-                }
-            }).then(res => {
-                if (res.code == 0) {
-                    ElMessage({
-                        message: '感谢您的反馈',
-                        type: 'success',
-                        duration: 1 * 1000
-                    });
-                }
-            });
-        },
         copy(s) {
             copy(s);
             ElMessage({
@@ -303,9 +281,8 @@ export default {
         },
         setHighlightKeys(text, key, bgColor) {
             var sText = text;
-            bgColor = bgColor || 'yellow';
-            let color = 'red';
-            var sKey = "<span style='background-color: " + bgColor + ';color: ' + color + ";font-weight:bold;'> " + key + ' </span>';
+            bgColor = bgColor || 'orange';
+            var sKey = "<span style='background-color: " + bgColor + ";'>" + key + '</span>';
             var regStr = new RegExp(key, 'g');
             sText = sText.replace(regStr, sKey); //替换key
             return sText;
@@ -450,9 +427,5 @@ export default {
             overflow-y: auto;
         }
     }
-}
-
-.vuepress-markdown-body {
-    overflow: hidden;
 }
 </style>

@@ -100,6 +100,11 @@ public class JavaDocApiController {
         return javaDocSearchService.search(params);
     }
 
+    @PostMapping("helpful")
+    public ResponseData helpful(@RequestBody Map<String, Object> params) {
+        return javaDocSearchService.helpful(params);
+    }
+
     /**
      * 所有项目列表
      *
@@ -117,6 +122,9 @@ public class JavaDocApiController {
             for (JavaDocProject item : projectList) {
                 item.setToken("");
             }
+
+            // 按名称排序
+            projectList.sort(Comparator.comparing(JavaDocProject::getName));
 
             // 只查询有菜单的项目列表
             if (existMenu) {
@@ -347,8 +355,8 @@ public class JavaDocApiController {
 
         LambdaQueryWrapper<JavaDocClass> wrapper = new LambdaQueryWrapper<JavaDocClass>().like(JavaDocClass::getImports, "%" + importClass + "%");
         ResponseData responseData = ResponseData.ok();
-        IPage<JavaDocClass> classPage = javaDocClassMapper.selectPage(new Page<JavaDocClass>(1,100),wrapper);
-        if (classPage.getSize()>0) {
+        IPage<JavaDocClass> classPage = javaDocClassMapper.selectPage(new Page<JavaDocClass>(1, 100), wrapper);
+        if (classPage.getSize() > 0) {
             responseData.putData(classPage.getRecords());
             responseData.setTotal(classPage.getTotal());
         }

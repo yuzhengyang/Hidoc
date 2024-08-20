@@ -1,20 +1,16 @@
 <template>
-    <el-container style="height:100%">
-        <el-header style="height:40px;">
+    <el-container style="height: 100%">
+        <el-header style="height: 40px">
             <el-affix :offset="50">
-                <el-row>
-                    <el-col :span="8">
-                        <el-button-group>
-                            <el-button type="primary" size='default' plain @click="pageMode = 'search'">搜索</el-button>
-                            <el-button type="primary" size='default' plain @click="pageMode = 'file'">目录</el-button>
-                            <el-button type="primary" size='default' plain @click="pageMode = 'view'">浏览</el-button>
-                        </el-button-group>
-                    </el-col>
-                </el-row>
+                <el-button-group style="z-index: 999;">
+                    <el-button type="primary" size="default" plain @click="pageMode = 'search'">搜索</el-button>
+                    <el-button type="primary" size="default" plain @click="pageMode = 'file'">目录</el-button>
+                    <el-button type="primary" size="default" plain @click="pageMode = 'view'">浏览</el-button>
+                </el-button-group>
             </el-affix>
         </el-header>
         <!-- 内容区域 -->
-        <el-container>
+        <el-container style="height: calc(100% - 40px)">
             <java-doc-search-page v-if="pageMode == 'search'" />
             <java-doc-file-page v-else-if="pageMode == 'file'" />
             <java-doc-view-page v-else />
@@ -54,7 +50,7 @@ export default {
 }
 
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
     background-color: #d8d8d8;
 }
 

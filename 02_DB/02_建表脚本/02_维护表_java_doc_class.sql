@@ -5,7 +5,7 @@
 -- DROP TABLE public.java_doc_class;
 
 CREATE TABLE IF NOT EXISTS public.java_doc_class (
-	id varchar(20) NOT NULL,
+	id varchar(2048) NOT NULL,
 	project_id varchar(20) NOT NULL,
 	create_user_id varchar(20) NULL,
 	create_time timestamp(6) NULL,

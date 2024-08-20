@@ -313,10 +313,13 @@ export default {
                     this.mineList = res.meta.mine;
                     this.coopList = res.meta.coop;
 
-                    this.collectedList.myCoop = _.filter(res.meta.mine, { isCoop: true, isOpen: true }); // 我公开的协作
+                    // 归类不同类别的文集
+                    if (res.meta.mine) {
+                        this.collectedList.myCoop = _.filter(res.meta.mine, { isCoop: true, isOpen: true }); // 我公开的协作
+                        this.collectedList.myOpen = _.filter(res.meta.mine, { isCoop: false, isOpen: true }); // 我公开的文集
+                        this.collectedList.myPrivate = _.filter(res.meta.mine, { isOpen: false }); // 私有文集
+                    }
                     this.collectedList.joinCoop = res.meta.coop; // 我参与的协作
-                    this.collectedList.myOpen = _.filter(res.meta.mine, { isCoop: false, isOpen: true }); // 我公开的文集
-                    this.collectedList.myPrivate = _.filter(res.meta.mine, { isOpen: false }); // 私有文集
                     // this.myAll = res.meta.mine;
                 }
             });

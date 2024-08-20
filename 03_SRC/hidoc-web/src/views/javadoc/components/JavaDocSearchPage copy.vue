@@ -1,46 +1,36 @@
 <template>
-    <el-container style="height: 100%">
-        <el-aside width="260px" style="height: 100%; padding-right: 10px; border-right: 1px solid #bbb">
-            <el-tree :data="this.projectList" node-key="id" default-expand-all :expand-on-click-node="false" @node-click="selectProject">
-                <template #default="{ data }">
-                    <span :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: selectProjectList.indexOf(data.name) > -1 ? '900' : 'normal', color: selectProjectList.indexOf(data.name) > -1 ? '#409eff' : '#3c3d40' }">{{ data.name }}</span>
-                </template>
-            </el-tree>
-        </el-aside>
-        <!-- 内容区域 -->
-        <el-container v-if="pageMode == 'search'">
-            <el-header style="height: 40px; margin-top: -40px">
-                <el-affix :offset="50">
-                    <el-row style="background-color: #ffffff; border: 1px solid #d1d3d4; border-radius: 10px; padding-left: 20px; padding-right: 20px; line-height: 40px">
-                        <el-col :span="2" style="padding-left: 5px">
-                            <el-select v-model="searchMode" placeholder="全部">
-                                <el-option label="全部" value="all"></el-option>
-                                <el-option label="方法" value="method"></el-option>
-                                <el-option label="类" value="class"></el-option>
-                            </el-select>
-                        </el-col>
-                        <el-col :span="6" style="padding-left: 5px">
-                            <el-input v-model="searchName" placeholder="类名、方法名" class="input-with-select" @keydown="searchEnter" clearable />
-                        </el-col>
-                        <el-col :span="12" style="padding-left: 5px">
-                            <el-input v-model="searchText" placeholder="文本内容" class="input-with-select" @keydown="searchEnter" clearable />
-                        </el-col>
-                        <el-col :span="2" style="padding-left: 5px">
-                            <el-switch v-model="searchHaveScene" width="50" inline-prompt active-text="场景" inactive-text="场景" />
-                        </el-col>
-                        <el-col :span="1" style="padding-left: 5px">
-                            <el-button type="success" @click="search()" style="height: 32px">
-                                <el-icon><Search /></el-icon>
-                            </el-button>
-                        </el-col>
-                    </el-row>
-                </el-affix>
-            </el-header>
+    <!-- 内容区域 -->
+    <div style="position:fixed; top:50px; right:30px;z-index: 99999;">
+        <!-- z-index: 99999; 取消z轴最顶端设置 -->
+        <el-row style="text-align:right;background-color:#FFF;border-radius: 4px;">
+            <el-col :span="4">
+                <el-select v-model="searchMode" placeholder="全部">
+                    <el-option label="全部" value="all"></el-option>
+                    <el-option label="方法" value="method"></el-option>
+                    <el-option label="类" value="class"></el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="6">
+                <el-input v-model="searchName" placeholder="类名、方法名" class="input-with-select" @keydown="searchEnter" clearable />
+            </el-col>
+            <el-col :span="12">
+                <el-input v-model="searchText" placeholder="文本内容" class="input-with-select" @keydown="searchEnter" clearable />
+            </el-col>
+            <el-col :span="2">
+                <el-button type="success" @click="search()" style="height:40px">
+                    <el-icon><Search /></el-icon>
+                </el-button>
+            </el-col>
+        </el-row>
+    </div>
+    <el-main>
+        <el-container style="height:100%" v-if="pageMode == 'search'">
             <el-main>
                 <el-row>
                     <el-col :span="24">
                         <el-row v-for="item in javadocItem" :key="item">
-                            <el-col :span="24">
+                            <el-col :span="1"></el-col>
+                            <el-col :span="22">
                                 <java-doc-item-card v-bind:data="item"></java-doc-item-card>
                             </el-col>
                         </el-row>
@@ -49,7 +39,7 @@
                 </el-row>
             </el-main>
         </el-container>
-    </el-container>
+    </el-main>
 </template>
 
 <script>
@@ -63,10 +53,8 @@ export default {
             searchText: '',
             searchName: '',
             searchMode: 'all',
-            searchHaveScene: true,
             javadocItem: [],
             pageMode: 'search',
-            selectProjectList: [],
             projectList: [],
             viewData: {
                 currentProjectId: '',
@@ -85,13 +73,6 @@ export default {
         // this.search();
     },
     methods: {
-        selectProject(data) {
-            if (this.selectProjectList.indexOf(data.name) > -1) {
-                this.selectProjectList = this.selectProjectList.filter(item => item !== data.name);
-            } else {
-                this.selectProjectList.push(data.name);
-            }
-        },
         searchEnter(e) {
             if (e.keyCode == 13) {
                 this.search();
@@ -105,9 +86,7 @@ export default {
                 data: {
                     mode: this.searchMode,
                     name: this.searchName,
-                    text: this.searchText,
-                    projects: this.selectProjectList,
-                    haveScene: this.searchHaveScene
+                    text: this.searchText
                 }
             }).then(res => {
                 if (res.code == 0) {
@@ -207,5 +186,19 @@ export default {
 }
 .el-card {
     margin: 10px;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    background-color: #d8d8d8;
+}
+
+/* 滚动槽 */
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #bfc1c4;
 }
 </style>

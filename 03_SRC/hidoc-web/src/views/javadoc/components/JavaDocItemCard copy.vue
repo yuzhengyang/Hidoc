@@ -1,99 +1,102 @@
 <template>
-    <!-- 新的卡片设计 -->
-    <div style="padding: 20px; border: 2px solid #aaf; border-radius: 20px; margin: 20px 21px 20px 21px">
-        <el-row>
-            <el-col :span="2">
-                <div style="background-color: lightgrey; border-radius: 0px; font-size: 14px; width: 40px; height: 32px; text-align: center; line-height: 32px">
-                    <span v-if="this.dataObj._class == 'JavaDocClass'" style="font-weight: bold; color: dodgerblue">类</span>
-                    <span v-if="this.dataObj._class == 'JavaDocMethod'" style="font-weight: bold; color: chocolate">方法</span>
-                </div>
-            </el-col>
-            <el-col :span="16" style="line-height: 32px; text-align: left">
-                <el-tag :type="this.dataObj._isPublic ? 'primary' : 'info'" style="margin: 5px" effect="dark">{{ this.dataObj.qualifier }}</el-tag>
-                <span style="font-size: 14px; color: #333; cursor: pointer; font-weight: bold" @click="copy(this.dataObj.name)">{{ this.dataObj.name }}</span>
-                <el-tooltip class="box-item" effect="dark" content="👍🏻 有帮助的" placement="top">
-                    <span style="cursor: pointer; margin-left: 40px" @click="helpful(true)">👍🏻</span>
-                </el-tooltip>
-                <el-tooltip class="box-item" effect="dark" content="👎🏾 没有用" placement="top">
-                    <span style="cursor: pointer" @click="helpful(false)">👎🏾</span>
-                </el-tooltip>
-            </el-col>
-            <el-col :span="6">
-                <div style="text-align: right; font-size: 14px; font-weight: bold">
-                    <span v-html="this.dataObj.projectName" />
-                </div>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="20" style="margin-top: 10px">
-                <span style="font-size: 14px" v-html="this.dataObj.commentInfo" />
-            </el-col>
-            <el-col :span="4">
-                <div v-if="this.dataObj._class == 'JavaDocClass'" style="float: right">
-                    <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" @click="showDialog('commentExampleDialog')">示例</el-button>
-                    <el-button type="warning" size="small" round v-if="this.dataObj.commentLog != ''" @click="showDialog('commentLogDialog')">Log</el-button>
-                    <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('originDocumentDialog')">Code</el-button>
-                </div>
-                <div v-if="this.dataObj._class == 'JavaDocMethod'" style="float: right">
-                    <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" @click="showDialog('commentExampleDialog')">示例</el-button>
-                    <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('sourceCodeDialog')">Code</el-button>
-                </div>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="24" style="margin: 5px; padding: 5px"></el-col>
-        </el-row>
-        <el-row v-if="this.dataObj.commentScene != ''">
-            <el-col :span="24" style="margin-left: 5px; padding-left: 5px; color: blue">
-                🎬️ 场景：
-                <span v-html="this.dataObj.commentScene" />
-            </el-col>
-        </el-row>
-        <el-row v-if="this.dataObj._class == 'JavaDocMethod'">
-            <el-col :span="22" style="margin: 5px; padding: 5px">
-                <div style="border: 2px dotted #aaa; border-radius: 10px; padding: 10px">
-                    <div>
-                        ➡️ 传入
-                        <el-table :data="this.dataObj.paramsJson" stripe :show-header="false">
-                            <el-table-column prop="type" label="类型" />
-                            <el-table-column prop="desc" label="描述" />
-                        </el-table>
+    <div class="demo-collapse">
+        <el-collapse v-model="activeNames" @change="handleChange">
+            <el-collapse-item name="1">
+                <template #title>
+                    <div style="background-color: lightgrey; border-radius: 0px; font-size: 14px; width: 40px; text-align: center">
+                        <span v-if="this.dataObj._class == 'JavaDocClass'" style="font-weight: bold; color: dodgerblue">类</span>
+                        <span v-if="this.dataObj._class == 'JavaDocMethod'" style="font-weight: bold; color: chocolate">方法</span>
                     </div>
-                    <div>↩️ 返回：{{ this.dataObj.returnType }} {{ this.dataObj.returnDesc }}</div>
-                    <div v-if="this.dataObj.throwses != ''">
-                        🐞 异常
-                        <el-table :data="this.dataObj.throwsesJson" stripe :show-header="false">
-                            <el-table-column prop="type" label="类型" />
-                            <el-table-column prop="desc" label="描述" />
-                        </el-table>
+                    <div style="padding-left: 5px">
+                        <span style="font-size: 14px">{{ this.dataObj.qualifier }}</span>
+                        <span style="font-size: 14px">{{ this.dataObj.returnType }}</span>
+                        <span style="font-size: 14px; color: red;font-weight: bold;">{{ this.dataObj.name }}</span>
+                        <span style="font-size: 14px; color: red;font-weight: bold;">()</span>
+                        <span style="font-size: 14px" v-html="this.dataObj.commentInfo" />
                     </div>
+                    <div style="float: right">
+                        <div v-if="this.dataObj._class == 'JavaDocClass'" style="float: right">
+                            <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''"  @click="showDialog('commentExampleDialog')">示例说明</el-button>
+                            <el-button type="warning" size="small" round v-if="this.dataObj.commentLog != ''" @click="showDialog('commentLogDialog')">修改记录</el-button>
+                            <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('originDocumentDialog')">源文件</el-button>
+                        </div>
+                        <div v-if="this.dataObj._class == 'JavaDocMethod'" style="float: right">
+                            <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''"  @click="showDialog('commentExampleDialog')">示例说明</el-button>
+                            <el-button type="success" size="small" round v-if="this.dataObj.javaDocClassLite ? true : false" @click="showDialog('classDetailsDialog')">类信息</el-button>
+                            <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('sourceCodeDialog')">方法源码</el-button>
+                        </div>
+                    </div>
+                </template>
+                <div>
+                    <span style="font-size: 14px; color: #888" @click="copy(this.dataObj.name)">{{ this.dataObj.name }}</span>
                 </div>
-            </el-col>
-        </el-row>
-        <el-row v-if="this.dataObj.commentLimit != ''">
-            <el-col :span="24" style="margin-left: 5px; padding-left: 5px; color: red">
-                ⛔️ 限制：
-                <span v-html="this.dataObj.commentLimit" />
-            </el-col>
-        </el-row>
-        <!-- 关键字 -->
-        <el-row v-if="this.dataObj.commentKeywords != ''">
-            <el-col :span="24">
-                <el-tag v-for="keyword in dataObj._commentKeywordArray" :key="keyword" type="warning" style="margin: 5px">{{ keyword }}</el-tag>
-            </el-col>
-        </el-row>
-        <el-row v-if="this.dataObj.javaDocClassLite">
-            <el-col :span="24">
-                <div style="text-align: right; font-size: 14px; font-weight: bold">
-                    <span @click="showDialog('classDetailsDialog')" style="cursor: pointer; color: blue">类：{{ this.dataObj.javaDocClassLite.name }}</span>
-                </div>
-            </el-col>
-        </el-row>
+                <div>Consistent within interface: all elements should be consistent, such as: design style, icons and texts, position of elements, etc.</div>
+            </el-collapse-item>
+        </el-collapse>
+        <div style="text-align: right; font-size: 14px; font-weight: bold">
+            来源：
+            <span v-html="this.dataObj.projectName + (this.dataObj.javaDocClassLite ? '，类：' + this.dataObj.javaDocClassLite.name + '，方法：' : '，类：') + this.dataObj.name" />
+        </div>
     </div>
-
-    <!-- ============================================================================================================== -->
-    <!-- ============================================================================================================== -->
-    <!-- ============================================================================================================== -->
+    <el-row>
+        <!-- 类型图标：类或方法 -->
+        <el-col :span="2"></el-col>
+        <!-- 主体内容 -->
+        <el-col :span="22">
+            <!-- 描述信息及按钮 -->
+            <el-row>
+                <el-col :span="18"></el-col>
+                <el-col :span="6"></el-col>
+            </el-row>
+            <!-- 场景 -->
+            <el-row v-if="this.dataObj.commentScene != ''">
+                <el-col :span="18" style="margin: 10px">
+                    场景：
+                    <span v-html="this.dataObj.commentScene" />
+                </el-col>
+            </el-row>
+            <!-- 返回值，参数及异常 -->
+            <el-row v-if="this.dataObj._class == 'JavaDocMethod'">
+                <el-col :span="22">
+                    <el-descriptions :column="1" size="medium" border>
+                        <el-descriptions-item :min-width="120">
+                            <template #label>返回值</template>
+                            <div>{{ this.dataObj.returnType }} {{ this.dataObj.returnDesc }}</div>
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template #label>入参</template>
+                            <el-table :data="this.dataObj.paramsJson" stripe :show-header="false">
+                                <el-table-column prop="type" label="类型" />
+                                <el-table-column prop="name" label="名称" />
+                                <el-table-column prop="desc" label="描述" />
+                            </el-table>
+                        </el-descriptions-item>
+                        <el-descriptions-item>
+                            <template #label>异常</template>
+                            <el-table :data="this.dataObj.throwsesJson" stripe :show-header="false">
+                                <el-table-column prop="type" label="类型" />
+                                <el-table-column prop="desc" label="描述" />
+                            </el-table>
+                        </el-descriptions-item>
+                    </el-descriptions>
+                </el-col>
+            </el-row>
+            <!-- 限制 -->
+            <el-row v-if="this.dataObj.commentLimit != ''">
+                <el-col :span="22" style="margin: 5px; padding: 5px; border-radius: 5px; background-color: lightpink">
+                    限制：
+                    <span v-html="this.dataObj.commentLimit" />
+                </el-col>
+            </el-row>
+            <!-- 关键字 -->
+            <el-row v-if="this.dataObj.commentKeywords != ''">
+                <el-col :span="22" style="margin: 5px; padding: 5px; border-radius: 5px; background-color: lightgreen">
+                    关键字：
+                    <span v-html="this.dataObj.commentKeywords" />
+                </el-col>
+            </el-row>
+        </el-col>
+    </el-row>
 
     <!-- 详细信息弹框 -->
     <!-- 示例说明 -->
@@ -252,16 +255,6 @@ export default {
 
         this.dataObj = this.data;
 
-        // 设置是否public
-        if (this.dataObj.qualifier.indexOf('public') > -1) {
-            this.dataObj._isPublic = true;
-        }
-
-        // 结构化关键字信息
-        if (this.dataObj.commentKeywords != '') {
-            this.dataObj._commentKeywordArray = this.dataObj.commentKeywords.replaceAll('，', ',').split(',');
-        }
-
         // 高亮关键字
         if (this.dataObj._highlightKeys && this.dataObj._highlightKeys.length > 0) {
             for (var i = 0; i < this.dataObj._highlightKeys.length; i++) {
@@ -273,26 +266,6 @@ export default {
         }
     },
     methods: {
-        helpful(isHelpful) {
-            request({
-                url: '/openapi/javadoc/helpful',
-                method: 'post',
-                data: {
-                    metaId: this.dataObj.id,
-                    classId: this.dataObj._class == 'JavaDocClass' ? this.dataObj.id : this.dataObj.classId,
-                    projectId: this.dataObj.projectId,
-                    isHelpful: isHelpful
-                }
-            }).then(res => {
-                if (res.code == 0) {
-                    ElMessage({
-                        message: '感谢您的反馈',
-                        type: 'success',
-                        duration: 1 * 1000
-                    });
-                }
-            });
-        },
         copy(s) {
             copy(s);
             ElMessage({
@@ -303,9 +276,8 @@ export default {
         },
         setHighlightKeys(text, key, bgColor) {
             var sText = text;
-            bgColor = bgColor || 'yellow';
-            let color = 'red';
-            var sKey = "<span style='background-color: " + bgColor + ';color: ' + color + ";font-weight:bold;'> " + key + ' </span>';
+            bgColor = bgColor || 'orange';
+            var sKey = "<span style='background-color: " + bgColor + ";'>" + key + '</span>';
             var regStr = new RegExp(key, 'g');
             sText = sText.replace(regStr, sKey); //替换key
             return sText;
@@ -450,9 +422,5 @@ export default {
             overflow-y: auto;
         }
     }
-}
-
-.vuepress-markdown-body {
-    overflow: hidden;
 }
 </style>
