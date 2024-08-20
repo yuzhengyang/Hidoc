@@ -3,6 +3,7 @@ package com.yuzhyn.hidoc.app.application.controller.serverman;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
+import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManCmd;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManExeLog;
@@ -13,6 +14,7 @@ import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManMachineMapper;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import com.yuzhyn.hidoc.app.utils.ssh.SshClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -195,14 +197,13 @@ public class ServerManCmdController {
                             }
 
                             R.SshManager.readChannel(dialogId, (bytes) -> {
-//                                String s = new String(bytes);
-                                System.out.println("server man cmd run: " + new String(bytes));
+                                // 这里不用读取，直接扔到队列定时处理就行
                                 R.Queues.CmdRunLogQueue.add(new CmdRunLog(dialogId, bytes));
                             });
 
                             try {
                                 R.SshManager.sendCommandRun(dialogId, cmd.getContentTa());
-                            } catch (IOException e) {
+                              } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }

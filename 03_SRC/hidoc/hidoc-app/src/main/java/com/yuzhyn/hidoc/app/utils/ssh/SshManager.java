@@ -6,6 +6,9 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
 import com.yuzhyn.azylee.core.logs.Alog;
+import com.yuzhyn.hidoc.app.aarg.R;
+import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManExeLog;
+import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -112,6 +115,27 @@ public class SshManager {
         }
     }
 
+    public void close(String id) {
+        SshClient client = getSshClientMap().getOrDefault(id, null);
+        if (client != null) {
+            if (client.getChannel().isConnected()) {
+                client.getChannel().disconnect();
+                log.info("cleanSshConnection: 关闭 channel: " + id);
+            }
+            if (client.getSession().isConnected()) {
+                client.getSession().disconnect();
+                log.info("cleanSshConnection: 关闭 session: " + id);
+            }
+            log.info("cleanSshConnection: 关闭连接: " + id);
+
+            // 如果连接已关闭，则移除连接信息
+            if (!client.getSession().isConnected()) {
+                getSshClientMap().remove(id);
+                log.info("cleanSshConnection: 移除连接: " + id);
+            }
+        }
+    }
+
 
     /**
      * 打开ssh连接shell通道
@@ -148,19 +172,25 @@ public class SshManager {
                 if (sshClient == null) {
                 }
                 //循环读取
-                byte[] buffer = new byte[4096];
+                byte[] buffer = new byte[10 * 1024];
                 int i = 0;
                 //如果没有数据来，线程会一直阻塞在这个地方等待数据。
                 while ((i = sshClient.getChannel().getInputStream().read(buffer)) != -1) {
+//                    // 完成时候发送结束标志，这里不行哎。。。
+//                    sendCommandRun(id, "echo \"[[##hidoc->serverman.run::end.manager//sshmanager_read_end]]\"");
+
                     String s = new String(buffer, 0, i);
                     sshClient.getHistory().add(new SshHistory(false, s));
-//                    log.info(s);
+                    log.info(s);
                     consumer.accept(Arrays.copyOfRange(buffer, 0, i));
                 }
-                System.out.println("跳出");
+
+                // 这里运行结束了，提供一条特殊消息告诉后续处理，防止长时间占用
+                String endFlag = "[[##hidoc->serverman.run::end.manager//sshmanager_read_end]]";
+                R.Queues.CmdRunLogQueue.add(new CmdRunLog(id, endFlag.getBytes()));
             } catch (IOException e) {
-                Alog.e("webssh连接异常");
-                Alog.e("异常信息:" + e.getMessage());
+                Alog.e("SshManager: io exception");
+                Alog.e("SshManager: io exception is: " + e.getMessage());
             }
         });
     }

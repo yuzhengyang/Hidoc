@@ -83,9 +83,8 @@
                         <!-- <el-table-column prop="id" label="会话ID"></el-table-column> -->
                         <el-table-column prop="beginTime" label="开始时间"></el-table-column>
                         <!-- <el-table-column prop="endTime" label="结束时间"></el-table-column> -->
-                        <el-table-column prop="contentTa" label="执行脚本a"></el-table-column>
-                        <el-table-column prop="contentTb" label="执行脚本b"></el-table-column>
-                        <el-table-column prop="contentTc" label="执行脚本c"></el-table-column>
+                        <el-table-column prop="contentTa" label="脚本a"></el-table-column>
+                        <el-table-column prop="resultTa" label="脚本a结果"></el-table-column>
                         <el-table-column fixed="right" label="操作">
                             <template #default="scope">
                                 <el-button type="text" round size="small" @click="fileDetail(scope.row.id)">详情</el-button>
