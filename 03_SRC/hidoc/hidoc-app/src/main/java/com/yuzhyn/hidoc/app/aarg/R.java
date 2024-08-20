@@ -11,15 +11,20 @@ import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.entity.file.FileDownloadLog;
+import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocQueryLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysFlowLog;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysFlowRule;
 import com.yuzhyn.hidoc.app.utils.EsTool;
 import com.yuzhyn.hidoc.app.utils.ssh.SshManager;
 import reactor.util.function.Tuple3;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -41,6 +46,7 @@ public final class R {
     public static long TodayAccessTimes = 0;
     public static SystemType SystemType = SystemTypeTool.getOSname();
     public static SshManager SshManager = new SshManager();
+    public static List<SysFlowRule> sysFlowRules = new ArrayList();
 
     public static LocalDateTime Today() {
         return LocalDateTime.now();
@@ -52,6 +58,11 @@ public final class R {
         public static Cache<String, UserInfo> UserInfo = CacheBuilder.newBuilder().build();
         public static Cache<String, FileCursor> SysFileCursor = CacheBuilder.newBuilder().build();
         public static Cache<String, File> SysFile = CacheBuilder.newBuilder().build();
+        /**
+         * key: 用户+url、角色+url
+         * value: 访问记录列表
+         */
+        public static Cache<String, Map<Long, SysFlowLog>> SysFlowLogs = CacheBuilder.newBuilder().build();
     }
 
     public static class Queues {
@@ -59,6 +70,7 @@ public final class R {
         public static ConcurrentLinkedQueue<DocAccessLog> DocAccessLogQueue = new ConcurrentLinkedQueue<>();
         public static ConcurrentLinkedQueue<CmdRunLog> CmdRunLogQueue = new ConcurrentLinkedQueue<>();
         public static ConcurrentLinkedQueue<FileDownloadLog> FileDownloadLogQueue = new ConcurrentLinkedQueue<>();
+        public static ConcurrentLinkedQueue<JavaDocQueryLog> JavaDocQueryLogQueue = new ConcurrentLinkedQueue<>();
     }
 
     public static class Maps {

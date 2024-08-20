@@ -6,6 +6,7 @@ import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.common.constant.UrlAccess;
 import com.yuzhyn.hidoc.app.common.enums.ResponseCode;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
+import com.yuzhyn.hidoc.app.manager.FlowManager;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -88,6 +89,18 @@ public class SecurityInterceptor implements HandlerInterceptor {
 
         if (isLogin) {
             log.info("已核对身份，用户信息已载入缓存");
+
+            log.info("访问控制和流量控制过滤");
+            if(!FlowManager.check(uri, CurrentUserManager.getUser())){
+                log.info("访问过于频繁，已拒绝请求");
+                response.setCharacterEncoding("UTF-8");
+                response.setContentType("application/json; charset=utf-8");
+                ResponseData rs = new ResponseData(ResponseCode.ACCESS_COUNT_MUCH);
+                response.setContentLength(rs.toJSONString().getBytes().length);
+                response.getOutputStream().write(rs.toJSONString().getBytes());
+                return false;
+            }
+
             return true;
         } else {
 

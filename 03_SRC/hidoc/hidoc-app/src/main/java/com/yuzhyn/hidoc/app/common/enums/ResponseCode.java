@@ -16,6 +16,7 @@ public enum ResponseCode {
     LOGIN_TIMEOUT(10, "您的账号已登出或状态过期，请重新登录"),
     ACCESS_NEED_LOGIN(11, "您访问的内容需要登录才能查看，请先登录系统"),
     UNAUTHORIZED(12, "您正在访问未经授权的内容，具体请联系内容发布方"),
+    ACCESS_COUNT_MUCH(13, "您访问的内容过于频繁，请稍后再试"),
 
 //    NO_RESOURCE(4, "暂无相关数据"),
 //    PARAMS_ERROR(5, "参数有误"),

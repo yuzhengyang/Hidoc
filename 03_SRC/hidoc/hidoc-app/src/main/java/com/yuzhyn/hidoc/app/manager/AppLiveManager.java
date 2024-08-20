@@ -141,6 +141,8 @@ public class AppLiveManager {
             R.EsTool.createClient();
         }
 
+        log.info("********** 加载访问控制配置 **********");
+        FlowManager.readRules();
 
         log.info("********** 配置加载完毕 **********");
     }
