@@ -66,16 +66,10 @@ public class JavaDocController {
     JavaDocProjectMapper javaDocProjectMapper;
 
     @Autowired
-    JavaDocClassMapper javaDocClassMapper;
+    JavaDocMetaMapper javaDocMetaMapper;
 
     @Autowired
-    JavaDocClassLiteMapper javaDocClassLiteMapper;
-
-    @Autowired
-    JavaDocMethodMapper javaDocMethodMapper;
-
-    @Autowired
-    JavaDocMethodLiteMapper javaDocMethodLiteMapper;
+    JavaDocMetaLiteMapper javaDocMetaLiteMapper;
 
     @Autowired
     JavaDocMenuMapper javaDocMenuMapper;
@@ -114,9 +108,9 @@ public class JavaDocController {
     @PostMapping("getOriginalDocument")
     public ResponseData getOriginalDocument(@RequestBody Map<String, Object> params) {
         String classId = MapTool.get(params, "classId", "").toString();
-        JavaDocClass javaDocClass = javaDocClassMapper.selectById(classId);
+        JavaDocMeta javaDocClass = javaDocMetaMapper.selectById(classId);
         if (javaDocClass != null) {
-            return ResponseData.okData("originalDocument", javaDocClass.getOriginalDocument());
+            return ResponseData.okData("originalDocument", javaDocClass.getSourceCode());
         }
         return ResponseData.error("没有找到类源文件");
     }
@@ -125,22 +119,10 @@ public class JavaDocController {
     public ResponseData getSourceCode(@RequestBody Map<String, Object> params) {
         String type = MapTool.get(params, "type", "").toString();
         String id = MapTool.get(params, "id", "").toString();
-        switch (type) {
-            case "class":
-                JavaDocClass javaDocClass = javaDocClassMapper.selectById(id);
-                if (javaDocClass != null) {
-                    // 这里其实没有使用，这里的内容是文件内容，并不是严格的类源代码
-                    return ResponseData.okData("sourceCode", javaDocClass.getOriginalDocument());
-                }
-                break;
-            case "method":
-                JavaDocMethod method = javaDocMethodMapper.selectById(id);
-                if (method != null) {
-                    return ResponseData.okData("sourceCode", method.getSourceCode());
-                }
-                break;
-            default:
-                break;
+
+        JavaDocMeta method = javaDocMetaMapper.selectById(id);
+        if (method != null) {
+            return ResponseData.okData("sourceCode", method.getSourceCode());
         }
         return ResponseData.error("没有找到源代码信息");
     }

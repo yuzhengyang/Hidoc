@@ -22,19 +22,19 @@ public class JavaDocHelpful {
     private String metaId;
     private String classId;
     private String projectId;
-    private Boolean isHelpful;
+    private Double helpfulRate;
 
     public JavaDocHelpful() {
         super();
     }
 
-    public JavaDocHelpful(String metaId, String classId, String projectId, Boolean isHelpful) {
-        this.id = R.SnowFlake.nexts();
-        this.userId = CurrentUserManager.getUser() != null ? CurrentUserManager.getUser().getId() : "";
+    public JavaDocHelpful(String metaId, String classId, String projectId, Double helpfulRate) {
+        this.userId = CurrentUserManager.getUser() != null ? CurrentUserManager.getUser().getId() : "*";
         this.createTime = LocalDateTime.now();
         this.metaId = metaId;
         this.classId = classId;
         this.projectId = projectId;
-        this.isHelpful = isHelpful;
+        this.helpfulRate = helpfulRate;
+        this.id = this.userId + "-" + this.metaId;
     }
 }

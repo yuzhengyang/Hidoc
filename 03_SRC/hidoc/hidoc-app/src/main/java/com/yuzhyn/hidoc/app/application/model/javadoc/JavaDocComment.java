@@ -58,16 +58,16 @@ public class JavaDocComment {
                 if (txtline.startsWith("*")) txtline = txtline.substring(1); // 去掉 " *" 的内容
                 if (txtline.startsWith(" ")) txtline = txtline.substring(1); // 去掉第一个空格 " " 的内容
 
-                if (txtline.startsWith("#场景：") || txtline.startsWith("#场景:")|| txtline.startsWith("#场景 ")) {
+                if (txtline.startsWith("#场景：") || txtline.startsWith("#场景:") || txtline.startsWith("#场景 ")) {
                     curblock = "scene";
                     txtline = txtline.substring(4);
                 } else if (txtline.startsWith("#限制：") || txtline.startsWith("#限制:") || txtline.startsWith("#限制 ")) {
                     curblock = "limit";
                     txtline = txtline.substring(4);
-                } else if (txtline.startsWith("#关键字：") || txtline.startsWith("#关键字:")|| txtline.startsWith("#关键字 ")) {
+                } else if (txtline.startsWith("#关键字：") || txtline.startsWith("#关键字:") || txtline.startsWith("#关键字 ")) {
                     curblock = "keywords";
                     txtline = txtline.substring(5);
-                } else if (txtline.startsWith("#目录：") || txtline.startsWith("#目录:")|| txtline.startsWith("#目录 ")) {
+                } else if (txtline.startsWith("#目录：") || txtline.startsWith("#目录:") || txtline.startsWith("#目录 ")) {
                     curblock = "menu";
                     txtline = txtline.substring(4);
                 } else if (txtline.startsWith("<pre>{@code 示例说明")) {
@@ -191,12 +191,14 @@ public class JavaDocComment {
         String[] lines = StringTool.splitLine(s);
         for (String line : lines) {
             String[] logs = StringTool.splitLine(line, "  ", 4, " ", true);
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("version", logs[0]);
-            jsonObject.put("time", logs[1]);
-            jsonObject.put("author", logs[2]);
-            jsonObject.put("content", logs[3]);
-            jsonArray.add(jsonObject);
+            if (StringTool.ok(logs[0], logs[1], logs[2], logs[3])) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("version", logs[0]);
+                jsonObject.put("time", logs[1]);
+                jsonObject.put("author", logs[2]);
+                jsonObject.put("content", logs[3]);
+                jsonArray.add(jsonObject);
+            }
         }
         return jsonArray;
     }

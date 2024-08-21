@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.service.javadoc;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -49,19 +50,13 @@ public class JavaDocCreateService {
     JavaDocProjectMapper javaDocProjectMapper;
 
     @Autowired
-    JavaDocClassMapper javaDocClassMapper;
+    JavaDocMetaMapper javaDocMetaMapper;
 
     @Autowired
-    JavaDocMethodMapper javaDocMethodMapper;
+    JavaDocMetaLiteMapper javaDocMetaLiteMapper;
 
     @Autowired
     JavaDocMenuMapper javaDocMenuMapper;
-
-    @Autowired
-    JavaDocClassLiteMapper javaDocClassLiteMapper;
-
-    @Autowired
-    JavaDocMethodLiteMapper javaDocMethodLiteMapper;
 
     @Transactional
     public ResponseData uploadZip(String projectName, List<String> fileList, List<String> step) {
@@ -90,8 +85,8 @@ public class JavaDocCreateService {
         javaDocProject.setUpdateTime(LocalDateTime.now());
 
         step.add("准备解析后的数据列表");
-        List<JavaDocClass> javaDocClassList = new ArrayList<>();
-        List<JavaDocMethod> javaDocMethodList = new ArrayList<>();
+        List<JavaDocMeta> javaDocClassList = new ArrayList<>();
+        List<JavaDocMeta> javaDocMethodList = new ArrayList<>();
         List<JavaDocMenu> javaDocMenuList = new ArrayList<>();
 
         step.add("准备数据开始分解存储");
@@ -127,15 +122,15 @@ public class JavaDocCreateService {
 
             step.add("保存类信息");
             if (ListTool.ok(javaDocClassList)) {
-                for (JavaDocClass item : javaDocClassList) {
-                    javaDocClassMapper.insert(item);
+                for (JavaDocMeta item : javaDocClassList) {
+                    javaDocMetaMapper.insert(item);
                 }
             }
 
             step.add("保存方法信息");
             if (ListTool.ok(javaDocMethodList)) {
-                for (JavaDocMethod item : javaDocMethodList) {
-                    javaDocMethodMapper.insert(item);
+                for (JavaDocMeta item : javaDocMethodList) {
+                    javaDocMetaMapper.insert(item);
                 }
             }
 
@@ -154,23 +149,18 @@ public class JavaDocCreateService {
         JavaDocProject project = javaDocProjectMapper.selectOne(new LambdaQueryWrapper<JavaDocProject>()
                 .eq(JavaDocProject::getName, projectName));
         if (project != null) {
-            int classFlag = javaDocClassLiteMapper.delete(new LambdaQueryWrapper<JavaDocClassLite>()
-                    .eq(JavaDocClassLite::getProjectId, project.getId()));
-
-
-            int methodFlag = javaDocMethodLiteMapper.delete(new LambdaQueryWrapper<JavaDocMethodLite>()
-                    .eq(JavaDocMethodLite::getProjectId, project.getId()));
-
+            int metaFlag = javaDocMetaLiteMapper.delete(new LambdaQueryWrapper<JavaDocMetaLite>()
+                    .eq(JavaDocMetaLite::getProjectId, project.getId()));
 
             int menuFlag = javaDocMenuMapper.delete(new LambdaQueryWrapper<JavaDocMenu>()
                     .eq(JavaDocMenu::getProjectId, project.getId()));
 
-            log.info("删除历史信息：class：" + classFlag + "，method：" + methodFlag + "，menu：" + menuFlag + "。");
+            log.info("删除历史信息：meta：" + metaFlag + "，menu：" + menuFlag + "。");
         }
 
     }
 
-    private void parseJavaDoc(String filepath, JavaDocProject javaDocProject, List<JavaDocClass> javaDocClassList, List<JavaDocMethod> javaDocMethodList) throws FileNotFoundException {
+    private void parseJavaDoc(String filepath, JavaDocProject javaDocProject, List<JavaDocMeta> javaDocClassList, List<JavaDocMeta> javaDocMethodList) throws FileNotFoundException {
         SysUser curUser = CurrentUserManager.getUser();
         if (curUser == null) {
             curUser = CurrentUserManager.getOpenUser();
@@ -195,13 +185,14 @@ public class JavaDocCreateService {
         if (ListTool.ok(typeList)) {
             for (TypeDeclaration typeItem : typeList) {
                 // 创建类信息
-                JavaDocClass javaDocClass = new JavaDocClass();
+                JavaDocMeta javaDocClass = new JavaDocMeta();
+                javaDocClass.setMetaType("JavaDocClass");
                 javaDocClass.setProjectId(javaDocProject.getId());
                 javaDocClass.setProjectName(javaDocProject.getName());
                 javaDocClass.setCreateUserId(curUser.getId());
                 javaDocClass.setCreateTime(LocalDateTime.now());
                 javaDocClass.setName(typeItem.getNameAsString());
-                javaDocClass.setOriginalDocument(cu.toString());
+                javaDocClass.setSourceCode(cu.toString());
                 javaDocClass.setIsStruct(false);
                 if (!StringTool.ok(mainClassName)) mainClassName = typeItem.getNameAsString();
 
@@ -221,8 +212,7 @@ public class JavaDocCreateService {
                             stringBuilder.append(" ");
                             importsJson.add(nodeItem.getNameAsString());
                         }
-                        javaDocClass.setImports(stringBuilder.toString());
-                        javaDocClass.setImportsJson(new JSONArray(importsJson));
+                        javaDocClass.setImports(JSON.toJSONString(importsJson));
                     }
                     // 填充修饰词
                     if (ListTool.ok(typeItem.getModifiers())) {
@@ -257,8 +247,7 @@ public class JavaDocCreateService {
                         javaDocClass.setCommentScene(javaDocComment.getScene());
                         javaDocClass.setCommentLimit(javaDocComment.getLimit());
                         javaDocClass.setCommentExample(javaDocComment.getExample());
-                        javaDocClass.setCommentLog(javaDocComment.getLog());
-                        javaDocClass.setCommentLogJson(javaDocComment.getLogJson());
+                        javaDocClass.setCommentLog(JSON.toJSONString(javaDocComment.getLogJson()));
                         javaDocClass.setCommentKeywords(javaDocComment.getKeywords());
                         javaDocClass.setCommentMenu(javaDocComment.getMenu());
                     }
@@ -272,7 +261,8 @@ public class JavaDocCreateService {
                     for (Node nodeItem : typeItem.getChildNodes()) {
                         if (nodeItem.getClass().equals(MethodDeclaration.class)) {
                             MethodDeclaration methodItem = (MethodDeclaration) nodeItem;
-                            JavaDocMethod javaDocMethod = new JavaDocMethod();
+                            JavaDocMeta javaDocMethod = new JavaDocMeta();
+                            javaDocMethod.setMetaType("JavaDocMethod");
                             javaDocMethod.setClassId(javaDocClass.getId());
                             javaDocMethod.setClassName(javaDocClass.getName());
                             javaDocMethod.setProjectId(javaDocProject.getId());
@@ -287,6 +277,7 @@ public class JavaDocCreateService {
                                 StringBuilder stringBuilder = new StringBuilder();
                                 for (Modifier modItem : methodItem.getModifiers()) {
                                     stringBuilder.append(modItem.getKeyword().asString());
+                                    stringBuilder.append(" ");
                                 }
                                 javaDocMethod.setQualifier(stringBuilder.toString());
                             }
@@ -303,18 +294,23 @@ public class JavaDocCreateService {
                                 javaDocMethod.setCommentScene(javaDocComment.getScene());
                                 javaDocMethod.setCommentLimit(javaDocComment.getLimit());
                                 javaDocMethod.setCommentExample(javaDocComment.getExample());
-                                javaDocMethod.setCommentLog(javaDocComment.getLog());
-                                javaDocMethod.setCommentLogJson(javaDocComment.getLogJson());
+                                javaDocMethod.setCommentLog(JSON.toJSONString(javaDocComment.getLogJson()));
                                 javaDocMethod.setCommentKeywords(javaDocComment.getKeywords());
                                 javaDocMethod.setCommentMenu(javaDocComment.getMenu());
                             }
                             // 返回值类型
                             javaDocMethod.setReturnType(methodItem.getTypeAsString());
                             // 填充传入参数
+                            StringBuilder paramsTypeString = new StringBuilder();
                             if (ListTool.ok(methodItem.getParameters())) {
                                 StringBuilder stringBuilder = new StringBuilder();
                                 JSONArray jsonArray = new JSONArray();
                                 for (Parameter parameterItem : methodItem.getParameters()) {
+                                    paramsTypeString.append("#");
+                                    paramsTypeString.append(parameterItem.getTypeAsString());
+                                    paramsTypeString.append(":");
+                                    paramsTypeString.append(parameterItem.getNameAsString());
+
                                     stringBuilder.append(parameterItem.getTypeAsString() + " ");
                                     stringBuilder.append(parameterItem.getNameAsString() + " ");
                                     JSONObject jsonObject = new JSONObject();
@@ -328,8 +324,7 @@ public class JavaDocCreateService {
                                     stringBuilder.append(desc + " ");
                                     jsonArray.add(jsonObject);
                                 }
-                                javaDocMethod.setParams(stringBuilder.toString());
-                                javaDocMethod.setParamsJson(jsonArray);
+                                javaDocMethod.setParams(JSON.toJSONString(jsonArray));
                             }
                             if (ListTool.ok(methodItem.getThrownExceptions())) {
                                 StringBuilder stringBuilder = new StringBuilder();
@@ -346,12 +341,11 @@ public class JavaDocCreateService {
                                     stringBuilder.append(desc + " ");
                                     jsonArray.add(jsonObject);
                                 }
-                                javaDocMethod.setThrowses(stringBuilder.toString());
-                                javaDocMethod.setThrowsesJson(jsonArray);
+                                javaDocMethod.setThrowses(JSON.toJSONString(jsonArray));
                             }
                             if (javaDocMethod.getParams() == null) javaDocMethod.setParams("");
-                            javaDocMethod.setId("[id:" + javaDocClass.getId() + "-" + javaDocMethod.getQualifier() + "-" + javaDocMethod.getName() + "-" + javaDocMethod.getReturnType() + "-" + javaDocMethod.getParams() + "]");
-                            javaDocMethod.setId(javaDocMethod.getId().replace(" ", ""));
+                            javaDocMethod.setId("[id:" + javaDocClass.getId() + "-" + javaDocMethod.getQualifier() + "-" + javaDocMethod.getReturnType() + "-" + javaDocMethod.getName() + "-" + paramsTypeString + "]");
+                            javaDocMethod.setId(javaDocMethod.getId().replace(" ", "-"));
                             javaDocMethodList.add(javaDocMethod);
                         }
                     }
@@ -360,10 +354,10 @@ public class JavaDocCreateService {
         }
     }
 
-    private void parseJavaDocMenu(JavaDocProject javaDocProject, List<JavaDocClass> javaDocClassList, List<JavaDocMenu> javaDocMenuList) {
+    private void parseJavaDocMenu(JavaDocProject javaDocProject, List<JavaDocMeta> javaDocClassList, List<JavaDocMenu> javaDocMenuList) {
         Map<String, JavaDocMenu> menuMap = new HashMap<>();
         if (ListTool.ok(javaDocClassList)) {
-            for (JavaDocClass classItem : javaDocClassList) {
+            for (JavaDocMeta classItem : javaDocClassList) {
                 if (StringTool.ok(classItem.getCommentMenu()) && StringTool.ok(classItem.getCommentMenu().trim())) {
                     String commentMenu = classItem.getCommentMenu().trim().replace('\\', '/');
                     String[] menuArray = StringTool.split(commentMenu, "/", true, false);

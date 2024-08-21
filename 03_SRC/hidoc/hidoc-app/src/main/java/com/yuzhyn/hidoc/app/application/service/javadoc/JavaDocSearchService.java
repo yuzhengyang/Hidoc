@@ -2,6 +2,7 @@ package com.yuzhyn.hidoc.app.application.service.javadoc;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -21,12 +22,14 @@ import com.yuzhyn.azylee.core.datas.strings.StringConst;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.ios.txts.TxtTool;
 import com.yuzhyn.hidoc.app.aarg.R;
+import com.yuzhyn.hidoc.app.application.entity.doc.DocThumb;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.*;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.*;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,16 +50,13 @@ public class JavaDocSearchService {
     JavaDocProjectMapper javaDocProjectMapper;
 
     @Autowired
-    JavaDocClassMapper javaDocClassMapper;
+    JavaDocMetaMapper javaDocMetaMapper;
 
     @Autowired
-    JavaDocClassLiteMapper javaDocClassLiteMapper;
+    JavaDocMetaSearchLiteMapper javaDocMetaSearchLiteMapper;
 
     @Autowired
-    JavaDocMethodMapper javaDocMethodMapper;
-
-    @Autowired
-    JavaDocMethodLiteMapper javaDocMethodLiteMapper;
+    JavaDocMetaLiteMapper javaDocMetaLiteMapper;
 
     @Autowired
     JavaDocQueryLogMapper javaDocQueryLogMapper;
@@ -66,10 +66,10 @@ public class JavaDocSearchService {
 
     public ResponseData search(Map<String, Object> params) {
 
-        String mode = MapTool.get(params, "mode", "").toString();
+        String metaType = MapTool.get(params, "metaType", "").toString();
         String name = MapTool.get(params, "name", "").toString();
         String text = MapTool.get(params, "text", "").toString();
-        Boolean haveScene = MapTool.getBoolean(params, "haveScene", "false");
+        Boolean isStruct = MapTool.getBoolean(params, "isStruct", "false");
 
         String[] projectArray;
         if (MapTool.get(params, "projects", null) != null) {
@@ -82,162 +82,80 @@ public class JavaDocSearchService {
         } else {
             projectArray = null;
         }
+
         String[] nameArray = split(name, " ", true, true);
         String[] textArray = split(text, " ", true, true);
 
-        saveQueryLog(mode, nameArray, textArray, projectArray);
+        saveQueryLog(metaType, nameArray, textArray, projectArray);
 
         Set<String> highlightKey = new HashSet<>();
         if (nameArray != null) highlightKey.addAll(Arrays.asList(nameArray));
         if (textArray != null) highlightKey.addAll(Arrays.asList(textArray));
 
-//        String textLike = "%" + text.replace(' ', '%') + "%"; // 替换空格为通配符有局限性，比如有强制的前后顺序
-        String begTag = "<span style='color:red;'>";
-        String endTag = "</span>";
-
         // 不输入任何信息，直接搜索是没有意义的，这里限制搜索个数，仅做示意
-        int selectClassPageSize = 5, selectMethodPageSize = 5;
+        Long offset = 0L;
+        Long limit = 10L;
         if (StringTool.ok(name) || StringTool.ok(text)) {
-            selectClassPageSize = 50;
-            selectMethodPageSize = 50;
-            if (mode.equals("class")) selectClassPageSize = 100;
-            if (mode.equals("method")) selectMethodPageSize = 100;
+            limit = 50L;
         }
 
         ResponseData responseData = ResponseData.ok();
         List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);
         if (!ListTool.ok(projectList)) return responseData;
 
-        List<JavaDocClassLite> classList = null;
-        List<JavaDocMethodLite> methodList = null;
-
-        if (mode.equals("class") || mode.equals("all")) {
-
-            LambdaQueryWrapper<JavaDocClassLite> classWrapper = new LambdaQueryWrapper<JavaDocClassLite>();
-            classWrapper = classWrapper.and(q -> q.eq(JavaDocClassLite::getIsStruct, true));
-            if (ListTool.ok(nameArray)) {
-                classWrapper = classWrapper.and(p -> {
-                    for (String key : nameArray) {
-                        String keyLike = "%" + key + "%";
-                        p.apply("COALESCE(name,'') ILIKE {0}", keyLike);
-//                                    "COALESCE(project_name,'')||" +
-//                                    "COALESCE(comment_info,'')||" +
-//                                    "COALESCE(comment_scene,'')||" +
-//                                    "COALESCE(comment_limit,'')||" +
-//                                    "COALESCE(comment_keywords,'')
-//                            .or().apply("comment_example ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
-//                            .or().apply("comment_log ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
-                    }
-                });
-            }
-            if (haveScene) {
-                classWrapper = classWrapper.and(q -> q.ne(JavaDocClassLite::getCommentScene, ""));
-            }
-            if (ListTool.ok(projectArray)) {
-                classWrapper = classWrapper.and(q -> q.in(JavaDocClassLite::getProjectName, projectArray));
-            }
-            if (ListTool.ok(textArray)) {
-                classWrapper = classWrapper.and(p -> {
-                    for (String key : textArray) {
-                        String keyLike = "%" + key + "%";
-                        p.apply(
-//                                    "COALESCE(name,'')||" +
-//                                    "COALESCE(project_name,'')||" +
-                                "COALESCE(comment_info,'')||" +
-                                        "COALESCE(comment_scene,'')||" +
-                                        "COALESCE(comment_limit,'')||" +
-                                        "COALESCE(comment_keywords,'') ILIKE {0}", keyLike);
-//                            .or().apply("comment_example ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
-//                            .or().apply("comment_log ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
-                    }
-                });
-            }
-
-            IPage<JavaDocClassLite> classPage = javaDocClassLiteMapper.selectPage(new Page<JavaDocClassLite>(1, selectClassPageSize), classWrapper);
-            classList = classPage.getRecords();
-            // 后端关键字高亮
-            // bug：导致内容被抹除
-            if (ListTool.ok(classList)) {
-                for (JavaDocClassLite classItem : classList) {
-                    classItem.set_highlightKeys(highlightKey.toArray(new String[0]));
-//                        classItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentInfo()), text, begTag, endTag));
-//                        classItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentScene()), text, begTag, endTag));
-//                        classItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(classItem.getCommentLimit()), text, begTag, endTag));
-////                        classItem.setCommentExample(HtmlStringTool.keywordsHightLight(classItem.getCommentExample(), text, begTag, endTag));
-////                        classItem.setCommentLog(HtmlStringTool.keywordsHightLight(classItem.getCommentLog(), text, begTag, endTag));
-//                        classItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(classItem.getCommentKeywords(), text, begTag, endTag));
-                }
-            }
+        LambdaQueryWrapper<JavaDocMetaLite> classWrapper = new LambdaQueryWrapper<JavaDocMetaLite>();
+        if(isStruct){
+            classWrapper = classWrapper.and(q -> q.eq(JavaDocMetaLite::getIsStruct, true));
         }
-        if (mode.equals("method") || mode.equals("all")) {
-
-            LambdaQueryWrapper<JavaDocMethodLite> methodWrapper = new LambdaQueryWrapper<JavaDocMethodLite>();
-            methodWrapper = methodWrapper.and(q -> q.eq(JavaDocMethodLite::getIsStruct, true));
-            if (ListTool.ok(nameArray)) {
-                methodWrapper = methodWrapper.and(p -> {
-                    for (String key : nameArray) {
-                        String keyLike = "%" + key + "%";
-                        p.apply("COALESCE(name,'')||" +
+        if (ListTool.ok(nameArray)) {
+            classWrapper = classWrapper.and(p -> {
+                for (String key : nameArray) {
+                    String keyLike = "%" + key + "%";
+                    p.apply("COALESCE(name,'') ILIKE {0}", keyLike);
 //                                    "COALESCE(project_name,'')||" +
-                                "COALESCE(class_name,'') ILIKE {0}", keyLike);
 //                                    "COALESCE(comment_info,'')||" +
 //                                    "COALESCE(comment_scene,'')||" +
 //                                    "COALESCE(comment_limit,'')||" +
 //                                    "COALESCE(comment_keywords,'')
 //                            .or().apply("comment_example ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
 //                            .or().apply("comment_log ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
-                    }
-                });
-            }
-            if (ListTool.ok(textArray)) {
-                methodWrapper = methodWrapper.and(p -> {
-                    for (String key : textArray) {
-                        String keyLike = "%" + key + "%";
-                        p.apply(
+                }
+            });
+        }
+        if (ListTool.ok(projectArray)) {
+            classWrapper = classWrapper.and(q -> q.in(JavaDocMetaLite::getProjectName, projectArray));
+        }
+        if (ListTool.ok(textArray)) {
+            classWrapper = classWrapper.and(p -> {
+                for (String key : textArray) {
+                    String keyLike = "%" + key + "%";
+                    p.apply(
 //                                    "COALESCE(name,'')||" +
 //                                    "COALESCE(project_name,'')||" +
-//                                    "COALESCE(class_name,'')||" +
-                                "COALESCE(comment_info,'')||" +
-                                        "COALESCE(comment_scene,'')||" +
-                                        "COALESCE(comment_limit,'')||" +
-                                        "COALESCE(comment_keywords,'') ILIKE {0}", keyLike);
+                            "COALESCE(comment_info,'')||" +
+                                    "COALESCE(comment_scene,'')||" +
+                                    "COALESCE(comment_limit,'')||" +
+                                    "COALESCE(comment_keywords,'') ILIKE {0}", keyLike);
 //                            .or().apply("comment_example ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
 //                            .or().apply("comment_log ILIKE {0}", keyLike) // 预览页面上不直接展示的内容，不提供搜索
-                    }
-                });
-            }
-            if (haveScene) {
-                methodWrapper = methodWrapper.and(q -> q.ne(JavaDocMethodLite::getCommentScene, ""));
-            }
-            if (ListTool.ok(projectArray)) {
-                methodWrapper = methodWrapper.and(q -> q.in(JavaDocMethodLite::getProjectName, projectArray));
-            }
+                }
+            });
+        }
+        List<JavaDocMetaSearchLite> classList   = javaDocMetaSearchLiteMapper.selectList(classWrapper, limit, offset);
 
-            IPage<JavaDocMethodLite> methodPage = javaDocMethodLiteMapper.selectPage(new Page<JavaDocMethodLite>(1, selectMethodPageSize), methodWrapper);
+        if (ListTool.ok(classList)) {
 
-            methodList = methodPage.getRecords();
-            // 后端关键字高亮
-            // bug：导致内容被抹除
-//                if (ListTool.ok(methodList)) {
-//                    for (JavaDocMethodLite methodItem : methodList) {
-//                        methodItem.setCommentInfo(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentInfo()), text, begTag, endTag));
-//                        methodItem.setCommentScene(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentScene()), text, begTag, endTag));
-//                        methodItem.setCommentLimit(HtmlStringTool.keywordsHightLight(HtmlStringTool.newLineBrFotmat(methodItem.getCommentLimit()), text, begTag, endTag));
-////                        methodItem.setCommentExample(HtmlStringTool.keywordsHightLight(methodItem.getCommentExample(), text, begTag, endTag));
-////                        methodItem.setCommentLog(HtmlStringTool.keywordsHightLight(methodItem.getCommentLog(), text, begTag, endTag));
-//                        methodItem.setCommentKeywords(HtmlStringTool.keywordsHightLight(methodItem.getCommentKeywords(), text, begTag, endTag));
-//                    }
-//                }
-            // 补充类信息
-            if (ListTool.ok(methodList)) {
-                List<String> methodClassIdList = methodList.stream().map(JavaDocMethodLite::getClassId).distinct().collect(toList());
-                List<JavaDocClassLite> methodClassList = javaDocClassLiteMapper.selectBatchIds(methodClassIdList);
+            List<String> methodClassIdList = classList.stream().filter(x -> x.getClassId() != null).map(JavaDocMetaSearchLite::getClassId).distinct().collect(toList());
+            List<JavaDocMetaLite> methodClassList = null;
+            if (ListTool.ok(methodClassIdList)) methodClassList = javaDocMetaLiteMapper.selectBatchIds(methodClassIdList);
 
-                for (JavaDocMethodLite methodItem : methodList) {
-                    methodItem.set_highlightKeys(highlightKey.toArray(new String[0]));
+            for (JavaDocMetaSearchLite methodItem : classList) {
+                // 设置高亮的关键字，交给前端去渲染高亮
+                methodItem.set_highlightKeys(highlightKey.toArray(new String[0]));
 
-                    for (JavaDocClassLite classItem : methodClassList) {
-                        if (methodItem.getClassId().equals(classItem.getId())) {
+                if (ListTool.ok(methodClassList)) {
+                    for (JavaDocMetaLite classItem : methodClassList) {
+                        if (methodItem.getClassId() != null && methodItem.getClassId().equals(classItem.getId())) {
                             methodItem.setJavaDocClassLite(JSONObject.parseObject(JSONObject.toJSONString(classItem)));
                         }
                     }
@@ -247,14 +165,13 @@ public class JavaDocSearchService {
 
         JSONArray jsonArray = new JSONArray();
         if (ListTool.ok(classList)) jsonArray.addAll(classList);
-        if (ListTool.ok(methodList)) jsonArray.addAll(methodList);
         responseData.putData(jsonArray);
         return responseData;
     }
 
-    private void saveQueryLog(String mode, String[] nameArray, String[] textArray, String[] projectArray) {
+    private void saveQueryLog(String metaType, String[] nameArray, String[] textArray, String[] projectArray) {
         String traceId = R.SnowFlake.nexts();
-        R.Queues.JavaDocQueryLogQueue.add(new JavaDocQueryLog(traceId, "mode", mode));
+        R.Queues.JavaDocQueryLogQueue.add(new JavaDocQueryLog(traceId, "metaType", metaType));
         if (ListTool.ok(nameArray)) {
             for (String s : nameArray) {
                 R.Queues.JavaDocQueryLogQueue.add(new JavaDocQueryLog(traceId, "name", s));
@@ -282,11 +199,16 @@ public class JavaDocSearchService {
         String metaId = MapTool.get(params, "metaId", "").toString();
         String classId = MapTool.get(params, "classId", "").toString();
         String projectId = MapTool.get(params, "projectId", "").toString();
-        Boolean isHelpful = MapTool.getBoolean(params, "isHelpful", true);
+        Double helpfulRate = MapTool.getDouble(params, "helpfulRate", 0);
 
-        JavaDocHelpful helpful = new JavaDocHelpful(metaId, classId, projectId, isHelpful);
-        javaDocHelpfulMapper.insert(helpful);
+        JavaDocHelpful helpful = new JavaDocHelpful(metaId, classId, projectId, helpfulRate);
+        JavaDocHelpful row = javaDocHelpfulMapper.selectById(helpful.getId());
 
+        if (row == null) {
+            javaDocHelpfulMapper.insert(helpful);
+        } else {
+            javaDocHelpfulMapper.updateById(helpful);
+        }
         return ResponseData.ok();
     }
 

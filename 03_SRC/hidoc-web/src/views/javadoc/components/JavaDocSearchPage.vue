@@ -26,7 +26,7 @@
                             <el-input v-model="searchText" placeholder="文本内容" class="input-with-select" @keydown="searchEnter" clearable />
                         </el-col>
                         <el-col :span="2" style="padding-left: 5px">
-                            <el-switch v-model="searchHaveScene" width="50" inline-prompt active-text="场景" inactive-text="场景" />
+                            <el-switch v-model="searchIsStruct" width="50" inline-prompt active-text="结构" inactive-text="全部" />
                         </el-col>
                         <el-col :span="1" style="padding-left: 5px">
                             <el-button type="success" @click="search()" style="height: 32px">
@@ -57,13 +57,14 @@ import { ElMessageBox, ElMessage } from 'element-plus';
 import { Search, Share, Guide } from '@element-plus/icons';
 import JavaDocItemCard from './JavaDocItemCard';
 import request from '../../../utils/request.js';
+import _ from 'lodash';
 export default {
     data() {
         return {
             searchText: '',
             searchName: '',
             searchMode: 'all',
-            searchHaveScene: true,
+            searchIsStruct: true,
             javadocItem: [],
             pageMode: 'search',
             selectProjectList: [],
@@ -107,11 +108,24 @@ export default {
                     name: this.searchName,
                     text: this.searchText,
                     projects: this.selectProjectList,
-                    haveScene: this.searchHaveScene
+                    isStruct: this.searchIsStruct
                 }
             }).then(res => {
                 if (res.code == 0) {
+
+                    // json字符串格式化成对象
+                    _(res.data).forEach(function (item) {
+                        // 转换meta的字符串为对象
+                        if (item.imports) item.imports = JSON.parse(item.imports);
+                        if (item.params) item.params = JSON.parse(item.params);
+                        if (item.throwses) item.throwses = JSON.parse(item.throwses);
+                        if (item.commentLog) item.commentLog = JSON.parse(item.commentLog);
+                        // 转换类信息的字符串为对象
+                        if (item.javaDocClassLite && item.javaDocClassLite.commentLog) item.javaDocClassLite.commentLog = JSON.parse(item.javaDocClassLite.commentLog);
+                    });
+
                     this.javadocItem = res.data;
+
                     ElMessage({
                         message: '搜索完成',
                         type: 'success',
@@ -160,38 +174,6 @@ export default {
             }).then(res => {
                 if (res.code == 0) {
                     this.viewData.packageList = res.data;
-                }
-            });
-        },
-        getClassList(packageName) {
-            this.viewData.currentPackageName = packageName;
-            request({
-                url: '/openapi/javadoc/classList',
-                method: 'post',
-                data: {
-                    projectId: this.viewData.currentProjectId,
-                    version: this.viewData.currentVersion,
-                    packageName: this.viewData.currentPackageName
-                }
-            }).then(res => {
-                if (res.code == 0) {
-                    this.viewData.classList = res.data;
-                }
-            });
-        },
-        getMethodList(classId) {
-            this.viewData.currentClassId = classId;
-            request({
-                url: '/openapi/javadoc/methodList',
-                method: 'post',
-                data: {
-                    projectId: this.viewData.currentProjectId,
-                    classId: this.viewData.currentClassId,
-                    version: this.viewData.currentVersion
-                }
-            }).then(res => {
-                if (res.code == 0) {
-                    this.viewData.methodList = res.data;
                 }
             });
         }

@@ -4,18 +4,27 @@
         <el-row>
             <el-col :span="2">
                 <div style="background-color: lightgrey; border-radius: 0px; font-size: 14px; width: 40px; height: 32px; text-align: center; line-height: 32px">
-                    <span v-if="this.dataObj._class == 'JavaDocClass'" style="font-weight: bold; color: dodgerblue">类</span>
-                    <span v-if="this.dataObj._class == 'JavaDocMethod'" style="font-weight: bold; color: chocolate">方法</span>
+                    <span v-if="this.dataObj.metaType == 'JavaDocClass'" style="font-weight: bold; color: dodgerblue">类</span>
+                    <span v-if="this.dataObj.metaType == 'JavaDocMethod'" style="font-weight: bold; color: chocolate">方法</span>
                 </div>
             </el-col>
             <el-col :span="16" style="line-height: 32px; text-align: left">
-                <el-tag :type="this.dataObj._isPublic ? 'primary' : 'info'" style="margin: 5px" effect="dark">{{ this.dataObj.qualifier }}</el-tag>
+                <el-tag :type="this.dataObj._isPublic ? 'success' : 'info'" style="margin: 5px" effect="dark">{{ this.dataObj.qualifier }}</el-tag>
                 <span style="font-size: 14px; color: #333; cursor: pointer; font-weight: bold" @click="copy(this.dataObj.name)">{{ this.dataObj.name }}</span>
-                <el-tooltip class="box-item" effect="dark" content="👍🏻 有帮助的" placement="top">
-                    <span style="cursor: pointer; margin-left: 40px" @click="helpful(true)">👍🏻</span>
-                </el-tooltip>
-                <el-tooltip class="box-item" effect="dark" content="👎🏾 没有用" placement="top">
-                    <span style="cursor: pointer" @click="helpful(false)">👎🏾</span>
+
+                <el-tooltip placement="top" effect="light">
+                    <template #content>
+                        <span v-if="this.isLogin">
+                            <span style="line-height: 34px">推荐：</span>
+                            <el-rate v-model="helpfulRate" @change="helpful" />
+                        </span>
+                        <span v-else>登录后可推荐</span>
+                    </template>
+                    <span style="cursor: pointer; margin-left: 40px">
+                        <!-- <span>⭐️</span> -->
+                        <!-- <span style="font-size: 12px; color: peru">{{ this.dataObj.helpfulRate ? this.dataObj.helpfulRate : 0 }}</span> -->
+                        <el-rate v-model="this.dataObj.helpfulRate" disabled size="small" />
+                    </span>
                 </el-tooltip>
             </el-col>
             <el-col :span="6">
@@ -29,14 +38,27 @@
                 <span style="font-size: 14px" v-html="this.dataObj.commentInfo" />
             </el-col>
             <el-col :span="4">
-                <div v-if="this.dataObj._class == 'JavaDocClass'" style="float: right">
+                <!-- 展示权限：user.roles.includes('admin') -->
+                <div v-if="this.dataObj.metaType == 'JavaDocClass'" style="float: right">
                     <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" @click="showDialog('commentExampleDialog')">示例</el-button>
-                    <el-button type="warning" size="small" round v-if="this.dataObj.commentLog != ''" @click="showDialog('commentLogDialog')">Log</el-button>
-                    <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('originDocumentDialog')">Code</el-button>
+                    <el-popover placement="left-end" :width="800" trigger="click">
+                        <template #reference>
+                            <el-button type="warning" size="small" round v-if="this.dataObj.commentLog && this.dataObj.commentLog.length > 0">日志</el-button>
+                        </template>
+                        <div style="border: 2px solid sandybrown">
+                            <el-table :data="this.dataObj.commentLog" :default-sort="{ prop: 'version', order: 'descending' }" height="400" border stripe>
+                                <el-table-column prop="version" label="版本" sortable width="140" />
+                                <el-table-column prop="time" label="修改时间" sortable width="140" />
+                                <el-table-column prop="author" label="修改人" width="120" />
+                                <el-table-column prop="content" label="修改内容" />
+                            </el-table>
+                        </div>
+                    </el-popover>
+                    <el-button type="danger" size="small" round v-if="this.isLogin" @click="showDialog('originDocumentDialog')">Code</el-button>
                 </div>
-                <div v-if="this.dataObj._class == 'JavaDocMethod'" style="float: right">
+                <div v-if="this.dataObj.metaType == 'JavaDocMethod'" style="float: right">
                     <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" @click="showDialog('commentExampleDialog')">示例</el-button>
-                    <el-button type="danger" size="small" round v-if="user.roles.includes('admin')" @click="showDialog('sourceCodeDialog')">Code</el-button>
+                    <el-button type="danger" size="small" round v-if="this.isLogin" @click="showDialog('sourceCodeDialog')">Code</el-button>
                 </div>
             </el-col>
         </el-row>
@@ -49,12 +71,12 @@
                 <span v-html="this.dataObj.commentScene" />
             </el-col>
         </el-row>
-        <el-row v-if="this.dataObj._class == 'JavaDocMethod'">
+        <el-row v-if="this.dataObj.metaType == 'JavaDocMethod'">
             <el-col :span="22" style="margin: 5px; padding: 5px">
                 <div style="border: 2px dotted #aaa; border-radius: 10px; padding: 10px">
                     <div>
                         ➡️ 传入
-                        <el-table :data="this.dataObj.paramsJson" stripe :show-header="false">
+                        <el-table :data="this.dataObj.params" stripe :show-header="false">
                             <el-table-column prop="type" label="类型" />
                             <el-table-column prop="desc" label="描述" />
                         </el-table>
@@ -62,7 +84,7 @@
                     <div>↩️ 返回：{{ this.dataObj.returnType }} {{ this.dataObj.returnDesc }}</div>
                     <div v-if="this.dataObj.throwses != ''">
                         🐞 异常
-                        <el-table :data="this.dataObj.throwsesJson" stripe :show-header="false">
+                        <el-table :data="this.dataObj.throwses" stripe :show-header="false">
                             <el-table-column prop="type" label="类型" />
                             <el-table-column prop="desc" label="描述" />
                         </el-table>
@@ -111,26 +133,6 @@
             </span>
         </template>
     </el-dialog>
-    <!-- 修改记录 -->
-    <el-dialog v-model="commentLogDialog" title="修改记录" width="90%" center fullscreen>
-        <el-container>
-            <el-main>
-                <el-table :data="this.dataObj.commentLogJson" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
-                    <el-table-column prop="version" label="版本" sortable width="180" />
-                    <el-table-column prop="time" label="修改时间" sortable width="180" />
-                    <el-table-column prop="author" label="修改人" width="180" />
-                    <el-table-column prop="content" label="修改内容" />
-                </el-table>
-            </el-main>
-        </el-container>
-        <template #footer>
-            <span class="dialog-footer">
-                <el-affix position="bottom" :offset="20">
-                    <el-button type="primary" @click="commentLogDialog = false">我知道了</el-button>
-                </el-affix>
-            </span>
-        </template>
-    </el-dialog>
     <!-- 类信息 -->
     <el-dialog v-model="classDetailsDialog" title="类信息" width="90%" center fullscreen>
         <el-container>
@@ -160,9 +162,9 @@
                     </div>
                     <div v-else>无</div>
 
-                    <h3>版本</h3>
-                    <div v-if="this.dataObj.javaDocClassLite.commentLog ? true : false">
-                        <el-table :data="this.dataObj.javaDocClassLite.commentLogJson" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
+                    <h3>日志</h3>
+                    <div v-if="this.dataObj.javaDocClassLite.commentLog && this.dataObj.javaDocClassLite.commentLog.length > 0">
+                        <el-table :data="this.dataObj.javaDocClassLite.commentLog" :default-sort="{ prop: 'version', order: 'descending' }" style="width: 100%" border>
                             <el-table-column prop="version" label="版本" sortable width="180" />
                             <el-table-column prop="time" label="修改时间" sortable width="180" />
                             <el-table-column prop="author" label="修改人" width="180" />
@@ -231,14 +233,14 @@ export default {
         return {
             isLogin: false,
             commentExampleDialog: false,
-            commentLogDialog: false,
             classDetailsDialog: false,
             originDocumentDialog: false,
             sourceCodeDialog: false,
             sourceCodeText: '',
             originalDocumentText: '',
             dataObj: {},
-            user: { roles: [] }
+            user: { roles: [] },
+            helpfulRate: 0
         };
     },
     mounted() {
@@ -273,15 +275,15 @@ export default {
         }
     },
     methods: {
-        helpful(isHelpful) {
+        helpful() {
             request({
                 url: '/openapi/javadoc/helpful',
                 method: 'post',
                 data: {
                     metaId: this.dataObj.id,
-                    classId: this.dataObj._class == 'JavaDocClass' ? this.dataObj.id : this.dataObj.classId,
+                    classId: this.dataObj.metaType == 'JavaDocClass' ? this.dataObj.id : this.dataObj.classId,
                     projectId: this.dataObj.projectId,
-                    isHelpful: isHelpful
+                    helpfulRate: this.helpfulRate
                 }
             }).then(res => {
                 if (res.code == 0) {
@@ -334,9 +336,6 @@ export default {
                 case 'commentExampleDialog':
                     this.commentExampleDialog = true;
                     break;
-                case 'commentLogDialog':
-                    this.commentLogDialog = true;
-                    break;
                 case 'classDetailsDialog':
                     this.classDetailsDialog = true;
                     break;
@@ -353,11 +352,11 @@ export default {
 
                         let id = '';
                         let type = '';
-                        if (this.dataObj._class == 'JavaDocClass') {
+                        if (this.dataObj.metaType == 'JavaDocClass') {
                             type = 'class';
                             id = this.dataObj.id;
                         }
-                        if (this.dataObj._class == 'JavaDocMethod') {
+                        if (this.dataObj.metaType == 'JavaDocMethod') {
                             type = 'method';
                             id = this.dataObj.id;
                         }
@@ -388,8 +387,8 @@ export default {
                         }
 
                         let classId = '';
-                        if (this.dataObj._class == 'JavaDocClass') classId = this.dataObj.id;
-                        if (this.dataObj._class == 'JavaDocMethod') classId = this.dataObj.classId;
+                        if (this.dataObj.metaType == 'JavaDocClass') classId = this.dataObj.id;
+                        if (this.dataObj.metaType == 'JavaDocMethod') classId = this.dataObj.classId;
                         request({
                             url: '/javadoc/getOriginalDocument',
                             method: 'post',

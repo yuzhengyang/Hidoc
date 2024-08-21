@@ -33,16 +33,10 @@ public class JavaDocApiController {
     JavaDocProjectMapper javaDocProjectMapper;
 
     @Autowired
-    JavaDocClassMapper javaDocClassMapper;
+    JavaDocMetaMapper javaDocMetaMapper;
 
     @Autowired
-    JavaDocClassLiteMapper javaDocClassLiteMapper;
-
-    @Autowired
-    JavaDocMethodMapper javaDocMethodMapper;
-
-    @Autowired
-    JavaDocMethodLiteMapper javaDocMethodLiteMapper;
+    JavaDocMetaLiteMapper javaDocMetaLiteMapper;
 
     @Autowired
     JavaDocMenuMapper javaDocMenuMapper;
@@ -156,10 +150,10 @@ public class JavaDocApiController {
 
         Set<String> packages = new HashSet<>();
         if (StringTool.ok(projectId)) {
-            List<JavaDocClassLite> classList = javaDocClassLiteMapper.selectList(new LambdaQueryWrapper<JavaDocClassLite>()
-                    .eq(JavaDocClassLite::getProjectId, projectId));
+            List<JavaDocMetaLite> classList = javaDocMetaLiteMapper.selectList(new LambdaQueryWrapper<JavaDocMetaLite>()
+                    .eq(JavaDocMetaLite::getProjectId, projectId));
             if (ListTool.ok(classList)) {
-                for (JavaDocClassLite classItem : classList) {
+                for (JavaDocMetaLite classItem : classList) {
                     if (StringTool.ok(classItem.getPackageInfo())) packages.add(classItem.getPackageInfo());
                 }
             }
@@ -221,20 +215,20 @@ public class JavaDocApiController {
         String packageName = MapTool.get(params, "packageName", "").toString();
         String menuPath = MapTool.get(params, "menuPath", "").toString();
 
-        LambdaQueryWrapper<JavaDocClassLite> wrapper = new LambdaQueryWrapper<JavaDocClassLite>();
+        LambdaQueryWrapper<JavaDocMetaLite> wrapper = new LambdaQueryWrapper<JavaDocMetaLite>();
 
         if (StringTool.ok(projectId)) {
-            wrapper.and(p -> p.eq(JavaDocClassLite::getProjectId, projectId));
+            wrapper.and(p -> p.eq(JavaDocMetaLite::getProjectId, projectId));
         }
         if (StringTool.ok(packageName)) {
-            wrapper.and(p -> p.eq(JavaDocClassLite::getPackageInfo, packageName));
+            wrapper.and(p -> p.eq(JavaDocMetaLite::getPackageInfo, packageName));
         }
         if (StringTool.ok(menuPath)) {
             wrapper.and(p -> p.apply("(COALESCE(comment_menu,'') ILIKE {0} OR COALESCE(comment_menu,'') = {1})", menuPath + "/%", menuPath));
         }
 
         ResponseData responseData = ResponseData.ok();
-        List<JavaDocClassLite> classList = javaDocClassLiteMapper.selectList(wrapper);
+        List<JavaDocMetaLite> classList = javaDocMetaLiteMapper.selectList(wrapper);
         if (ListTool.ok(classList)) {
             responseData.putData(classList);
         }
@@ -253,10 +247,10 @@ public class JavaDocApiController {
         String classId = MapTool.get(params, "classId", "").toString();
         String version = MapTool.get(params, "version", "").toString();
 
-        JavaDocClass classInfo = javaDocClassMapper.selectById(classId);
-        List<JavaDocMethodLite> methodList = javaDocMethodLiteMapper.selectList(new LambdaQueryWrapper<JavaDocMethodLite>()
-                .and(p -> p.eq(JavaDocMethodLite::getProjectId, projectId))
-                .and(p -> p.eq(JavaDocMethodLite::getClassId, classId)));
+        JavaDocMeta classInfo = javaDocMetaMapper.selectById(classId);
+        List<JavaDocMetaLite> methodList = javaDocMetaLiteMapper.selectList(new LambdaQueryWrapper<JavaDocMetaLite>()
+                .and(p -> p.eq(JavaDocMetaLite::getProjectId, projectId))
+                .and(p -> p.eq(JavaDocMetaLite::getClassId, classId)));
 
         if (classInfo != null) {
             // 为每个方法设置类信息，此处会导致数据量巨大，注释掉不使用
@@ -289,25 +283,25 @@ public class JavaDocApiController {
         String classId = MapTool.get(params, "classId", "").toString();
         String version = MapTool.get(params, "version", "").toString();
 
-        LambdaQueryWrapper<JavaDocMethodLite> wrapper = new LambdaQueryWrapper<JavaDocMethodLite>();
+        LambdaQueryWrapper<JavaDocMetaLite> wrapper = new LambdaQueryWrapper<JavaDocMetaLite>();
 
         if (StringTool.ok(projectId)) {
-            wrapper.and(p -> p.eq(JavaDocMethodLite::getProjectId, projectId));
+            wrapper.and(p -> p.eq(JavaDocMetaLite::getProjectId, projectId));
         }
         if (StringTool.ok(classId)) {
-            wrapper.and(p -> p.eq(JavaDocMethodLite::getClassId, classId));
+            wrapper.and(p -> p.eq(JavaDocMetaLite::getClassId, classId));
         }
 
         ResponseData responseData = ResponseData.ok();
-        List<JavaDocMethodLite> methodList = javaDocMethodLiteMapper.selectList(wrapper);
+        List<JavaDocMetaLite> methodList = javaDocMetaLiteMapper.selectList(wrapper);
         if (ListTool.ok(methodList)) {
 
             // 补充类信息
-            List<String> methodClassIdList = methodList.stream().map(JavaDocMethodLite::getClassId).distinct().collect(toList());
-            List<JavaDocClassLite> methodClassList = javaDocClassLiteMapper.selectBatchIds(methodClassIdList);
+            List<String> methodClassIdList = methodList.stream().map(JavaDocMetaLite::getClassId).distinct().collect(toList());
+            List<JavaDocMetaLite> methodClassList = javaDocMetaLiteMapper.selectBatchIds(methodClassIdList);
 
-            for (JavaDocMethodLite methodItem : methodList) {
-                for (JavaDocClassLite classItem : methodClassList) {
+            for (JavaDocMetaLite methodItem : methodList) {
+                for (JavaDocMetaLite classItem : methodClassList) {
                     if (methodItem.getClassId().equals(classItem.getId())) {
                         methodItem.setJavaDocClassLite(JSONObject.parseObject(JSONObject.toJSONString(classItem)));
                     }
@@ -353,9 +347,9 @@ public class JavaDocApiController {
         String importClass = MapTool.get(params, "importClass", "").toString();
         if (!StringTool.ok(importClass)) return ResponseData.error("请输入类名称");
 
-        LambdaQueryWrapper<JavaDocClass> wrapper = new LambdaQueryWrapper<JavaDocClass>().like(JavaDocClass::getImports, "%" + importClass + "%");
+        LambdaQueryWrapper<JavaDocMeta> wrapper = new LambdaQueryWrapper<JavaDocMeta>().like(JavaDocMeta::getImports, "%" + importClass + "%");
         ResponseData responseData = ResponseData.ok();
-        IPage<JavaDocClass> classPage = javaDocClassMapper.selectPage(new Page<JavaDocClass>(1, 100), wrapper);
+        IPage<JavaDocMeta> classPage = javaDocMetaMapper.selectPage(new Page<JavaDocMeta>(1, 100), wrapper);
         if (classPage.getSize() > 0) {
             responseData.putData(classPage.getRecords());
             responseData.setTotal(classPage.getTotal());
