@@ -23,6 +23,7 @@ public class JavaDocMetaSearchLite {
     private String createUserId;
     private LocalDateTime createTime;
     private Boolean isStruct;
+    private Boolean isDeprecated;
     private String metaType;
 
     private String classId;

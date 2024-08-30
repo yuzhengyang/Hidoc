@@ -22,6 +22,7 @@ public class JavaDocMeta {
     private String createUserId;
     private LocalDateTime createTime;
     private Boolean isStruct;
+    private Boolean isDeprecated;
     private String metaType;
 
     private String classId;
@@ -33,6 +34,7 @@ public class JavaDocMeta {
     private String imports;
 
     private String name;
+    private String annotations;
     private String qualifier;
     private String returnType;
     private String returnDesc;

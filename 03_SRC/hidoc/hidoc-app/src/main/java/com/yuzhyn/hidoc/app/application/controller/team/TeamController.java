@@ -203,6 +203,10 @@ public class TeamController {
             List<TeamMember> memberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
 
             for (Team teamItem : teamList) {
+                // 删除加入策略
+                if (teamItem.getJoinRule() != null) {
+                    teamItem.setJoinRule(null);
+                }
 
                 // 补充是否加入状态
                 teamItem.setMyJoinStatus("n");

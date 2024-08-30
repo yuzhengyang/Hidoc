@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.system.ibatis.handler.JsonbTypeHandler;
 import lombok.Data;
 
@@ -27,5 +28,8 @@ public class TeamMember {
     private String createUserId;
     private LocalDateTime updateTime;
     private String updateUserId;
+
+    @TableField(exist = false)
+    private SysUserLite userInfo;
 
 }

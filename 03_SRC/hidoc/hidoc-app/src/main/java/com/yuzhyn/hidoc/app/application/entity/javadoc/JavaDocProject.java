@@ -16,6 +16,8 @@ public class JavaDocProject {
     private String id;
     private String name;
     private String description;
+    private String teamsRead;
+    private String teamsCode;
 
     private String token;
 

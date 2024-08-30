@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS public.java_doc_meta (
 	create_user_id varchar(20) NOT NULL,
 	create_time timestamp(6) NOT NULL,
 	is_struct bool NULL,
+	is_deprecated bool NULL,
 	meta_type varchar(256) NULL,
 	
 	class_id varchar(2048) NULL,
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS public.java_doc_meta (
 	imports text NULL,
 	
 	"name" varchar(1024) NULL,
+	annotations text NULL,
 	qualifier varchar(2048) NULL,
 	return_type varchar(1024) NULL,
 	return_desc varchar(1024) NULL,
@@ -41,7 +43,8 @@ CREATE TABLE IF NOT EXISTS public.java_doc_meta (
 
 
 -- 增加字段
--- SELECT * FROM sysdb_add_column('java_doc_meta', 'menu_id', 'varchar(20) NULL');
+SELECT * FROM sysdb_add_column('java_doc_meta', 'is_deprecated', 'bool NULL');
+SELECT * FROM sysdb_add_column('java_doc_meta', 'annotations', 'text NULL');
 
 
 -- 修改字段长度

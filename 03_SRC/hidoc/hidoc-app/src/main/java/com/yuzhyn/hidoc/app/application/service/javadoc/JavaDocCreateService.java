@@ -13,6 +13,8 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.yuzhyn.azylee.core.datas.collections.ArrayTool;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
@@ -192,6 +194,16 @@ public class JavaDocCreateService {
                 javaDocClass.setCreateUserId(curUser.getId());
                 javaDocClass.setCreateTime(LocalDateTime.now());
                 javaDocClass.setName(typeItem.getNameAsString());
+                javaDocClass.setIsDeprecated(false);
+                if (typeItem.getAnnotations() != null && !typeItem.getAnnotations().isEmpty()) {
+                    List<String> annotationsJson = new ArrayList<>();
+                    typeItem.getAnnotations().forEach(x -> {
+                        String anno = x.toString();
+                        annotationsJson.add(anno);
+                        if (anno.equals("@Deprecated")) javaDocClass.setIsDeprecated(true);
+                    });
+                    javaDocClass.setAnnotations(JSON.toJSONString(annotationsJson));
+                }
                 javaDocClass.setSourceCode(cu.toString());
                 javaDocClass.setIsStruct(false);
                 if (!StringTool.ok(mainClassName)) mainClassName = typeItem.getNameAsString();
@@ -270,8 +282,17 @@ public class JavaDocCreateService {
                             javaDocMethod.setCreateUserId(curUser.getId());
                             javaDocMethod.setCreateTime(LocalDateTime.now());
                             javaDocMethod.setName(methodItem.getNameAsString());
+                            javaDocMethod.setIsDeprecated(false);
+                            if (methodItem.getAnnotations() != null && !methodItem.getAnnotations().isEmpty()) {
+                                List<String> annotationsJson = new ArrayList<>();
+                                methodItem.getAnnotations().forEach(x -> {
+                                    String anno = x.toString();
+                                    annotationsJson.add(anno);
+                                    if (anno.equals("@Deprecated")) javaDocMethod.setIsDeprecated(true);
+                                });
+                                javaDocMethod.setAnnotations(JSON.toJSONString(annotationsJson));
+                            }
                             javaDocMethod.setSourceCode(methodItem.toString());
-                            javaDocMethod.setIsStruct(javaDocClass.getIsStruct());
                             // 填充修饰词
                             if (ListTool.ok(methodItem.getModifiers())) {
                                 StringBuilder stringBuilder = new StringBuilder();
@@ -287,8 +308,7 @@ public class JavaDocCreateService {
                                 String content = methodItem.getComment().get().getContent();
                                 javaDocComment = new JavaDocComment(content);
                                 javaDocComment.parseComment();
-//                                javaDocMethod.setIsStruct(javaDocComment.isStruct());
-//                                if (!javaDocClass.getIsStruct()) javaDocMethod.setIsStruct(false);
+                                javaDocMethod.setIsStruct(javaDocComment.isStruct());
                                 javaDocMethod.setReturnDesc(javaDocComment.getReturn());
                                 javaDocMethod.setCommentInfo(javaDocComment.getInfo());
                                 javaDocMethod.setCommentScene(javaDocComment.getScene());

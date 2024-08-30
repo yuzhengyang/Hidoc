@@ -7,10 +7,13 @@ import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.ios.files.FileTool;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.*;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.*;
+import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.application.service.javadoc.JavaDocSearchService;
 import com.yuzhyn.hidoc.app.application.service.javadoc.JavaDocUploadService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
+import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -75,11 +78,13 @@ public class JavaDocController {
     JavaDocMenuMapper javaDocMenuMapper;
 
     @Autowired
+    TeamMemberMapper teamMemberMapper;
+
+    @Autowired
     JavaDocSearchService javaDocSearchService;
 
     @Autowired
     JavaDocUploadService javaDocUploadService;
-
 
 
     /**
@@ -110,7 +115,22 @@ public class JavaDocController {
         String classId = MapTool.get(params, "classId", "").toString();
         JavaDocMeta javaDocClass = javaDocMetaMapper.selectById(classId);
         if (javaDocClass != null) {
-            return ResponseData.okData("originalDocument", javaDocClass.getSourceCode());
+
+            // 校验代码查看权限
+            JavaDocProject project = javaDocProjectMapper.selectById(javaDocClass.getProjectId());
+            List<TeamMember> teamMemberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
+            if (StringTool.ok(project.getTeamsCode())) {
+                if (ListTool.ok(teamMemberList)) {
+                    for (TeamMember member : teamMemberList) {
+                        if (project.getTeamsCode().contains(member.getTeamId())) {
+                            return ResponseData.okData("originalDocument", javaDocClass.getSourceCode());
+                        }
+                    }
+                }
+                return ResponseData.error("您不属于该工程源码查看的团队，不能查看源码内容");
+            }else{
+                return ResponseData.okData("originalDocument", javaDocClass.getSourceCode());
+            }
         }
         return ResponseData.error("没有找到类源文件");
     }
@@ -122,7 +142,22 @@ public class JavaDocController {
 
         JavaDocMeta method = javaDocMetaMapper.selectById(id);
         if (method != null) {
-            return ResponseData.okData("sourceCode", method.getSourceCode());
+
+            // 校验代码查看权限
+            JavaDocProject project = javaDocProjectMapper.selectById(method.getProjectId());
+            List<TeamMember> teamMemberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
+            if (StringTool.ok(project.getTeamsCode())) {
+                if (ListTool.ok(teamMemberList)) {
+                    for (TeamMember member : teamMemberList) {
+                        if (project.getTeamsCode().contains(member.getTeamId())) {
+                            return ResponseData.okData("sourceCode", method.getSourceCode());
+                        }
+                    }
+                }
+                return ResponseData.error("您不属于该工程源码查看的团队，不能查看源码内容");
+            }else{
+                return ResponseData.okData("sourceCode", method.getSourceCode());
+            }
         }
         return ResponseData.error("没有找到源代码信息");
     }

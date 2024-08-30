@@ -38,7 +38,7 @@ public class JavaDocComment {
     public void parseComment() {
         parseCommentType();
         formatComment();
-        if (commentResult.containsKey("info") || commentResult.containsKey("scene") || commentResult.containsKey("limit") ||
+        if (commentResult.containsKey("scene") || commentResult.containsKey("limit") ||
                 commentResult.containsKey("keywords") || commentResult.containsKey("menu") || commentResult.containsKey("example")) {
             this.isStruct = true;
         }

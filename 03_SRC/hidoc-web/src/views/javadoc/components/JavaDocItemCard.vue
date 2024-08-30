@@ -3,16 +3,33 @@
     <div style="padding: 20px; border: 2px solid #aaf; border-radius: 20px; margin: 20px 21px 20px 21px">
         <el-row>
             <el-col :span="2">
-                <div style="background-color: lightgrey; border-radius: 0px; font-size: 14px; width: 40px; height: 32px; text-align: center; line-height: 32px">
+                <div style="background-color: lightgrey; border-radius: 0px; font-size: 14px; width: 60px; height: 32px; text-align: center; line-height: 32px">
                     <span v-if="this.dataObj.metaType == 'JavaDocClass'" style="font-weight: bold; color: dodgerblue">类</span>
                     <span v-if="this.dataObj.metaType == 'JavaDocMethod'" style="font-weight: bold; color: chocolate">方法</span>
                 </div>
             </el-col>
             <el-col :span="16" style="line-height: 32px; text-align: left">
-                <el-tag :type="this.dataObj._isPublic ? 'success' : 'info'" style="margin: 5px" effect="dark">{{ this.dataObj.qualifier }}</el-tag>
-                <span style="font-size: 14px; color: #333; cursor: pointer; font-weight: bold" @click="copy(this.dataObj.name)">{{ this.dataObj.name }}</span>
+                <el-tag v-if="this.dataObj.isDeprecated" type="error" style="margin: 5px" effect="dark">废弃</el-tag>
+                <el-tag v-if="this.dataObj.qualifier" :type="this.dataObj._isPublic ? 'success' : 'info'" style="margin: 5px" effect="dark">{{ this.dataObj.qualifier }}</el-tag>
+
+                <span v-if="this.dataObj.className" style="font-size: 14px; color: #333; cursor: pointer; font-weight: bold; color: blue" @click="showDialog('classDetailsDialog')">
+                    {{ this.dataObj.className }}
+                </span>
+
+                <span v-if="this.dataObj.className" style="font-size: 14px; color: #333; font-weight: bold; color: blue; padding-left: 10px; padding-right: 10px">.</span>
+
+                <span style="font-size: 14px; color: #333; font-weight: bold">
+                    {{ this.dataObj.name }}
+                </span>
 
                 <el-tooltip placement="top" effect="light">
+                    <template #content>
+                        <span>复制名称</span>
+                    </template>
+                    <CopyDocument style="width: 1em; height: 1em; margin-left: 10px; margin-right: 10px; cursor: pointer" @click="copy(this.dataObj.className ? this.dataObj.className + '.' + this.dataObj.name : this.dataObj.name)" />
+                </el-tooltip>
+
+                <el-tooltip v-if="!this.dataObj.isDeprecated" placement="top" effect="light">
                     <template #content>
                         <span v-if="this.isLogin">
                             <span style="line-height: 34px">推荐：</span>
@@ -23,7 +40,7 @@
                     <span style="cursor: pointer; margin-left: 40px">
                         <!-- <span>⭐️</span> -->
                         <!-- <span style="font-size: 12px; color: peru">{{ this.dataObj.helpfulRate ? this.dataObj.helpfulRate : 0 }}</span> -->
-                        <el-rate v-model="this.dataObj.helpfulRate" disabled size="small" />
+                        <el-rate v-model="this.dataObj.helpfulRate" disabled />
                     </span>
                 </el-tooltip>
             </el-col>
@@ -72,24 +89,33 @@
             </el-col>
         </el-row>
         <el-row v-if="this.dataObj.metaType == 'JavaDocMethod'">
-            <el-col :span="22" style="margin: 5px; padding: 5px">
-                <div style="border: 2px dotted #aaa; border-radius: 10px; padding: 10px">
-                    <div>
-                        ➡️ 传入
-                        <el-table :data="this.dataObj.params" stripe :show-header="false">
-                            <el-table-column prop="type" label="类型" />
-                            <el-table-column prop="desc" label="描述" />
-                        </el-table>
-                    </div>
-                    <div>↩️ 返回：{{ this.dataObj.returnType }} {{ this.dataObj.returnDesc }}</div>
-                    <div v-if="this.dataObj.throwses != ''">
-                        🐞 异常
-                        <el-table :data="this.dataObj.throwses" stripe :show-header="false">
-                            <el-table-column prop="type" label="类型" />
-                            <el-table-column prop="desc" label="描述" />
-                        </el-table>
-                    </div>
-                </div>
+            <el-col :span="10" style="border: 2px dotted #aaa; border-radius: 10px; margin: 5px; padding: 10px; font-size: 14px">
+                <p v-for="item in this.dataObj.params" :key="item">
+                    ➡️
+                    <el-text type="primary">{{ item.type }}</el-text>
+                    :
+                    <el-text type="warning">{{ item.desc }}</el-text>
+                </p>
+                <p v-if="this.dataObj.params.length == 0">
+                    ➡️
+                    <el-text type="info">没有入参</el-text>
+                </p>
+            </el-col>
+            <el-col :span="1" style="margin: 5px; padding: 5px"></el-col>
+            <el-col :span="11" style="border: 2px dotted #aaa; border-radius: 10px; margin: 5px; padding: 10px; font-size: 14px">
+                <p>
+                    ↩️
+                    <el-text type="primary">{{ this.dataObj.returnType }}</el-text>
+                    :
+                    <el-text :type="this.dataObj.returnType == 'void' ? 'info' : 'warning'">{{ this.dataObj.returnType == 'void' ? '没有返回值' : this.dataObj.returnDesc }}</el-text>
+                </p>
+                <p v-if="this.dataObj.throwses != ''"></p>
+                <p v-for="item in this.dataObj.throwses" :key="item">
+                    🐞
+                    <el-text type="primary">{{ item.type }}</el-text>
+                    :
+                    <el-text type="warning">{{ item.desc }}</el-text>
+                </p>
             </el-col>
         </el-row>
         <el-row v-if="this.dataObj.commentLimit != ''">
@@ -104,11 +130,12 @@
                 <el-tag v-for="keyword in dataObj._commentKeywordArray" :key="keyword" type="warning" style="margin: 5px">{{ keyword }}</el-tag>
             </el-col>
         </el-row>
-        <el-row v-if="this.dataObj.javaDocClassLite">
-            <el-col :span="24">
-                <div style="text-align: right; font-size: 14px; font-weight: bold">
-                    <span @click="showDialog('classDetailsDialog')" style="cursor: pointer; color: blue">类：{{ this.dataObj.javaDocClassLite.name }}</span>
-                </div>
+        <el-row style="margin-top: 5px">
+            <el-col :span="12" style="text-align: left">
+                <span style="color: grey; font-size: 12px">{{ this.dataObj.createTime }} 刷新</span>
+            </el-col>
+            <el-col v-if="this.dataObj.javaDocClassLite" :span="12" style="text-align: right; font-size: 14px; font-weight: bold">
+                <span @click="showDialog('classDetailsDialog')" style="cursor: pointer; color: blue">类：{{ this.dataObj.javaDocClassLite.name }}</span>
             </el-col>
         </el-row>
     </div>
@@ -134,7 +161,7 @@
         </template>
     </el-dialog>
     <!-- 类信息 -->
-    <el-dialog v-model="classDetailsDialog" title="类信息" width="90%" center fullscreen>
+    <el-dialog v-model="classDetailsDialog" title="类信息" width="90%" center>
         <el-container>
             <el-main>
                 <div>
@@ -371,8 +398,8 @@ export default {
                             if (res.code == 0) {
                                 this.sourceCodeText = '```java' + '\r\n' + res.meta.sourceCode + '\r\n' + '```';
                             }
+                            this.sourceCodeDialog = true;
                         });
-                        this.sourceCodeDialog = true;
                     }
                     break;
                 case 'originDocumentDialog':
@@ -405,8 +432,8 @@ export default {
                                 //     duration: 1 * 1000
                                 // });
                             }
+                            this.originDocumentDialog = true;
                         });
-                        this.originDocumentDialog = true;
                     }
                     break;
             }

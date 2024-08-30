@@ -17,6 +17,7 @@ import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.application.service.team.TeamMemberService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import com.yuzhyn.hidoc.app.utils.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +53,29 @@ public class TeamMemberController {
     @Autowired
     TeamMemberService teamMemberService;
 
+    @PostMapping("list")
+    public ResponseData list(@RequestBody Map<String, Object> params) {
+        if (MapTool.ok(params, "teamId")) {
+            String teamId = MapTool.getString(params, "teamId", "");
+            List<TeamMember> members = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getTeamId, teamId));
+            if (ListTool.ok(members)) {
+                List<String> userIds = members.stream().map(TeamMember::getUserId).collect(toList());
+                List<SysUserLite> users = sysUserLiteMapper.selectList(new LambdaQueryWrapper<SysUserLite>().in(SysUserLite::getId, userIds));
+                if (ListTool.ok(users)) {
+                    members.forEach(member -> {
+                        users.forEach(user -> {
+                            if (member.getUserId().equals(user.getId())) {
+                                member.setUserInfo(user);
+                            }
+                        });
+                    });
+                }
+                return ResponseData.okData(members);
+            }
+        }
+        return ResponseData.ok();
+    }
+
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "teamId", "type", "value")) {
@@ -71,27 +96,36 @@ public class TeamMemberController {
     public ResponseData invite(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "teamId", "email")) {
             String teamId = MapTool.getString(params, "teamId", "");
-            String email = MapTool.getString(params, "email", "");
+            String emailInput = MapTool.getString(params, "email", "");
 
-            Team team = teamMapper.selectById(teamId);
-            if (team == null) return ResponseData.error("团队信息不存在");
+            String[] emailArray = StrUtil.split(emailInput, ",", true, true);
 
-            SysUserLite userLite = sysUserLiteMapper.selectOne(new LambdaQueryWrapper<SysUserLite>().eq(SysUserLite::getEmail, email));
-            if (userLite == null) return ResponseData.error("用户信息不存在");
+            int flagCount = 0;
+            for (String emailItem : emailArray) {
+                String email = emailItem.trim();
+                Team team = teamMapper.selectById(teamId);
+                if (team == null) return ResponseData.error("团队信息不存在");
 
-            TeamMember teamMember = new TeamMember();
-            teamMember.setId(R.SnowFlake.nexts());
-            teamMember.setTeamId(teamId);
-            teamMember.setUserId(userLite.getId());
-            teamMember.setCreateTime(LocalDateTime.now());
-            teamMember.setCreateUserId(CurrentUserManager.getUserId());
-            int flag = teamMemberMapper.insert(teamMember);
-            if (flag > 0) {
-                TeamMemberLog teamMemberLog = TeamMemberLog.create(R.SnowFlake.nexts(), CurrentUserManager.getUserId(), teamMember, "邀请加入");
-                teamMemberLogMapper.insert(teamMemberLog);
+                SysUserLite userLite = sysUserLiteMapper.selectOne(new LambdaQueryWrapper<SysUserLite>().eq(SysUserLite::getEmail, email));
+                if (userLite == null) return ResponseData.error("用户信息不存在");
 
-                teamMapper.updateMemberCount(teamId);
-                return ResponseData.ok();
+                TeamMember teamMember = new TeamMember();
+                teamMember.setId(R.SnowFlake.nexts());
+                teamMember.setTeamId(teamId);
+                teamMember.setUserId(userLite.getId());
+                teamMember.setCreateTime(LocalDateTime.now());
+                teamMember.setCreateUserId(CurrentUserManager.getUserId());
+                int flag = teamMemberMapper.insert(teamMember);
+                if (flag > 0) {
+                    TeamMemberLog teamMemberLog = TeamMemberLog.create(R.SnowFlake.nexts(), CurrentUserManager.getUserId(), teamMember, "邀请加入");
+                    teamMemberLogMapper.insert(teamMemberLog);
+                    teamMapper.updateMemberCount(teamId);
+                    flagCount += flag;
+                }
+            }
+
+            if (flagCount > 0) {
+                return ResponseData.ok("邀请成功，本次邀请人数：" + flagCount);
             }
         }
         return ResponseData.error("邀请失败，请检查信息");

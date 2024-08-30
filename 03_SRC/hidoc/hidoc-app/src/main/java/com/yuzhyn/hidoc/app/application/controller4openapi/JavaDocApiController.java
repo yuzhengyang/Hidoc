@@ -9,10 +9,13 @@ import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.ios.files.FileTool;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.*;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.*;
+import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.application.service.javadoc.JavaDocSearchService;
 import com.yuzhyn.hidoc.app.application.service.javadoc.JavaDocUploadService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
+import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +37,9 @@ public class JavaDocApiController {
 
     @Autowired
     JavaDocMetaMapper javaDocMetaMapper;
+
+    @Autowired
+    TeamMemberMapper teamMemberMapper;
 
     @Autowired
     JavaDocMetaLiteMapper javaDocMetaLiteMapper;
@@ -108,7 +114,35 @@ public class JavaDocApiController {
     @PostMapping("projectList")
     public ResponseData projectList(@RequestBody Map<String, Object> params) {
         boolean existMenu = MapTool.getBoolean(params, "existMenu", false);
-        List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);
+
+        List<JavaDocProject> projectList = new ArrayList<>();
+
+        List<JavaDocProject> projectDbList = javaDocProjectMapper.selectList(null);
+
+        // 筛选工程的团队查询权限，如果没有有权限的工程代码权限读取，则直接返回空列表
+        if (CurrentUserManager.isLogin()) {
+            List<TeamMember> teamMemberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
+            for (JavaDocProject project : projectDbList) {
+                if (StringTool.ok(project.getTeamsRead())) {
+                    if (ListTool.ok(teamMemberList)) {
+                        for (TeamMember member : teamMemberList) {
+                            if (project.getTeamsRead().contains(member.getTeamId())) {
+                                projectList.add(project);
+                            }
+                        }
+                    }
+                } else {
+                    projectList.add(project);
+                }
+            }
+        } else {
+            for (JavaDocProject project : projectDbList) {
+                if (!StringTool.ok(project.getTeamsRead())) {
+                    projectList.add(project);
+                }
+            }
+        }
+
 
         if (ListTool.ok(projectList)) {
 

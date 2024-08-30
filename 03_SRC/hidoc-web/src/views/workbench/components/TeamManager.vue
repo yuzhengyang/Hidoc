@@ -23,6 +23,7 @@
                                 </el-table-column>
                                 <el-table-column label="操作">
                                     <template #default="scopeOp">
+                                        <el-link type="primary" style="font-size: 12px; margin-right: 10px" @click="queryMembers(scopeOp.row.id)">查看成员</el-link>
                                         <el-link v-if="scopeOp.row.myJoinStatus == 'n'" type="warning" style="font-size: 12px; margin-right: 10px" @click="joinTeam(scopeOp.row.id, 'autoJoinEmailSuffix', '')">自动加入</el-link>
                                         <el-link v-if="scopeOp.row.myJoinStatus == 'n'" type="success" style="font-size: 12px; margin-right: 10px" @click="openJoinTeam(scopeOp.row.id)">密码加入</el-link>
                                         <el-link v-if="scopeOp.row.myJoinStatus == 'y'" type="success" style="font-size: 12px; margin-right: 10px" @click="openInviteUser(scopeOp.row.id)">邀请成员</el-link>
@@ -49,6 +50,7 @@
                                 <el-table-column prop="memberCount" label="团队人数" width="180"></el-table-column>
                                 <el-table-column fixed="right" label="管理">
                                     <template #default="scopeOp">
+                                        <el-link type="primary" style="font-size: 12px; margin-right: 10px" @click="queryMembers(scopeOp.row.id)">查看成员</el-link>
                                         <el-link type="warning" style="font-size: 12px; margin-right: 10px" @click="openEditTeam(scopeOp.row.id, true)">编辑信息</el-link>
                                         <!-- <el-link type="success" style="font-size: 12px; margin-right: 10px" @click="setAdmin(scopeOp.row, false)">xx管理成员</el-link>
                                         <el-link style="font-size: 12px; margin-right: 10px" @click="previewDoc(scopeOp.row)">xx团队转让</el-link>
@@ -118,6 +120,15 @@
             </span>
         </template>
     </el-dialog>
+
+    <!-- 查看成员列表 -->
+    <el-dialog v-model="this.memberListForm.dialog" title="成员列表">
+        <el-table :data="this.memberListForm.list" :default-sort="{ prop: 'createTime', order: 'descending' }" height="400" border stripe>
+            <el-table-column prop="createTime" label="加入时间" sortable />
+            <el-table-column prop="userInfo.realName" label="姓名" width="120" />
+            <el-table-column prop="userInfo.email" label="邮箱" />
+        </el-table>
+    </el-dialog>
 </template>
 
 <script>
@@ -148,6 +159,10 @@ export default {
             inviteUserForm: {
                 dialog: false,
                 prop: { email: '' }
+            },
+            memberListForm: {
+                dialog: false,
+                list: []
             },
             currentMachineList: []
         };
@@ -284,6 +299,20 @@ export default {
                 if (res.code == 0) {
                     console.log(res);
                     this.showAllTeams();
+                }
+            });
+        },
+        queryMembers(teamId) {
+            this.memberListForm.list = [];
+            return request({
+                url: '/teamMember/list',
+                method: 'post',
+                data: { teamId: teamId }
+            }).then(res => {
+                if (res.code == 0) {
+                    console.log(res);
+                    this.memberListForm.list = res.data;
+                    this.memberListForm.dialog = true;
                 }
             });
         },

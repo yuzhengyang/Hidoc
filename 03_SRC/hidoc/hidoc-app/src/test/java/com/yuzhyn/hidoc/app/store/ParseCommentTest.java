@@ -3,7 +3,7 @@ package com.yuzhyn.hidoc.app.store;
 import com.yuzhyn.hidoc.app.application.model.javadoc.JavaDocComment;
 
 public class ParseCommentTest {
-   static String comment = "\n" +
+    static String comment = "\n" +
             "     * 商品包拆包\n" +
             "     * #场景：数据查询时，使用平台需要写大量SQL语句执行，但是对于普通增删改查\n" +
             "     * 可使用基本方法工具\n" +
@@ -31,10 +31,25 @@ public class ParseCommentTest {
             "     *                       传入参数不能为空\n" +
             "     * @return 拆包后的商品列表\n" +
             "     ";
+    static String comment2 = """
+                /**
+                 * 下划线转驼峰
+                 *
+                 * @param param
+                 * @return
+                 * @deprecated 代码迁移至NameFormat
+                 */
+                @Deprecated
+                public static String underlineToCamel(String param) {
+                    return NameFormat.underlineToCamel(param);
+                }
+            """;
 
     public static void main(String[] args) {
-        JavaDocComment jdc = new JavaDocComment(comment);
+        JavaDocComment jdc = new JavaDocComment(comment2);
         jdc.parseComment();
+        System.out.println(jdc.isStruct());
+
     }
 
 }

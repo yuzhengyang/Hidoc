@@ -25,9 +25,12 @@ import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocThumb;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.*;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.*;
+import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import com.yuzhyn.hidoc.app.utils.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,12 +67,16 @@ public class JavaDocSearchService {
     @Autowired
     JavaDocHelpfulMapper javaDocHelpfulMapper;
 
+    @Autowired
+    TeamMemberMapper teamMemberMapper;
+
     public ResponseData search(Map<String, Object> params) {
 
         String metaType = MapTool.get(params, "metaType", "").toString();
         String name = MapTool.get(params, "name", "").toString();
         String text = MapTool.get(params, "text", "").toString();
-        Boolean isStruct = MapTool.getBoolean(params, "isStruct", "false");
+        Boolean isStruct = MapTool.getBoolean(params, "isStruct", "true");
+        Boolean isDeprecated = MapTool.getBoolean(params, "isDeprecated", "false");
 
         String[] projectArray;
         if (MapTool.get(params, "projects", null) != null) {
@@ -83,8 +90,8 @@ public class JavaDocSearchService {
             projectArray = null;
         }
 
-        String[] nameArray = split(name, " ", true, true);
-        String[] textArray = split(text, " ", true, true);
+        String[] nameArray = StrUtil.split(name, " ", true, true);
+        String[] textArray = StrUtil.split(text, " ", true, true);
 
         saveQueryLog(metaType, nameArray, textArray, projectArray);
 
@@ -99,19 +106,50 @@ public class JavaDocSearchService {
             limit = 50L;
         }
 
+        List<String> allowProjects = new ArrayList<>();
         ResponseData responseData = ResponseData.ok();
         List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);
         if (!ListTool.ok(projectList)) return responseData;
 
+        // 筛选工程的团队查询权限，如果没有有权限的工程代码权限读取，则直接返回空列表
+        if (CurrentUserManager.isLogin()) {
+            List<TeamMember> teamMemberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
+            for (JavaDocProject project : projectList) {
+                if (StringTool.ok(project.getTeamsRead())) {
+                    if (ListTool.ok(teamMemberList)) {
+                        for (TeamMember member : teamMemberList) {
+                            if (project.getTeamsRead().contains(member.getTeamId())) {
+                                allowProjects.add(project.getId());
+                            }
+                        }
+                    }
+                } else {
+                    allowProjects.add(project.getId());
+                }
+            }
+        } else {
+            for (JavaDocProject project : projectList) {
+                if (!StringTool.ok(project.getTeamsRead())) {
+                    allowProjects.add(project.getId());
+                }
+            }
+        }
+        if (!ListTool.ok(allowProjects)) return responseData;
+
+        // 开始使用条件拼接查询
         LambdaQueryWrapper<JavaDocMetaLite> classWrapper = new LambdaQueryWrapper<JavaDocMetaLite>();
-        if(isStruct){
+        classWrapper.in(JavaDocMetaLite::getProjectId, allowProjects);
+        if (isStruct) {
             classWrapper = classWrapper.and(q -> q.eq(JavaDocMetaLite::getIsStruct, true));
+        }
+        if (!isDeprecated) {
+            classWrapper = classWrapper.and(q -> q.eq(JavaDocMetaLite::getIsDeprecated, false));
         }
         if (ListTool.ok(nameArray)) {
             classWrapper = classWrapper.and(p -> {
                 for (String key : nameArray) {
                     String keyLike = "%" + key + "%";
-                    p.apply("COALESCE(name,'') ILIKE {0}", keyLike);
+                    p.apply("(COALESCE(name,'') ILIKE {0} OR COALESCE(class_name,'') ILIKE {0})", keyLike);
 //                                    "COALESCE(project_name,'')||" +
 //                                    "COALESCE(comment_info,'')||" +
 //                                    "COALESCE(comment_scene,'')||" +
@@ -141,7 +179,7 @@ public class JavaDocSearchService {
                 }
             });
         }
-        List<JavaDocMetaSearchLite> classList   = javaDocMetaSearchLiteMapper.selectList(classWrapper, limit, offset);
+        List<JavaDocMetaSearchLite> classList = javaDocMetaSearchLiteMapper.selectList(classWrapper, limit, offset);
 
         if (ListTool.ok(classList)) {
 
@@ -212,45 +250,5 @@ public class JavaDocSearchService {
         return ResponseData.ok();
     }
 
-    /**
-     * 这里由于公共工具代码异常，暂时在这里修复，等到公共代码发布之后，使用新的公共工具版本库
-     *
-     * @param s
-     * @param regex
-     * @param filterSpace
-     * @param filterRepeat
-     * @return
-     */
-    public static String[] split(String s, String regex, boolean filterSpace, boolean filterRepeat) {
-        if (StringTool.ok(s)) {
-            String[] array = s.split(regex);
-            // 过滤空格
-            List<String> list = new ArrayList<String>();
-            Set<String> sets = new HashSet<String>();
-            for (String item : array) {
-                boolean canAdd = false;
-
-                if (filterSpace) {
-                    if (StringTool.ok(item.trim())) canAdd = true;
-                } else {
-                    canAdd = true;
-                }
-
-                if (canAdd) {
-                    if (filterRepeat) {
-                        if (!sets.contains(item)) {
-                            list.add(item);
-                            sets.add(item);
-                        }
-                    } else {
-                        list.add(item);
-                    }
-                }
-            }
-            return list.toArray(new String[list.size()]);
-        } else {
-            return null;
-        }
-    }
 
 }
