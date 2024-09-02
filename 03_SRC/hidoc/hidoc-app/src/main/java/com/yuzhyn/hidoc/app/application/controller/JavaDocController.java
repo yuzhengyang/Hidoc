@@ -7,13 +7,18 @@ import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.azylee.core.ios.files.FileTool;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.*;
+import com.yuzhyn.hidoc.app.application.entity.team.Team;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamLite;
 import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.*;
+import com.yuzhyn.hidoc.app.application.mapper.team.TeamLiteMapper;
+import com.yuzhyn.hidoc.app.application.mapper.team.TeamMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.application.service.javadoc.JavaDocSearchService;
 import com.yuzhyn.hidoc.app.application.service.javadoc.JavaDocUploadService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import com.yuzhyn.hidoc.app.utils.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -72,6 +77,9 @@ public class JavaDocController {
     JavaDocMetaMapper javaDocMetaMapper;
 
     @Autowired
+    TeamLiteMapper teamLiteMapper;
+
+    @Autowired
     JavaDocMetaLiteMapper javaDocMetaLiteMapper;
 
     @Autowired
@@ -107,6 +115,54 @@ public class JavaDocController {
     @PostMapping("projectList")
     public ResponseData projectList(@RequestBody Map<String, Object> params) {
         List<JavaDocProject> projectList = javaDocProjectMapper.selectList(null);
+
+        // 循环查询工程的搜索权限和代码查看权限，属于哪个团队
+        if (ListTool.ok(projectList)) {
+            // 先根据名称排序
+            projectList.sort(Comparator.comparing(JavaDocProject::getName));
+
+            // 把涉及到的团队信息都一次性查询出来，放到map里面，后续使用，避免循环查询
+            Map<String, TeamLite> teamMap = new HashMap<>();
+            List<String> teamsList = new ArrayList<>();
+            teamsList.addAll(projectList.stream().map(JavaDocProject::getTeamsRead).toList());
+            teamsList.addAll(projectList.stream().map(JavaDocProject::getTeamsCode).toList());
+            Set<String> teamIds = new HashSet<>();
+            for (String teams : teamsList) {
+                String[] teamsArray = StrUtil.split(teams, ",", true, true, true);
+                if (ListTool.ok(teamsArray)) {
+                    teamIds.addAll(Arrays.asList(teamsArray));
+                }
+            }
+            if (ListTool.ok(teamIds)) {
+                List<TeamLite> teamList = teamLiteMapper.selectList(new LambdaQueryWrapper<TeamLite>().in(TeamLite::getId, teamIds));
+                teamMap = teamList.stream().collect(Collectors.toMap(TeamLite::getId, team -> team));
+            }
+            // 根据工程的团队权限设置，给赋值上对应的团队信息
+            for (JavaDocProject project : projectList) {
+                project.setTeamsReadList(new ArrayList<>());
+                project.setTeamsCodeList(new ArrayList<>());
+                String teamsCodeString = project.getTeamsCode();
+                String teamsReadString = project.getTeamsRead();
+                String[] teamsCodeArray = StrUtil.split(teamsCodeString, ",", true, true, true);
+                String[] teamsReadArray = StrUtil.split(teamsReadString, ",", true, true, true);
+                if (ListTool.ok(teamsCodeArray)) {
+                    for (String teamId : teamsCodeArray) {
+                        if (teamMap.containsKey(teamId)) {
+                            TeamLite team = teamMap.get(teamId);
+                            project.getTeamsCodeList().add(new TeamLite(team.getId(), team.getName()));
+                        }
+                    }
+                }
+                if (ListTool.ok(teamsReadArray)) {
+                    for (String teamId : teamsReadArray) {
+                        if (teamMap.containsKey(teamId)) {
+                            TeamLite team = teamMap.get(teamId);
+                            project.getTeamsReadList().add(new TeamLite(team.getId(), team.getName()));
+                        }
+                    }
+                }
+            }
+        }
         return ResponseData.okData(projectList);
     }
 
@@ -128,7 +184,7 @@ public class JavaDocController {
                     }
                 }
                 return ResponseData.error("您不属于该工程源码查看的团队，不能查看源码内容");
-            }else{
+            } else {
                 return ResponseData.okData("originalDocument", javaDocClass.getSourceCode());
             }
         }
@@ -155,7 +211,7 @@ public class JavaDocController {
                     }
                 }
                 return ResponseData.error("您不属于该工程源码查看的团队，不能查看源码内容");
-            }else{
+            } else {
                 return ResponseData.okData("sourceCode", method.getSourceCode());
             }
         }

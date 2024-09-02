@@ -18,7 +18,7 @@ public class StrUtil {
      * @param filterRepeat
      * @return
      */
-    public static String[] split(String s, String regex, boolean filterSpace, boolean filterRepeat) {
+    public static String[] split(String s, String regex, boolean filterSpace, boolean filterRepeat, boolean doTrim) {
         if (StringTool.ok(s)) {
             String[] array = s.split(regex);
             // 过滤空格
@@ -36,11 +36,11 @@ public class StrUtil {
                 if (canAdd) {
                     if (filterRepeat) {
                         if (!sets.contains(item)) {
-                            list.add(item);
+                            list.add(doTrim ? item.trim() : item);
                             sets.add(item);
                         }
                     } else {
-                        list.add(item);
+                        list.add(doTrim ? item.trim() : item);
                     }
                 }
             }

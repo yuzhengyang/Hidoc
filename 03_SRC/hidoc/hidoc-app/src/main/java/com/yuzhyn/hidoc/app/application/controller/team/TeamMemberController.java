@@ -98,7 +98,9 @@ public class TeamMemberController {
             String teamId = MapTool.getString(params, "teamId", "");
             String emailInput = MapTool.getString(params, "email", "");
 
-            String[] emailArray = StrUtil.split(emailInput, ",", true, true);
+            emailInput = emailInput.replaceAll("\n",",");
+            emailInput = emailInput.replaceAll("，",",");
+            String[] emailArray = StrUtil.split(emailInput, ",", true, true, true);
 
             int flagCount = 0;
             for (String emailItem : emailArray) {
@@ -106,21 +108,26 @@ public class TeamMemberController {
                 Team team = teamMapper.selectById(teamId);
                 if (team == null) return ResponseData.error("团队信息不存在");
 
-                SysUserLite userLite = sysUserLiteMapper.selectOne(new LambdaQueryWrapper<SysUserLite>().eq(SysUserLite::getEmail, email));
-                if (userLite == null) return ResponseData.error("用户信息不存在");
+                SysUserLite userLite = sysUserLiteMapper.selectOne(new LambdaQueryWrapper<SysUserLite>().eq(SysUserLite::getEmail, email).eq(SysUserLite::getIsFrozen, false));
+                if (userLite == null) {
+//                    return ResponseData.error("用户信息不存在");
+                    continue;
+                }
 
-                TeamMember teamMember = new TeamMember();
-                teamMember.setId(R.SnowFlake.nexts());
-                teamMember.setTeamId(teamId);
-                teamMember.setUserId(userLite.getId());
-                teamMember.setCreateTime(LocalDateTime.now());
-                teamMember.setCreateUserId(CurrentUserManager.getUserId());
-                int flag = teamMemberMapper.insert(teamMember);
-                if (flag > 0) {
-                    TeamMemberLog teamMemberLog = TeamMemberLog.create(R.SnowFlake.nexts(), CurrentUserManager.getUserId(), teamMember, "邀请加入");
-                    teamMemberLogMapper.insert(teamMemberLog);
-                    teamMapper.updateMemberCount(teamId);
-                    flagCount += flag;
+                if (!teamMemberMapper.exists(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getTeamId, teamId).eq(TeamMember::getUserId, userLite.getId()))) {
+                    TeamMember teamMember = new TeamMember();
+                    teamMember.setId(R.SnowFlake.nexts());
+                    teamMember.setTeamId(teamId);
+                    teamMember.setUserId(userLite.getId());
+                    teamMember.setCreateTime(LocalDateTime.now());
+                    teamMember.setCreateUserId(CurrentUserManager.getUserId());
+                    int flag = teamMemberMapper.insert(teamMember);
+                    if (flag > 0) {
+                        TeamMemberLog teamMemberLog = TeamMemberLog.create(R.SnowFlake.nexts(), CurrentUserManager.getUserId(), teamMember, "邀请加入");
+                        teamMemberLogMapper.insert(teamMemberLog);
+                        teamMapper.updateMemberCount(teamId);
+                        flagCount += flag;
+                    }
                 }
             }
 

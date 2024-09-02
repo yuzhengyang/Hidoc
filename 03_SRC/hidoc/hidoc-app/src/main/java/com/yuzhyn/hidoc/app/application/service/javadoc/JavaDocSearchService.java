@@ -90,8 +90,8 @@ public class JavaDocSearchService {
             projectArray = null;
         }
 
-        String[] nameArray = StrUtil.split(name, " ", true, true);
-        String[] textArray = StrUtil.split(text, " ", true, true);
+        String[] nameArray = StrUtil.split(name, " ", true, true, true);
+        String[] textArray = StrUtil.split(text, " ", true, true, true);
 
         saveQueryLog(metaType, nameArray, textArray, projectArray);
 

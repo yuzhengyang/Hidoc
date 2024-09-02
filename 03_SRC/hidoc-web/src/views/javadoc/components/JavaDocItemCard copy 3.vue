@@ -51,10 +51,10 @@
             </el-col>
         </el-row>
         <el-row>
-            <el-col :span="19" style="margin-top: 10px; font-size: 14px">
-                <span v-html="this.dataObj.commentInfo" />
+            <el-col :span="20" style="margin-top: 10px">
+                <span style="font-size: 14px" v-html="this.dataObj.commentInfo" />
             </el-col>
-            <el-col :span="5">
+            <el-col :span="4">
                 <!-- 展示权限：user.roles.includes('admin') -->
                 <div v-if="this.dataObj.metaType == 'JavaDocClass'" style="float: right">
                     <el-button type="primary" size="small" round v-if="this.dataObj.commentExample != ''" @click="showDialog('commentExampleDialog')">示例</el-button>
@@ -109,6 +109,7 @@
                     :
                     <el-text :type="this.dataObj.returnType == 'void' ? 'info' : 'warning'">{{ this.dataObj.returnType == 'void' ? '没有返回值' : this.dataObj.returnDesc }}</el-text>
                 </p>
+                <p v-if="this.dataObj.throwses != ''"></p>
                 <p v-for="item in this.dataObj.throwses" :key="item">
                     🐞
                     <el-text type="primary">{{ item.type }}</el-text>
@@ -132,6 +133,9 @@
         <el-row style="margin-top: 5px">
             <el-col :span="12" style="text-align: left">
                 <span style="color: grey; font-size: 12px">{{ this.dataObj.createTime }} 刷新</span>
+            </el-col>
+            <el-col v-if="this.dataObj.javaDocClassLite" :span="12" style="text-align: right; font-size: 14px; font-weight: bold">
+                <span @click="showDialog('classDetailsDialog')" style="cursor: pointer; color: blue">类：{{ this.dataObj.javaDocClassLite.name }}</span>
             </el-col>
         </el-row>
     </div>

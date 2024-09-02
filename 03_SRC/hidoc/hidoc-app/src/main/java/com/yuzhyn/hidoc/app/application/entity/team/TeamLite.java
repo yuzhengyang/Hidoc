@@ -41,4 +41,12 @@ public class TeamLite {
     @TableField(exist = false)
     private String myJoinStatus;
 
+    public TeamLite() {
+    }
+
+    public TeamLite(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
 }

@@ -14,7 +14,7 @@
                                 <el-table-column prop="name" label="名称" width="180"></el-table-column>
                                 <el-table-column prop="description" label="描述" width="240"></el-table-column>
                                 <el-table-column prop="createTime" label="创建时间" width="180"></el-table-column>
-                                <el-table-column prop="ownerUser.realName" label="所属人" width="120"></el-table-column>
+                                <el-table-column prop="ownerUser.realName" label="录入人" width="120"></el-table-column>
                                 <el-table-column prop="memberCount" label="团队人数" width="100"></el-table-column>
                                 <el-table-column label="加入状态" width="100">
                                     <template #default="scope_myJoinStatus">
@@ -34,7 +34,7 @@
                         </el-col>
                     </el-row>
                 </el-tab-pane>
-                <el-tab-pane label="我管理的团队" v-if="user.roles.includes('admin')">
+                <el-tab-pane label="我的团队" v-if="user.roles.includes('admin')">
                     <el-row>
                         <el-button-group>
                             <el-button round type="success" size="small" @click="openCreateTeam">创建团队</el-button>
@@ -46,7 +46,7 @@
                                 <el-table-column prop="name" label="名称" width="180"></el-table-column>
                                 <el-table-column prop="description" label="描述" width="180"></el-table-column>
                                 <el-table-column prop="createTime" label="创建时间" width="180"></el-table-column>
-                                <el-table-column prop="ownerUser.realName" label="所属人" width="180"></el-table-column>
+                                <el-table-column prop="ownerUser.realName" label="录入人" width="180"></el-table-column>
                                 <el-table-column prop="memberCount" label="团队人数" width="180"></el-table-column>
                                 <el-table-column fixed="right" label="管理">
                                     <template #default="scopeOp">
@@ -110,7 +110,7 @@
     <el-dialog v-model="this.inviteUserForm.dialog" title="邀请成员加入团队">
         <el-form :model="this.inviteUserForm.prop">
             <el-form-item label="成员邮箱" :label-width="formLabelWidth">
-                <el-input v-model="this.inviteUserForm.prop.email" autocomplete="off" />
+                <el-input v-model="this.inviteUserForm.prop.email" autocomplete="off" type="textarea" :rows="10" />
             </el-form-item>
         </el-form>
         <template #footer>

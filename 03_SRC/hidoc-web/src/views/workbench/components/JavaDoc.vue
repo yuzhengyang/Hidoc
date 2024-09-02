@@ -2,25 +2,37 @@
     <el-container>
         <el-header height="30px">
             <el-row>
-                <el-col :span="16">
-                </el-col>
-                <el-col :span="8" style="text-align:right;">
+                <el-col :span="16"></el-col>
+                <el-col :span="8" style="text-align: right">
                     <el-button type="primary" round @click="openUploadDialog">上传zip</el-button>
                     <el-button type="primary" round @click="loadProjectList">刷新</el-button>
                 </el-col>
             </el-row>
         </el-header>
         <el-main>
-            <el-row :gutter="12">
-                <el-col :span="8" v-for="item in projectList" :key="item">
-                    <el-card shadow="hover">
-                        <div>名称：{{item.name}}</div>
-                        <div>描述：{{item.description}}</div>
-                        <div>token：{{item.token}}</div>
-                        <div>创建：{{item.createTime}}</div>
-                        <div>更新：{{item.updateTime}}</div>
-                    </el-card>
-                </el-col>
+            <el-row :span="24">
+                <el-table :data="projectList" stripe>
+                    <el-table-column prop="name" label="名称" width="300" />
+                    <!-- <el-table-column prop="description" label="描述"  width="200"/> -->
+                    <el-table-column prop="token" label="token" width="150" />
+                    <el-table-column prop="createTime" label="创建时间" width="160" />
+                    <el-table-column prop="updateTime" label="更新时间" width="160" />
+                    <el-table-column label="团队（访问权限）" width="160">
+                        <template #default="scope_space">
+                            <el-tag v-for="item in scope_space.row.teamsReadList" :key="item.id" type="success" size="small">{{ item.name }}</el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="团队（源码权限）" width="160">
+                        <template #default="scope_space">
+                            <el-tag v-for="item in scope_space.row.teamsCodeList" :key="item.id" type="success" size="small">{{ item.name }}</el-tag>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作">
+                        <template>
+                            <el-link type="warning" style="font-size: 12px; margin-right: 10px">设置关联团队</el-link>
+                        </template>
+                    </el-table-column>
+                </el-table>
             </el-row>
         </el-main>
     </el-container>
