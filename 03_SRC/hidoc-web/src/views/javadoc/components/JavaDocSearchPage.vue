@@ -167,12 +167,13 @@
     <el-tour v-model="helpTour">
         <el-tour-step :target="$refs.projectTree?.$el" title="🏢 工程列表" placement="right">
             <div>您可以在这里点击某些工程，来筛选从哪些工程查询信息</div>
+            <div>默认不选择，会查询有权限的所有工程</div>
         </el-tour-step>
         <el-tour-step :target="$refs.searchName?.$el" title="📁 搜索类或方法" description="在这里可以输入类名或方法名，可以较为精准的定位到需要的信息" />
         <el-tour-step :target="$refs.searchText?.$el" title="📄 搜索注释内容" description="您可以输入文本，进行注释内容的查询，多个词用空格隔开，结果会以高亮显示" placement="bottom-end" />
         <el-tour-step :target="$refs.searchIsStruct?.$el" title="📰 只搜索结构化后的注释吗？" placement="bottom-end">
             <p>结构化的注释，指的是注释中，包含至少一种描述，如：#场景、#限制、#关键字</p>
-            <p>您也可以从全部注释中搜索，这样搜索会比较慢，并且准确度较低</p>
+            <p>您也可以切换到从全部注释中搜索，这样搜索范围较大</p>
         </el-tour-step>
         <el-tour-step :target="$refs.searchIsDeprecated?.$el" title="⛓️‍💥 要搜索废弃的类或方法？" placement="bottom-end">
             <p>通常我们会使用 @Deprecated 注解，来标识淘汰的类或方法</p>
@@ -197,7 +198,7 @@
             <p>↩️ 返回值：类型和数据是不是你需要的</p>
             <p>🐞 异常：您需要注意识别和应对，避免突发状况</p>
         </el-tour-step>
-        <el-tour-step target="#metaCommentLimit" title="⛔️ 使用限制" description="有些方法开发者并不希望被公共使用，这里可以体现存在的限制" placement="bottom" />
+        <el-tour-step target="#metaCommentLimit" title="⛔️ 使用限制" description="有些方法可能存在一些限定条件，为避免影响，请关注使用限制" placement="bottom" />
         <el-tour-step target="#metaKeyword" title="🗝️ 关键字" description="同类型的代码，可以使用关键字来区分，也能更好的帮助大家来搜索" placement="bottom" />
         <el-tour-step target="#metaCreateTime" title="🕙 刷新时间" placement="bottom" style="width: 500px">
             <p>代码注释每小时都会自动更新到这里</p>
