@@ -1,0 +1,10 @@
+{
+  "ScriptType": "SSHX-SCRIPT-V1",
+  "ServerName": "公司服务器-HIDOC",
+  "CmdLines": [
+    ["wait", "2"],
+    ["cmd", "cd /home/hidev/hidoc/javadoc"],
+    ["cmd", "./start.sh"],
+    ["wait", "60"]
+  ]
+}

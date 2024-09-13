@@ -1,0 +1,10 @@
+{
+  "ScriptType": "SSHX-SCRIPT-V1",
+  "ServerName": "公司服务器-HIDOC",
+  "CmdLines": [
+    ["wait", "2"],
+    ["upfile", "\\hidoc-app\\target\\hidoc-app-2.0.0-SNAPSHOT.jar", "/appdata/hidoc/app/hidoc-app-2.0.0-SNAPSHOT.jar"],
+    ["cmd", "cd /appdata/hidoc/app"],
+    ["cmd", "./start-app.sh"]
+  ]
+}

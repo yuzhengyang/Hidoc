@@ -1,0 +1,11 @@
+{
+  "ScriptType": "SSHX-SCRIPT-V1",
+  "ServerName": "公司服务器-HIDOC",
+  "CmdLines": [
+    ["wait", "2"],
+    ["cmd", "cd /appdata/hidoc/app"],
+    ["cmd", "sh ./db-backup-hidoc.sh"],
+    ["wait", "60"],
+    ["downfile", "/appdata/hidoc/app/db-backup-hidoc.sql", "\\备份数据库文件\\db-backup-hidoc.sql"]
+  ]
+}
