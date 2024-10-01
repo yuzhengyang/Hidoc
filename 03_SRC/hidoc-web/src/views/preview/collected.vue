@@ -65,7 +65,7 @@
                 </div>
                 <div v-else>
                     <!-- 文档标题 -->
-                    <el-row>
+                    <el-row v-if="this.isShowTitle">
                         <el-col :span="23" style="text-align: center">
                             <span style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">{{ this.doc.title }}</span>
                         </el-col>
@@ -368,7 +368,8 @@ export default {
                 copy: false,
                 member: false
             },
-            lockUser: {}
+            lockUser: {},
+            isShowTitle: false
         };
     },
     components: { DocIlinkRelation },
@@ -500,8 +501,23 @@ export default {
                 if (res.code == 0) {
                     this.doc = res.meta.doc;
 
+                    // 判断标题的展示方式，如果开头的章节名称和标题一样，则隐藏标题
+                    let _titleDefaultSame = true;
+                    let array = _.split(this.doc.content, '\n');
+                    if (array[0].startsWith('#')) {
+                        if (array[0].indexOf('# @ ') >= 0) {
+                            let title = array[0].substring(array[0].indexOf('# @ ') + 4);
+                            let titleSame = title.indexOf(this.doc.title);
+                            if (titleSame >= 0) {
+                                _titleDefaultSame = false;
+                            }
+                        }
+                    }
+                    this.isShowTitle = _titleDefaultSame;
+
                     // 预览前对文本进行处理，然后再渲染预览
                     this.doc.content = mdFormat(this.doc.content);
+
                     document.title = this.doc.title;
                     this.contributors = [];
                     if (res.meta.contributors && res.meta.contributors.length > 0) {
@@ -887,7 +903,7 @@ export default {
     background: #59a1ff46;
     width: 100%;
 }
-.vuepress-markdown-body{
+.vuepress-markdown-body {
     overflow: hidden;
 }
 </style>

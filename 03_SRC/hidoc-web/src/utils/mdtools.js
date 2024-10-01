@@ -107,10 +107,19 @@ function psUnames(str) {
     let baseUrl = config().imageServer + '';
     return str.replaceAll('#hd.uname://', baseUrl);
 }
-function setChapterNumber(text) {
+function setChapterNumber(text, defaultNumber) {
     if (text.indexOf('# @ ') < 0) return text;
 
     let number = [0, 0, 0, 0, 0, 0];
+    if(defaultNumber){
+        if(defaultNumber[0]) number[0] = defaultNumber[0];
+        if(defaultNumber[1]) number[1] = defaultNumber[1];
+        if(defaultNumber[2]) number[2] = defaultNumber[2];
+        if(defaultNumber[3]) number[3] = defaultNumber[3];
+        if(defaultNumber[4]) number[4] = defaultNumber[4];
+        if(defaultNumber[5]) number[5] = defaultNumber[5];
+    }
+    
     let array = _.split(text, '\n');
     for (let i = 0; i < array.length; i++) {
         if (array[i].startsWith('# @ ')) {
@@ -118,22 +127,37 @@ function setChapterNumber(text) {
             number = [number[0], 0, 0, 0, 0, 0];
         }
         if (array[i].startsWith('## @ ')) {
+            if (number[0] === 0) ++number[0];
             array[i] = array[i].replace('## @ ', `## ${number[0]}.${++number[1]} `);
             number = [number[0], number[1], 0, 0, 0, 0];
         }
         if (array[i].startsWith('### @ ')) {
+            if (number[0] === 0) ++number[0];
+            if (number[1] === 0) ++number[1];
             array[i] = array[i].replace('### @ ', `### ${number[0]}.${number[1]}.${++number[2]} `);
             number = [number[0], number[1], number[2], 0, 0, 0];
         }
         if (array[i].startsWith('#### @ ')) {
+            if (number[0] === 0) ++number[0];
+            if (number[1] === 0) ++number[1];
+            if (number[2] === 0) ++number[2];
             array[i] = array[i].replace('#### @ ', `#### ${number[0]}.${number[1]}.${number[2]}.${++number[3]} `);
             number = [number[0], number[1], number[2], number[3], 0, 0];
         }
         if (array[i].startsWith('##### @ ')) {
+            if (number[0] === 0) ++number[0];
+            if (number[1] === 0) ++number[1];
+            if (number[2] === 0) ++number[2];
+            if (number[3] === 0) ++number[3];
             array[i] = array[i].replace('##### @ ', `##### ${number[0]}.${number[1]}.${number[2]}.${number[3]}.${++number[4]} `);
             number = [number[0], number[1], number[2], number[3], number[4], 0];
         }
         if (array[i].startsWith('###### @ ')) {
+            if (number[0] === 0) ++number[0];
+            if (number[1] === 0) ++number[1];
+            if (number[2] === 0) ++number[2];
+            if (number[3] === 0) ++number[3];
+            if (number[4] === 0) ++number[4];
             array[i] = array[i].replace('###### @ ', `###### ${number[0]}.${number[1]}.${number[2]}.${number[3]}.${number[4]}.${++number[5]} `);
             number = [number[0], number[1], number[2], number[3], number[4], number[5]];
         }

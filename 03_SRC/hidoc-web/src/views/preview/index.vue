@@ -33,7 +33,7 @@
             <el-row>
                 <el-col :span="24">
                     <el-row>
-                        <el-col :span="6" v-for="item in collectedList" :key="item">
+                        <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-for="item in collectedList" :key="item">
                             <doc-collected-card v-bind:data="item"></doc-collected-card>
                         </el-col>
                     </el-row>
