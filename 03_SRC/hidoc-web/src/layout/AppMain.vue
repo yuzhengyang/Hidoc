@@ -4,13 +4,13 @@
         <el-header class="app-main-header">
             <div>
                 <div class="grid-content bg-purple" @click="home" style="cursor: pointer; height: 40px; width: 55px; float: left"><img alt="logo" src="../assets/logo.png" height="40" @click="gotoPage('preview')" /></div>
-                <div style="cursor: pointer; height: 40px; width: 55px; float: left; font-weight: bold; font-size: 14px" @click="gotoPage('preview')">hidoc</div>
+                <!-- <div style="cursor: pointer; height: 40px; width: 55px; float: left; font-weight: bold; font-size: 14px" @click="gotoPage('preview')">hidoc</div> -->
                 <div style="float: left; font: 14px">
                     <el-button type="text" size="small" @click="gotoPage('preview')" style="margin: 0">文集</el-button>
                     <el-button type="text" style="margin: 0">|</el-button>
-                    <el-button type="text" size="small" @click="gotoPage('fileshare')" style="margin: 0">共享文件</el-button>
+                    <el-button type="text" size="small" @click="gotoPage('fileshare')" style="margin: 0">文件</el-button>
                     <el-button type="text" style="margin: 0">|</el-button>
-                    <el-button type="text" size="small" @click="gotoPage('javadoc')" style="margin: 0">代码注释</el-button>
+                    <el-button type="text" size="small" @click="gotoPage('javadoc')" style="margin: 0">代码</el-button>
                 </div>
             </div>
 
