@@ -2,28 +2,28 @@
     <el-container style="height: 100%">
         <!-- 标题区域 -->
         <el-header class="app-main-header">
-            <div>
-                <div class="grid-content bg-purple" @click="home" style="cursor: pointer; height: 40px; width: 55px; float: left"><img alt="logo" src="../assets/logo.png" height="40" @click="gotoPage('preview')" /></div>
-                <div style="cursor: pointer; height: 40px; width: 55px; float: left; font-weight: bold; font-size: 14px" @click="gotoPage('preview')">hidoc</div>
-                <div style="float: left; font: 14px">
-                    <el-button type="text" size="small" @click="gotoPage('preview')" style="margin: 0">文集</el-button>
-                    <el-button type="text" style="margin: 0">|</el-button>
-                    <el-button type="text" size="small" @click="gotoPage('fileshare')" style="margin: 0">共享文件</el-button>
-                    <el-button type="text" style="margin: 0">|</el-button>
-                    <el-button type="text" size="small" @click="gotoPage('javadoc')" style="margin: 0">代码注释</el-button>
-                </div>
-            </div>
+            <el-row>
+                <el-col :xs="20" :sm="11" :md="11" :lg="7" :xl="7">
+                    <div class="grid-content bg-purple" @click="home" style="cursor: pointer; height: 40px; width: 55px; float: left"><img alt="logo" src="../assets/logo.png" height="40" /></div>
+                    <div style="cursor: pointer; height: 40px; width: 55px; float: left; font-weight: bold; font-size: 14px">hidoc</div>
+                    <div style="float: left; font: 14px">
+                        <el-button type="text" size="small" @click="gotoPage('preview')">文集</el-button>
+                        <el-button type="text">|</el-button>
+                        <el-button type="text" size="small" @click="gotoPage('fileshare')">共享文件</el-button>
+                        <el-button type="text">|</el-button>
+                        <el-button type="text" size="small" @click="gotoPage('javadoc')">代码注释</el-button>
+                    </div>
+                </el-col>
+                <el-col :xs="3" :sm="12" :md="12" :lg="16" :xl="16">
+                    <div v-if="this.$store.state.user.token == undefined || this.$store.state.user.token == ''" class="grid-content">
+                        <el-link :underline="false" @click="register" style="font-size: 12px">
+                            <el-icon><User /></el-icon>
+                            <span>&nbsp;注册</span>
+                        </el-link>
+                        <el-link :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
+                        <el-link :underline="false" @click="login" style="font-size: 12px">登录</el-link>
 
-            <div style="float: right">
-                <div v-if="this.$store.state.user.token == undefined || this.$store.state.user.token == ''" class="grid-content">
-                    <el-link :underline="false" @click="register" style="font-size: 12px">
-                        <el-icon><User /></el-icon>
-                        <span>&nbsp;注册</span>
-                    </el-link>
-                    <el-link :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
-                    <el-link :underline="false" @click="login" style="font-size: 12px">登录</el-link>
-
-                    <!-- <el-dropdown>
+                        <!-- <el-dropdown>
                             <el-button type="text">
                                 <i class="el-icon-ship"></i>
                                 访客
@@ -42,35 +42,35 @@
                                 </el-dropdown-menu>
                             </template>
                         </el-dropdown> -->
-                </div>
-                <div v-else class="grid-content">
-                    <el-link :underline="false" @click="workbench" style="font-size: 12px">
-                        <el-icon><Monitor /></el-icon>
-                        <span>&nbsp;工作台</span>
-                    </el-link>
-                    <el-link :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
-                    <el-dropdown style="vertical-align: middle; z-index: 99999 !important">
-                        <el-link :underline="false" style="font-size: 12px">
-                            <el-avatar :size="22" :src="currentAvatar(this.$store.state.user.avatar)" style="margin: 5px" shape="square" />
-                            <span v-if="isShowName">{{ this.$store.state.user.name }}</span>
-                            <el-icon><ArrowDown /></el-icon>
+                    </div>
+                    <div v-else class="grid-content">
+                        <el-link :underline="false" @click="workbench" style="font-size: 12px">
+                            <el-icon><Monitor /></el-icon>
+                            <span>&nbsp;工作台</span>
                         </el-link>
-                        <template #dropdown>
-                            <el-dropdown-menu>
-                                <el-dropdown-item>😀 hi~ {{ this.$store.state.user.name }}</el-dropdown-item>
-                                <el-dropdown-item @click="changePasswordDialogVisible = true">
-                                    <el-icon><Key /></el-icon>
-                                    修改密码
-                                </el-dropdown-item>
-                                <el-dropdown-item @click="logout">
-                                    <el-icon><CircleClose /></el-icon>
-                                    退出
-                                </el-dropdown-item>
-                            </el-dropdown-menu>
-                        </template>
-                    </el-dropdown>
-                </div>
-            </div>
+                        <el-link :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
+                        <el-dropdown style="vertical-align: middle">
+                            <el-link :underline="false" style="font-size: 12px">
+                                <el-avatar :size="22" :src="currentAvatar(this.$store.state.user.avatar)" style="margin: 5px" shape="square" />
+                                <!-- {{ this.$store.state.user.name }} -->
+                                <el-icon><ArrowDown /></el-icon>
+                            </el-link>
+                            <template #dropdown>
+                                <el-dropdown-menu>
+                                    <el-dropdown-item @click="changePasswordDialogVisible = true">
+                                        <el-icon><Key /></el-icon>
+                                        修改密码
+                                    </el-dropdown-item>
+                                    <el-dropdown-item @click="logout">
+                                        <el-icon><CircleClose /></el-icon>
+                                        退出
+                                    </el-dropdown-item>
+                                </el-dropdown-menu>
+                            </template>
+                        </el-dropdown>
+                    </div>
+                </el-col>
+            </el-row>
         </el-header>
         <!-- 内容区域 -->
         <el-main>
@@ -119,8 +119,7 @@ export default {
             changePasswordForm: {
                 password: '',
                 password2: ''
-            },
-            isShowName: false
+            }
         };
     },
     mounted() {
@@ -129,19 +128,8 @@ export default {
         if (user && user.realName && user.email) {
             watermark.set(user.realName, user.email);
         }
-
-        window.addEventListener('resize', this.handleResize);
-        this.handleResize();
     },
-    beforeUnmount() {
-        window.removeEventListener('resize', this.handleResize);
-    },
-    created() {},
     methods: {
-        handleResize(event) {
-            this.fullWidth = document.documentElement.clientWidth;
-            this.isShowName = this.fullWidth > 1000;
-        },
         gotoPage(page) {
             if (page == 'preview') {
                 // let routeData = this.$router.resolve({

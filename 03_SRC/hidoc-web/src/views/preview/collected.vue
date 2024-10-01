@@ -1,6 +1,6 @@
 <template>
     <el-container style="height: 100%">
-        <el-aside width="280px" style="height: 100%; padding-right: 10px; border-right: 1px solid #bbb">
+        <el-aside id="doc-menu-aside" width="280px" style="height: 100%; padding-right: 10px; border-right: 1px solid #bbb">
             <el-row>
                 <el-col :span="24">
                     <el-input placeholder="请输入内容" v-model="keyword" @keydown="searchEnter">
@@ -203,7 +203,7 @@
             </el-main>
         </el-container>
         <!-- 大纲导航 -->
-        <el-aside v-if="pageMode === 'detail' && isShowAnchor" width="250px" style="height: 100%">
+        <el-aside id="doc-anchor-aside" v-if="pageMode === 'detail' && isShowAnchor" width="250px" style="height: 100%">
             <div style="padding: 45px 10px 100px 10px; font-size: 12px">
                 <div v-for="anchor in titles" :key="anchor" class="anchor-item" :style="{ padding: `4px 0 4px ${anchor.indent * 10}px` }" @click="handleAnchorClick(anchor)">
                     <a>{{ anchor.title }}</a>
@@ -243,7 +243,7 @@
         </div>
         <!-- ========== ========== ========== 右侧快捷按钮：工具条 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
-        <div style="position: fixed; top: 50px; right: 70px; z-index: 9999" v-if="this.$store.state.user.token != undefined && this.$store.state.user.token != ''">
+        <div v-if="isShowFunctionButton && this.$store.state.user.token != undefined && this.$store.state.user.token != ''" style="position: fixed; top: 50px; right: 70px">
             <!-- <el-popover placement="left" title="标题" width="200" trigger="hover">
                 <div>456456</div>
                 <el-button type="primary" icon="el-icon-menu" circle>click 激活</el-button>
@@ -313,7 +313,7 @@
 
         <!-- ========== ========== ========== 右侧快捷按钮：大纲导航 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
-        <div style="position: fixed; top: 50px; right: 20px; z-index: 9999">
+        <div v-if="isShowFunctionButton" style="position: fixed; top: 50px; right: 20px">
             <el-button type="success" circle @click="isShowAnchor = !isShowAnchor">
                 <el-icon><Tickets /></el-icon>
             </el-button>
@@ -369,7 +369,8 @@ export default {
                 member: false
             },
             lockUser: {},
-            isShowTitle: false
+            isShowTitle: false,
+            isShowFunctionButton: true
         };
     },
     components: { DocIlinkRelation },
@@ -389,11 +390,20 @@ export default {
 
         this.docId = this.$route.params.docId;
         window.addEventListener('storage', this.HandleUiMsg);
+        window.addEventListener('resize', this.handleResize);
+        this.handleResize();
     },
     beforeUnmount() {
         window.removeEventListener('storage', this.HandleUiMsg);
+        window.removeEventListener('resize', this.handleResize);
     },
+    created() {},
     methods: {
+        handleResize(event) {
+            this.fullWidth = document.documentElement.clientWidth;
+            this.isShowAnchor = this.fullWidth > 1000;
+            this.isShowFunctionButton = this.fullWidth > 1000;
+        },
         HandleUiMsg(e) {
             if (e.key == 'ui-msg') {
                 debugger;
@@ -906,4 +916,14 @@ export default {
 .vuepress-markdown-body {
     overflow: hidden;
 }
+@media screen and (max-width: 800px) {
+    #doc-menu-aside {
+        display: none;
+    }
+}
+/* @media screen and (max-width: 1000px) {
+    #doc-anchor-aside {
+        display: none;
+    }
+} */
 </style>

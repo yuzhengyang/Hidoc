@@ -2,16 +2,15 @@
     <el-container>
         <el-main>
             <el-row class="login-main">
-                <el-col :span="9">
-                    <div class="grid-content" style="text-align: right; cursor: pointer" @click="home">
+                <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
+                    <div class="grid-content" style="text-align: center; cursor: pointer;margin-top: 50px;" @click="home">
                         <img alt="logo" src="../..//assets/logo.png" width="96" />
-                        <div style="height: 150px;">
-                            <div style="width: 100px;float: right; text-align: center;font-weight: bold;">hidoc</div>
+                        <div style="height: 150px">
+                            <div style="text-align: center; font-weight: bold">hidoc</div>
                         </div>
                     </div>
                 </el-col>
-                <el-col :span="1"></el-col>
-                <el-col :span="8">
+                <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
                     <el-form ref="loginForm" :model="form" :rules="rules" status-icon label-width="80px">
                         <el-form-item label="登录账号" prop="username">
                             <el-input id="username" v-model="form.username" maxlength="64" placeholder="请输入您的登录账号"></el-input>
@@ -42,7 +41,6 @@
                         </el-form-item>
                     </el-form>
                 </el-col>
-                <el-col :span="6"></el-col>
             </el-row>
         </el-main>
     </el-container>
@@ -105,8 +103,16 @@ export default {
     setup() {},
     mounted() {
         document.title = '登录';
+        window.addEventListener('resize', this.handleResize);
+        this.handleResize();
+    },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.handleResize);
     },
     methods: {
+        handleResize(event) {
+            this.fullWidth = document.documentElement.clientWidth;
+        },
         home() {
             this.$router.push({ path: '/', params: {} });
         },
@@ -198,5 +204,8 @@ export default {
     align-items: center; /* 主要是这两行代码 */
     font-size: 16px;
     height: 550px;
+    text-align: center;
+    margin-left: 60px;
+    margin-right: 60px;
 }
 </style>
