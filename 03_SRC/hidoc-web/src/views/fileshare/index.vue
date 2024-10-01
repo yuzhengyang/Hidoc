@@ -41,22 +41,30 @@
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="3" v-for="item in filterShareFileList()" :key="item">
+                <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="item in filterShareFileList()" :key="item">
                     <el-card>
                         <div>
-                            <el-image style="width: 100%; height: 60px; background-color: rgba(52, 126, 255, 0.786); text-align: center">
+                            <el-image style="width: 40px; height: 30px; background-color: rgba(52, 126, 255, 0.786); text-align: center">
                                 <template #error>
                                     <div class="image-slot">
-                                        <span style="font-size: 40px; color: white; user-select: none">{{ item.ext }}</span>
+                                        <span style="font-size: 20px; color: white; user-select: none">{{ item.ext }}</span>
                                     </div>
                                 </template>
                             </el-image>
+                            <div>
+                                <span style="font-size: 20px; user-select: none">{{ item.fileName }}</span>
+                            </div>
                         </div>
                         <div style="font-size: 14px">
                             <el-popover placement="bottom-start" :width="260" trigger="hover">
                                 <template #reference>
-                                    <div style="height: 40px; margin-top: 5px">
-                                        <el-link type="primary" @click="fileDownload(item)">{{ item.fileName }}</el-link>
+                                    <div style="height: 30px; margin-top: 15px">
+                                        <div style="float: left">
+                                            <el-link type="primary" style="font-weight: bold" @click="fileDownload(item)">立即下载</el-link>
+                                        </div>
+                                        <div style="float: right">
+                                            <el-link type="warning" style="font-weight: bold" @click="fileDownloadCopy(item)">复制链接</el-link>
+                                        </div>
                                     </div>
                                 </template>
                                 <template #default>
@@ -88,6 +96,7 @@ import request from '../../utils/request.js';
 import { config } from '@/utils/config';
 import { getToken } from '@/utils/auth';
 import _ from 'lodash';
+import { copy } from '../../utils/clipboard.js';
 export default {
     data() {
         return {
@@ -116,6 +125,14 @@ export default {
         this.getShareFileList();
     },
     methods: {
+        copy(s) {
+            copy(s);
+            ElMessage({
+                message: '复制成功',
+                type: 'success',
+                duration: 1 * 1000
+            });
+        },
         getCurrentUserInfo() {
             request({
                 url: '/user/currentUserInfo',
@@ -149,6 +166,9 @@ export default {
         },
         fileDownload(data) {
             window.location.href = config().baseServer + 'f/d/u/' + data.uname;
+        },
+        fileDownloadCopy(data) {
+            this.copy(config().baseServer + 'f/d/u/' + data.uname);
         }
     }
 };
