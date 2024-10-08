@@ -138,6 +138,7 @@ service.interceptors.response.use(
                     }
                     break;
             }
+            console.log(`请求回复异常：${res.message}`);
             return Promise.reject(new Error(res.message || 'Error'));
         } else {
             return res;

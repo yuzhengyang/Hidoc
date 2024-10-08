@@ -2,21 +2,21 @@
     <el-container>
         <el-header height="30px">
             <el-row>
-                <el-col :span="16" style="text-align: left">
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16" style="text-align: left; margin-top: 3px">
                     <el-button-group v-if="!(this.$store.state.user.token == undefined || this.$store.state.user.token == '')">
                         <el-button type="success" size="small" @click="searchByCollectedRole('default')" round :plain="this.collectedRole != 'default'">ALL</el-button>
                         <el-button type="primary" size="small" @click="searchByCollectedRole('myJoin')" round :plain="this.collectedRole != 'myJoin'">参与</el-button>
                         <el-button type="danger" size="small" @click="searchByCollectedRole('private')" round :plain="this.collectedRole != 'private'">私有</el-button>
                     </el-button-group>
                 </el-col>
-                <el-col :span="8" style="text-align: right">
+                <el-col :xs="24" :sm="8" :md="8" :lg="8" :xl="8" style="text-align: right; margin-top: 3px">
                     <el-input v-model="searchText" placeholder="搜索一下" class="input-with-select" @keydown="searchEnter" clearable>
-                        <template #prepend>
+                        <!-- <template #prepend>
                             <el-select v-model="searchMode" placeholder="Select" style="width: 110px">
                                 <el-option label="全文" value="1"></el-option>
                                 <el-option label="关键字" value="2"></el-option>
                             </el-select>
-                        </template>
+                        </template> -->
                         <template #append>
                             <el-button @click="search()">
                                 <el-icon>
@@ -33,6 +33,7 @@
             <el-row>
                 <el-col :span="24">
                     <el-row>
+                        <el-col :xs="24" :sm="0" :md="0" :lg="0" :xl="0">&nbsp;</el-col>
                         <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-for="item in collectedList" :key="item">
                             <doc-collected-card v-bind:data="item"></doc-collected-card>
                         </el-col>

@@ -241,6 +241,11 @@
                 <el-icon><Share /></el-icon>
             </el-button>
         </div>
+        <div style="position: fixed; bottom: 250px; right: 20px; z-index: 9999">
+            <el-button circle @click="this.docFocus()" style="box-shadow: 0px 0px 3px 3px #ddd">
+                <el-icon><FullScreen /></el-icon>
+            </el-button>
+        </div>
         <!-- ========== ========== ========== 右侧快捷按钮：工具条 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
         <div v-if="isShowFunctionButton && this.$store.state.user.token != undefined && this.$store.state.user.token != ''" style="position: fixed; top: 50px; right: 70px">
@@ -263,9 +268,9 @@
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.focus">
-                            <span style="cursor: pointer" @click="docFocus()">
-                                <el-icon><FullScreen /></el-icon>
-                                -演示
+                            <span style="cursor: pointer" @click="colFocus()">
+                                <el-icon><Reading /></el-icon>
+                                -阅读
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.his">
@@ -789,6 +794,14 @@ export default {
             let routeData = this.$router.resolve({
                 name: 'docfocus',
                 params: { docId: this.$route.params.docId }
+            });
+            window.open(routeData.path, '_blank');
+        },
+        // 专注模式（文集）
+        colFocus() {
+            let routeData = this.$router.resolve({
+                name: 'colfocus',
+                params: { collectedId: this.$route.params.collectedId }
             });
             window.open(routeData.path, '_blank');
         },

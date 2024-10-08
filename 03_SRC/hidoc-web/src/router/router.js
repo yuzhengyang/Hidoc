@@ -64,6 +64,11 @@ const router = createRouter({
             component: () => import('@/views/preview/docfocus')
         },
         {
+            name: 'colfocus',
+            path: '/colfocus/:collectedId',
+            component: () => import('@/views/preview/colfocus')
+        },
+        {
             name: 'unauthorized',
             path: '/unauthorized',
             component: () => import('@/views/error/unauthorized')
