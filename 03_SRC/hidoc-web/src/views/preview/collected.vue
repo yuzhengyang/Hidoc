@@ -25,6 +25,35 @@
 
         <el-container>
             <el-main ref="docContainer" id="docContainer">
+                <!-- 这里是为了手机端查看文集，做了适配，这段代码算是冗余代码，后续有空了再优化 -->
+                <div id="doc-menu-button" v-if="isShowMenuButton">
+                    <el-affix :offset="60">
+                        <el-button type="primary" style="margin-left: 16px" @click="isShowDrawerMenu = true">导航</el-button>
+                    </el-affix>
+                    <el-drawer v-model="isShowDrawerMenu" title="I am the title" :with-header="false" direction="ltr" size="80%">
+                        <el-row>
+                            <el-col :span="24">
+                                <el-input placeholder="请输入内容" v-model="keyword" @keydown="searchEnter">
+                                    <template #suffix>
+                                        <el-icon><Search style="cursor: pointer" @click="search" /></el-icon>
+                                    </template>
+                                </el-input>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="24" style="line-height: 46px; text-align: center; border-bottom: 1px solid #bbb; font-size: 16px; font-weight: bold; cursor: pointer" @click="indexPage">{{ this.collected.name }}</el-col>
+                        </el-row>
+                        <el-tree :data="this.collected.docLites" node-key="id" default-expand-all :expand-on-click-node="false" @node-click="goDocPage">
+                            <template #default="{ data }">
+                                <span v-if="length(data.title) < 35" :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
+                                <el-tooltip v-else effect="dark" :content="data.title" placement="right">
+                                    <span :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
+                                </el-tooltip>
+                            </template>
+                        </el-tree>
+                    </el-drawer>
+                </div>
+
                 <div v-if="pageMode === 'index'">
                     <el-row>
                         <el-col :span="24" style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">{{ this.collected.name }}</el-col>
@@ -241,11 +270,6 @@
                 <el-icon><Share /></el-icon>
             </el-button>
         </div>
-        <div style="position: fixed; bottom: 250px; right: 20px; z-index: 9999">
-            <el-button circle @click="this.docFocus()" style="box-shadow: 0px 0px 3px 3px #ddd">
-                <el-icon><FullScreen /></el-icon>
-            </el-button>
-        </div>
         <!-- ========== ========== ========== 右侧快捷按钮：工具条 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
         <div v-if="isShowFunctionButton && this.$store.state.user.token != undefined && this.$store.state.user.token != ''" style="position: fixed; top: 50px; right: 70px">
@@ -268,9 +292,9 @@
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.focus">
-                            <span style="cursor: pointer" @click="colFocus()">
-                                <el-icon><Reading /></el-icon>
-                                -阅读
+                            <span style="cursor: pointer" @click="docFocus()">
+                                <el-icon><FullScreen /></el-icon>
+                                -预览
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.his">
@@ -321,6 +345,13 @@
         <div v-if="isShowFunctionButton" style="position: fixed; top: 50px; right: 20px">
             <el-button type="success" circle @click="isShowAnchor = !isShowAnchor">
                 <el-icon><Tickets /></el-icon>
+            </el-button>
+        </div>
+    </div>
+    <div v-else>
+        <div style="position: fixed; bottom: 50px; right: 20px; z-index: 9999">
+            <el-button circle @click="this.colFocus()" style="box-shadow: 0px 0px 3px 3px #ddd">
+                <el-icon><Reading /></el-icon>
             </el-button>
         </div>
     </div>
@@ -375,7 +406,9 @@ export default {
             },
             lockUser: {},
             isShowTitle: false,
-            isShowFunctionButton: true
+            isShowFunctionButton: true,
+            isShowMenuButton: false,
+            isShowDrawerMenu: false
         };
     },
     components: { DocIlinkRelation },
@@ -408,6 +441,7 @@ export default {
             this.fullWidth = document.documentElement.clientWidth;
             this.isShowAnchor = this.fullWidth > 1000;
             this.isShowFunctionButton = this.fullWidth > 1000;
+            this.isShowMenuButton = this.fullWidth < 800;
         },
         HandleUiMsg(e) {
             if (e.key == 'ui-msg') {

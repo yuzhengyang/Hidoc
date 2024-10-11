@@ -7,7 +7,7 @@
         </el-header>
         <el-main style="height: 100%" id="fileContainer">
             <el-row>
-                <el-col :span="6" v-for="item in hidocFileList" :key="item">
+                <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4"  v-for="item in hidocFileList" :key="item">
                     <el-card>
                         <div style="font-size: 14px">
                             <p>{{ item.collectedName }} [{{ item.collectedOwnerName }}]</p>

@@ -26,7 +26,7 @@
                 </el-col>
                 <el-col :span="21">
                     <el-row>
-                        <el-col :span="4" v-for="item in tableData" :key="item">
+                        <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="4" v-for="item in tableData" :key="item">
                             <el-card>
                                 <div style="font-size: 14px">
                                     <p>{{ item.fileName }}</p>
@@ -62,7 +62,7 @@
                                         <el-button @click="fileHistory(item)" type="text" size="mini">历史</el-button>
                                         <el-button @click="fileDownload(item)" type="text" size="mini">下载</el-button>
                                         <el-button @click="fileShare(item)" type="text" size="mini" v-if="this.currentBucket.name.indexOf('.') < 0">share</el-button>
-                                        <el-popover placement="top-start" :width="200" trigger="click" v-if="this.currentBucket.name.indexOf('.') < 0">
+                                        <el-popover placement="top-start" :width="200" trigger="click" v-if="this.currentBucket.name.indexOf('.') < 0 || this.currentBucket.name.indexOf('.share') >= 0">
                                             <p>删除操作不可撤回，确定删除吗？</p>
                                             <div style="text-align: right; margin: 0">
                                                 <el-button type="danger" size="mini" @click="fileDelete(item)">确定删除</el-button>
