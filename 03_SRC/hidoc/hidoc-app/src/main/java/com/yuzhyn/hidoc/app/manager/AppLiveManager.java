@@ -112,6 +112,9 @@ public class AppLiveManager {
         log.info("********** 加载通知邮箱配置 **********");
         R.Maps.emailConfig = AppConf.toMap(appConfList, "notice-email");
 
+        log.info("********** 加载功能配置 **********");
+        R.Maps.functionConfig = AppConf.toMap(appConfList, "function");
+
         log.info("********** 检索用户信息 **********");
         List<SysUser> userList = sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>());
         if (ListTool.ok(userList)) {

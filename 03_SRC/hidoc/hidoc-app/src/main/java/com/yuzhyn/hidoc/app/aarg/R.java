@@ -83,6 +83,7 @@ public final class R {
         public static Map<String, String> emailConfig = new HashMap<>();
         public static Map<String, String> registerConfig = new HashMap<>();
         public static Map<String, String> elasticConfig = new HashMap<>();
+        public static Map<String, String> functionConfig = new HashMap<>();
     }
 
     public static class Paths {
