@@ -212,8 +212,15 @@ public class UserController {
             String username = MapTool.get(params, "username", "").toString();
             String password = MapTool.get(params, "password", "").toString();
 
+            // 如果输入的账号包括@字符，则认为是使用了邮箱进行登录，通过邮箱查询对应的账号来登录
+            if (username.contains("@")) {
+                List<SysUser> emailUsers = sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, username));
+                if (ListTool.ok(emailUsers)) {
+                    username = emailUsers.get(0).getName();
+                }
+            }
+
             // password 要设置加密后的字符串，0除外，0为重置密码，允许直接登录
-            SysUser currentUser = CurrentUserManager.getUser();
             if (!password.equals("0")) password = MixdeTool.md5Mix(username, password);
             String pwdParam = password;
 

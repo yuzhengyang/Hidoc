@@ -25,3 +25,7 @@ COMMENT ON COLUMN "public"."server_man_machine"."username" IS '账号';
 COMMENT ON COLUMN "public"."server_man_machine"."password" IS '密码';
 COMMENT ON TABLE "public"."server_man_machine" IS '服务管理服务器信息';
 
+
+-- 增加字段
+
+SELECT * FROM sysdb_add_column('server_man_machine', 'teams_execute', 'text NULL');

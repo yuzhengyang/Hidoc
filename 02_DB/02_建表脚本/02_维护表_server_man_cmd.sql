@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS "server_man_cmd" (
   "content_ta" text ,
   "content_tb" text ,
   "content_tc" text ,
+  "interval" int8,
   CONSTRAINT server_man_cmd_pkey PRIMARY KEY (id)
 )
 ;
@@ -21,3 +22,8 @@ COMMENT ON COLUMN "public"."server_man_cmd"."description" IS '服务描述';
 COMMENT ON COLUMN "public"."server_man_cmd"."type" IS '命令类型';
 COMMENT ON TABLE "public"."server_man_cmd" IS '服务管理命令信息';
 
+
+-- 增加字段
+
+SELECT * FROM sysdb_add_column('server_man_cmd', 'is_share', 'bool');
+SELECT * FROM sysdb_add_column('server_man_cmd', 'interval', 'int8');

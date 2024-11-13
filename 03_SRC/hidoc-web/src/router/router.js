@@ -28,6 +28,11 @@ const router = createRouter({
                     name: 'javadoc'
                 },
                 {
+                    path: '/ssh',
+                    component: () => import('@/views/ssh'),
+                    name: 'ssh'
+                },
+                {
                     path: '/collected/:collectedId/:docId',
                     name: 'collected',
                     component: () => import('@/views/preview/collected')

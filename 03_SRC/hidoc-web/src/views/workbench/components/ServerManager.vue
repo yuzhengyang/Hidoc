@@ -1,5 +1,5 @@
 <template>
-    <el-tabs type="card" style="padding:10px">
+    <el-tabs type="card" style="padding: 10px">
         <!-- @tab-click="handleClick" -->
         <el-tab-pane label="服务器列表">
             <el-row>
@@ -7,48 +7,56 @@
                     <el-button round type="success" size="small" @click="openCreateMachine">创建</el-button>
                 </el-button-group>
             </el-row>
-            <el-row style="padding:50px">
+            <el-row style="padding: 30px">
                 <el-col :span="24">
                     <el-collapse accordion @change="showCmdList">
                         <el-collapse-item v-for="item in currentMachineList" :key="item.id.toString()" :index="item.id" :title="item.name" :name="item.id">
-                            <div>
-                                {{ item.description }}
-                                <el-button type="text" round size="small" @click="openEditMachine(item.id)">[编辑服务器信息]</el-button>
-                            </div>
-                            <div>&nbsp;</div>
-                            <div>
-                                <el-button type="success" round size="small" @click="openCreateCmd(item.id)">创建指令</el-button>
-                            </div>
-                            <div>
-                                <el-table :data="this.currentCmdList" style="width: 100%">
-                                    <el-table-column prop="name" label="名称"></el-table-column>
-                                    <!-- <el-table-column prop="description" label="描述信息"></el-table-column> -->
-                                    <!-- <el-table-column prop="createTime" label="创建时间"></el-table-column> -->
-                                    <el-table-column prop="type" label="类型" width="80"></el-table-column>
-                                    <el-table-column prop="contentTa" label="contentTa"></el-table-column>
-                                    <!-- <el-table-column prop="contentTb" label="contentTb"></el-table-column>
+                            <template #title>
+                                <div>
+                                    <span style="font-weight: bold; font-size: 18px; color: #000">{{ item.name }}</span>
+                                    <span style="font-weight: bold; font-size: 18px; color: #888">（{{ item.address }}）</span>
+                                </div>
+                            </template>
+                            <div style="padding-left: 30px; margin-left: 15px; border-left: 3px solid #ccc">
+                                <div>
+                                    {{ item.description }}
+                                    <el-button type="text" round size="small" @click="openEditMachine(item.id)">[编辑服务器信息]</el-button>
+                                </div>
+                                <div>&nbsp;</div>
+                                <div>
+                                    <el-button type="success" round size="small" @click="openCreateCmd(item.id)">创建指令</el-button>
+                                </div>
+                                <div>
+                                    <el-table :data="this.currentCmdList" style="width: 100%">
+                                        <el-table-column prop="name" label="名称"></el-table-column>
+                                        <!-- <el-table-column prop="description" label="描述信息"></el-table-column> -->
+                                        <!-- <el-table-column prop="createTime" label="创建时间"></el-table-column> -->
+                                        <el-table-column prop="type" label="类型" width="80"></el-table-column>
+                                        <el-table-column prop="contentTa" label="contentTa"></el-table-column>
+                                        <!-- <el-table-column prop="contentTb" label="contentTb"></el-table-column>
                                     <el-table-column prop="contentTc" label="contentTc"></el-table-column> -->
-                                    <el-table-column fixed="right" label="操作" width="100">
-                                        <template #default="scope">
-                                            <el-button type="success" round size="small" @click="runCmd(scope.row)">执行</el-button>
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column fixed="right" label="管理" width="200">
-                                        <template #default="scope">
-                                            <el-button type="warning" round size="small" @click="openEditCmd(scope.row)">编辑</el-button>
-                                            <!-- <el-button type="warning" round size="small" @click="openCreateCmd(scope.row)">编辑</el-button> -->
-                                            <el-popover placement="top-start" :width="200" trigger="click">
-                                                <p>删除操作不可撤回，确定删除吗？</p>
-                                                <div style="text-align: right; margin: 0">
-                                                    <el-button type="danger" size="mini" @click="deleteCmd(scope.row)">确定</el-button>
-                                                </div>
-                                                <template #reference>
-                                                    <el-button type="danger" round size="small">删除</el-button>
-                                                </template>
-                                            </el-popover>
-                                        </template>
-                                    </el-table-column>
-                                </el-table>
+                                        <el-table-column fixed="right" label="操作" width="100">
+                                            <template #default="scope">
+                                                <el-button type="success" round size="small" @click="runCmd(scope.row)">执行</el-button>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column fixed="right" label="管理" width="200">
+                                            <template #default="scope">
+                                                <el-button type="warning" round size="small" @click="openEditCmd(scope.row)">编辑</el-button>
+                                                <!-- <el-button type="warning" round size="small" @click="openCreateCmd(scope.row)">编辑</el-button> -->
+                                                <el-popover placement="top-start" :width="200" trigger="click">
+                                                    <p>删除操作不可撤回，确定删除吗？</p>
+                                                    <div style="text-align: right; margin: 0">
+                                                        <el-button type="danger" size="mini" @click="deleteCmd(scope.row)">确定</el-button>
+                                                    </div>
+                                                    <template #reference>
+                                                        <el-button type="danger" round size="small">删除</el-button>
+                                                    </template>
+                                                </el-popover>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </div>
                             </div>
                         </el-collapse-item>
                     </el-collapse>
@@ -57,7 +65,7 @@
         </el-tab-pane>
 
         <el-tab-pane label="执行日志">
-            <el-row style="padding:50px">
+            <el-row style="padding: 50px">
                 <el-col :span="24">
                     <el-row>
                         <el-col :span="3">
@@ -70,7 +78,7 @@
                             <el-input v-model="searchDataParams.ip" placeholder="执行人" class="input-with-select" @keydown="searchDataEnter" clearable />
                         </el-col>
                         <el-col :span="2">
-                            <el-button type="success" @click="searchData()" style="height:40px">
+                            <el-button type="success" @click="searchData()" style="height: 40px">
                                 <el-icon>
                                     <Search />
                                 </el-icon>
@@ -173,7 +181,7 @@
         <template #footer>
             <span class="dialog-footer">
                 <el-affix position="bottom" :offset="20">
-                    <el-button type="primary" @click="this.exeLogDialog.dialog = false" style="width:300px">关闭</el-button>
+                    <el-button type="primary" @click="this.exeLogDialog.dialog = false" style="width: 300px">关闭</el-button>
                 </el-affix>
             </span>
         </template>
@@ -494,7 +502,7 @@ export default {
             }).then(res => {
                 if (res.code == 0) {
                     console.log(res);
-                    this.exeLogDialog.current.fileDetail = '```java' + '\r\n' + res.meta.fileDetail + '\r\n' + '```';
+                    this.exeLogDialog.current.fileDetail = '```bash' + '\r\n' + res.meta.fileDetail + '\r\n' + '```';
                     this.exeLogDialog.dialog = true;
                 }
             });

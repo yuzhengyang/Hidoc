@@ -1,6 +1,5 @@
 package com.yuzhyn.hidoc.app.application.controller.team;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
@@ -14,7 +13,7 @@ import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
-import com.yuzhyn.hidoc.app.application.service.team.TeamMemberService;
+import com.yuzhyn.hidoc.app.application.service.team.TeamService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import com.yuzhyn.hidoc.app.utils.StrUtil;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +49,7 @@ public class TeamMemberController {
     SysUserLiteMapper sysUserLiteMapper;
 
     @Autowired
-    TeamMemberService teamMemberService;
+    TeamService teamService;
 
     @PostMapping("list")
     public ResponseData list(@RequestBody Map<String, Object> params) {
@@ -85,7 +83,7 @@ public class TeamMemberController {
             String email = CurrentUserManager.getUser().getEmail();
             String action = "加入团队";
 
-            return teamMemberService.create(teamId, CurrentUserManager.getUserId(), type, value, email, action, CurrentUserManager.getUserId());
+            return teamService.joinTeam(teamId, CurrentUserManager.getUserId(), type, value, email, action, CurrentUserManager.getUserId());
 
         }
         return ResponseData.error("加入失败，请检查信息");

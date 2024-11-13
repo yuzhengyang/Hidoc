@@ -960,6 +960,7 @@ export default {
     background: #59a1ff46;
     width: 100%;
 }
+/* 修复markdown代码带滚动条问题 */
 .vuepress-markdown-body {
     overflow: hidden;
 }

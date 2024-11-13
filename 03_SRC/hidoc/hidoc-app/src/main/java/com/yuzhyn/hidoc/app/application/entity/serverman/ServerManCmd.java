@@ -22,6 +22,7 @@ public class ServerManCmd {
     private String contentTa;
     private String contentTb;
     private String contentTc;
-
+    private Boolean isShare;
+    private Long interval;
 
 }

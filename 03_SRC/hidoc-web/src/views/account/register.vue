@@ -2,16 +2,15 @@
     <el-container>
         <el-main>
             <el-row class="login-main">
-                <el-col :span="9">
-                    <div class="grid-content" style="text-align: right; cursor: pointer" @click="home">
-                        <img alt="Vue logo" src="../../assets/logo.png" width="96" />
-                        <div style="height: 150px;">
-                            <div style="width: 100px;float: right; text-align: center;font-weight: bold;">hidoc</div>
+                <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
+                    <div class="grid-content" style="text-align: center; cursor: pointer;margin-top: 50px;" @click="home">
+                        <img alt="logo" src="../..//assets/logo.png" width="96" />
+                        <div style="height: 50px">
+                            <div style="text-align: center; font-weight: bold">hidoc</div>
                         </div>
                     </div>
                 </el-col>
-                <el-col :span="1"></el-col>
-                <el-col :span="8">
+                <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
                     <div style="text-align: center; margin-bottom: 20px">
                         <el-popover placement="bottom" trigger="manual" :width="400" v-model:visible="selectAvatarPanelVisible">
                             <template #reference>
@@ -73,7 +72,6 @@
                         </el-form-item>
                     </el-form>
                 </el-col>
-                <el-col :span="6"></el-col>
             </el-row>
         </el-main>
     </el-container>
@@ -186,7 +184,7 @@ export default {
 .el-main {
     /* background-color: #e9eef3; */
     /* color: #333; */
-    /* text-align: left; */
+    /* text-align: right; */
 }
 .login-main {
     display: -webkit-flex; /* Safari */
@@ -194,5 +192,8 @@ export default {
     align-items: center; /* 主要是这两行代码 */
     font-size: 16px;
     height: 550px;
+    text-align: center;
+    margin-left: 60px;
+    margin-right: 60px;
 }
 </style>

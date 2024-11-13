@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.manager;
 
+import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;

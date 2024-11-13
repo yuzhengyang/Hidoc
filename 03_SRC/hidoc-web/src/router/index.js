@@ -2,7 +2,7 @@ import router from './router.js';
 import store from '../store';
 
 // 不重定向白名单
-const whiteList = ['home', 'preview', 'fileshare', 'javadoc', 'collected', 'login', 'loginx', 'register', 'docfocus'];
+const whiteList = ['home', 'preview', 'fileshare', 'ssh', 'javadoc', 'collected', 'login', 'loginx', 'register', 'docfocus'];
 
 router.beforeEach((to, from, next) => {
     console.log('store.state.user.token: ' + store.state.user.token);

@@ -12,8 +12,8 @@
                 </el-col>
                 <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
                     <el-form ref="loginForm" :model="form" :rules="rules" status-icon label-width="80px">
-                        <el-form-item label="登录账号" prop="username">
-                            <el-input id="username" v-model="form.username" maxlength="64" placeholder="请输入您的登录账号"></el-input>
+                        <el-form-item label="账号" prop="username">
+                            <el-input id="username" v-model="form.username" maxlength="64" placeholder="请输入账号或邮箱"></el-input>
                         </el-form-item>
                         <el-form-item label="密码" prop="password">
                             <el-input id="password" type="password" v-model="form.password" maxlength="64" autocomplete="off" placeholder="请输入您的密码"></el-input>

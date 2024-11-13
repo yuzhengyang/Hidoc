@@ -1,9 +1,11 @@
 package com.yuzhyn.hidoc.app.application.controller.serverman;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
+import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
-import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManCmd;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManExeLog;
@@ -12,9 +14,9 @@ import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManCmdMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManExeLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManMachineMapper;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
+import com.yuzhyn.hidoc.app.application.service.team.TeamService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
-import com.yuzhyn.hidoc.app.utils.ssh.SshClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +42,9 @@ public class ServerManCmdController {
 
     @Autowired
     ServerManExeLogMapper serverManExeLogMapper;
+
+    @Autowired
+    TeamService teamService;
 
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
@@ -187,6 +192,25 @@ public class ServerManCmdController {
 
                     if (machine != null) {
 
+                        // 判断执行间隔，防止频繁操作引发的未知问题，默认间隔5分钟
+                        Page<ServerManExeLog> logPage = serverManExeLogMapper.selectPage(new Page<ServerManExeLog>(1, 1),
+                                new LambdaQueryWrapper<ServerManExeLog>()
+                                        .eq(ServerManExeLog::getCmdId, id)
+                                        .orderByDesc(ServerManExeLog::getBeginTime));
+                        if (logPage.getTotal() > 0) {
+                            Long cmdInterval = cmd.getInterval() == null ? 300 : cmd.getInterval(); // 执行间隔时间
+                            LocalDateTime lastTime = logPage.getRecords().get(0).getBeginTime(); // 上次执行时间
+                            LocalDateTime allowTime = lastTime.plusSeconds(cmdInterval); // 本次允许的执行时间
+                            if (beginTime.isBefore(allowTime)) {
+                                return ResponseData.error("执行间隔过短，请在 " + DateTimeFormat.toStr(allowTime, DateTimeFormatPattern.NORMAL_DATETIME) + " 后再执行。");
+                            }
+                        }
+
+                        // 这里判断权限，团队权限（命令共享），个人权限
+                        if(!teamService.isMember(machine.getTeamsExecute(), CurrentUserManager.getUserId())){
+                            return ResponseData.error("您不在所属的团队中，没有操作权限，详情请咨询管理员。");
+                        }
+
                         // 执行ssh命令
                         if (machine.getType().equals("ssh")) {
                             boolean createStat = R.SshManager.create(dialogId, machine.getAddress(), machine.getPort(), machine.getUsername(), machine.getPassword(), null);
@@ -203,7 +227,7 @@ public class ServerManCmdController {
 
                             try {
                                 R.SshManager.sendCommandRun(dialogId, cmd.getContentTa());
-                              } catch (IOException e) {
+                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -223,7 +247,9 @@ public class ServerManCmdController {
                         serverManExeLog.setResultTb("");
                         serverManExeLog.setResultTc("");
                         serverManExeLogMapper.insert(serverManExeLog);
-                        return ResponseData.ok("执行成功，详细输出信息请查看日志");
+                        ResponseData result = ResponseData.ok("执行成功，详细输出信息请查看日志");
+                        result.putDataMap("log", serverManExeLog);
+                        return result;
                     }
 
                 }
