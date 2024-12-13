@@ -53,4 +53,27 @@ public class EmailService {
         emailTool.sendMessage(addresses, "注册验证码",
                 "您好： " + username + " ， 您的验证码为： " + code + "");
     }
+
+    public boolean sendCardUserPassword(String email, String password, String cardName, String levelNames) {
+        try {
+            EmailTool emailTool = createEmailTool();
+            emailTool.createSession();
+            Address[] addresses = emailTool.createAddress(Arrays.asList(email));
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("您好，欢迎使用 " + cardName + "<br />");
+            stringBuilder.append("账号：" + email + "<br />");
+            stringBuilder.append("密码：" + password + "<br />");
+            stringBuilder.append("用户等级：" + levelNames + "<br />");
+            stringBuilder.append("<br />");
+            stringBuilder.append("<hr />");
+            stringBuilder.append("本邮件由系统自动发出，请勿回复。"  + "<br />");
+            stringBuilder.append("谢谢！"  + "<br />");
+            emailTool.sendMessage(addresses,
+                    cardName + "-账号注册",
+                    stringBuilder.toString());
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
 }
