@@ -12,19 +12,17 @@ CREATE TABLE IF NOT EXISTS "card_level" (
   "member_count" int4,
   "is_enable" bool DEFAULT false,
   "is_allow_apply" bool DEFAULT false,
-  "allow_apply_email" varchar(255) ,
+  "allow_email" text ,
+  "allow_email_suffix" varchar(255) ,
   "lock_user_id" varchar(20) ,
   "lock_time" timestamp(6),
   "lock_duration" int4,
-  "lock_version" varchar(255) ,
+  "lock_version" int8 NOT NULL DEFAULT 0,
+  "lock_key" varchar(255) NOT NULL DEFAULT '0',
   CONSTRAINT card_level_pkey PRIMARY KEY (id)
 )
 ;
 
 SELECT * FROM sysdb_add_unique_index('card_level', 'uidx_card_level_card_id_name', 'card_id, name');
-
-
-SELECT * FROM sysdb_add_column('card_level', 'allow_apply_email', 'varchar(255)');
-SELECT * FROM sysdb_add_column('card_level', 'lock_version', 'varchar(255)');
 
 

@@ -27,7 +27,8 @@ public class CardLevel {
     private Boolean isEnable;
 
     private Boolean isAllowApply;
-    private String allowApplyEmail;
+    private String allowEmail;
+    private String allowEmailSuffix;
 
     /**
      * 锁定用户ID，用来锁定对资源包的修改或类似功能的应用
@@ -39,5 +40,6 @@ public class CardLevel {
      */
     private LocalDateTime lockTime;
     private int lockDuration;
-    private String lockVersion;
+    private long lockVersion;
+    private String lockKey;
 }

@@ -46,4 +46,23 @@ public class CardApiController {
         if (haslevels) responseData.putDataMap("levels", result.getT3());
         return responseData;
     }
+
+    @PostMapping("lock")
+    public ResponseData lock(@RequestBody Map<String, Object> params) {
+        Tuple3<Boolean, String, String> result = cardUserService.lock(params);
+        ResponseData responseData = ResponseData.ok();
+        responseData.putDataMap("flag", result.getT1());
+        responseData.putDataMap("key", result.getT2());
+        responseData.putDataMap("msg", result.getT3());
+        return responseData;
+    }
+
+    @PostMapping("unlock")
+    public ResponseData unlock(@RequestBody Map<String, Object> params) {
+        Tuple2<Boolean, String> result = cardUserService.unlock(params);
+        ResponseData responseData = ResponseData.ok();
+        responseData.putDataMap("flag", result.getT1());
+        responseData.putDataMap("msg", result.getT2());
+        return responseData;
+    }
 }

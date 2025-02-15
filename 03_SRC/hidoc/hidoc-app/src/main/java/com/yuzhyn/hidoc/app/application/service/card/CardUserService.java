@@ -3,6 +3,7 @@ package com.yuzhyn.hidoc.app.application.service.card;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
@@ -79,7 +80,7 @@ public class CardUserService {
 
         if (!cardLevel.getIsAllowApply()) return Tuples.of(false, "当前等级不支持自助申请");
 
-        if (!userEmail.contains(cardLevel.getAllowApplyEmail())) return Tuples.of(false, "您的邮箱地址不支持申请");
+        if (!userEmail.contains(cardLevel.getAllowEmailSuffix())) return Tuples.of(false, "您的邮箱地址不支持申请");
 
         // 在level允许自助申请时，如果没有匹配记录，则创建记录
         cardUser = new CardUser();
@@ -139,7 +140,7 @@ public class CardUserService {
         return Tuples.of(true, "登录成功", levels);
     }
 
-    public Tuple2<Boolean, String> lock(Map<String, Object> params) {
+    public Tuple3<Boolean, String, String> lock(Map<String, Object> params) {
         String cardId = MapTool.getString(params, "cardId", "");
         String levelId = MapTool.getString(params, "levelId", "");
         String userEmail = MapTool.getString(params, "userEmail", "");
@@ -151,23 +152,54 @@ public class CardUserService {
                 .eq(CardUser::getCardId, cardId)
                 .eq(CardUser::getUserEmail, userEmail)
                 .eq(CardUser::getUserPassword, userPassword));
-        if (cardLevel == null || cardUser == null) return Tuples.of(false, "账号不存在或密码错误");
+        if (cardLevel == null || cardUser == null) return Tuples.of(false, "", "账号不存在或密码错误");
 
-        if (!cardUser.getLevelIds().contains(cardLevel.getId())) return Tuples.of(false, "账号未开通该等级");
+        if (!cardUser.getLevelIds().contains(cardLevel.getId())) return Tuples.of(false, "", "账号未开通该等级");
 
-        if (!cardLevel.getLockUserId().equals(cardUser.getId()) && !cardLevel.getLockTime().plusSeconds(cardLevel.getLockDuration()).isBefore(now)) {
-            return Tuples.of(false, "当前已由其他用户锁定");
+        if (cardLevel.getLockUserId() != null && cardLevel.getLockTime() != null) {
+            if (!cardLevel.getLockUserId().equals(cardUser.getId()) && !cardLevel.getLockTime().plusSeconds(cardLevel.getLockDuration()).isBefore(now)) {
+                return Tuples.of(false, "", "当前已由其他用户锁定");
+            }
         }
 
-        // 进行锁定
-        String oldLockVersion = cardLevel.getLockVersion();
+        // 记录锁定的相关信息，用来锁定
+        String oldLockKey = cardLevel.getLockKey();
+        String newLockKey = UUIDTool.get();
+        long oldLockVersion = cardLevel.getLockVersion();
+        long newLockVersion = cardLevel.getLockVersion() + 1;
+
         cardLevel.setLockUserId(cardUser.getId());
         cardLevel.setLockTime(now);
         cardLevel.setLockDuration(duration);
-        cardLevel.setLockVersion(UUIDTool.get());
-        if (cardLevelMapper.update(cardLevel, new LambdaQueryWrapper<CardLevel>().eq(CardLevel::getId, levelId).eq(CardLevel::getLockVersion, oldLockVersion)) > 0)
-            return Tuples.of(true, "锁定成功");
+        cardLevel.setLockVersion(newLockVersion);
+        cardLevel.setLockKey(newLockKey);
+        if (cardLevelMapper.update(cardLevel, new LambdaQueryWrapper<CardLevel>()
+                .eq(CardLevel::getId, levelId)
+                .eq(CardLevel::getLockKey, oldLockKey)
+                .eq(CardLevel::getLockVersion, oldLockVersion)) > 0)
+            return Tuples.of(true, newLockKey, "锁定成功");
 
-        return Tuples.of(false, "锁定失败");
+        return Tuples.of(false, "", "锁定失败");
+    }
+
+    public Tuple2<Boolean, String> unlock(Map<String, Object> params) {
+        String levelId = MapTool.getString(params, "levelId", "");
+        String lockKey = MapTool.getString(params, "lockKey", "");
+        CardLevel cardLevel = cardLevelMapper.selectOne(new LambdaQueryWrapper<CardLevel>()
+                .eq(CardLevel::getId, levelId)
+                .eq(CardLevel::getLockKey, lockKey));
+
+        // 进行解锁
+        if (cardLevel != null) {
+            cardLevel.setLockUserId("");
+            cardLevel.setLockTime(LocalDateTime.of(2000, 1, 1, 0, 0));
+            cardLevel.setLockDuration(0);
+            cardLevel.setLockKey("0");
+            if (cardLevelMapper.update(cardLevel, new LambdaQueryWrapper<CardLevel>()
+                    .eq(CardLevel::getId, levelId)
+                    .eq(CardLevel::getLockKey, lockKey)) > 0)
+                return Tuples.of(true, "解锁成功");
+        }
+        return Tuples.of(false, "解锁失败");
     }
 }
