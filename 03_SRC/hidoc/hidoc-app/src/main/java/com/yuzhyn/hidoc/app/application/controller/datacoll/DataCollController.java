@@ -93,6 +93,7 @@ public class DataCollController {
 
                     // 设置保存到es的数据信息
                     if (R.EsTool != null) {
+                        jsonObject.put("ax.stdTime", LocalDateTime.now());
                         jsonObject.put("ax.createTime", createTime);
                         jsonObject.put("ax.dataSource", dataSource);
                         jsonObject.put("ax.clientType", clientType);
