@@ -37,13 +37,13 @@
                         <!-- <el-button size="mini">关系图谱</el-button> -->
                     </el-button-group>
                     <el-button-group style="padding-left: 5px">
-                        <el-button size="small">
+                        <el-button size="small" @click="openUploadFileDialog('')">
                             <el-icon style="padding-right: 3px"><FolderOpened /></el-icon>
                             插入文件
                         </el-button>
                     </el-button-group>
                     <el-button-group style="padding-left: 5px">
-                        <el-button size="small" @click="openUploadDialog()">
+                        <el-button size="small" @click="openUploadFileDialog('video')">
                             <el-icon style="padding-right: 3px"><VideoPlay /></el-icon>
                             插入视频
                         </el-button>
@@ -151,11 +151,11 @@
             </template>
         </el-dialog>
 
-        <el-dialog :title="上传文件" v-model="dialogUploadVisible">
-            <video-file-upload v-bind:uploadDataParams="uploadDataParams" :callback="uploadCallback" ref="videoFileUpload"></video-file-upload>
+        <el-dialog :title="上传文件" v-model="uploadSet.dialogVisible">
+            <doc-file-upload v-bind:uploadDataParams="uploadSet.uploadDataParams" :callback="uploadCallback" ref="docFileUpload"></doc-file-upload>
             <template #footer>
                 <span class="dialog-footer">
-                    <el-button type="primary" @click="dialogUploadVisible = false">完 成</el-button>
+                    <el-button type="primary" @click="uploadSet.dialogVisible = false">完 成</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -175,7 +175,7 @@
 
 <script>
 import { ElMessage, ElMessageBox } from 'element-plus';
-import VideoFileUpload from './VideoFileUpload';
+import DocFileUpload from './DocFileUpload';
 import request from '../../../utils/request.js';
 import { config } from '@/utils/config';
 import { mdFormat } from '../../../utils/mdtools';
@@ -233,9 +233,11 @@ export default {
             operationStatus: true,
             loadStatus: 'create',
             createMode: '',
-            dialogUploadVisible: false,
-            uploadDataParams: {
-                bucketName: '.hidoc'
+            uploadSet: {
+                dialogVisible: false,
+                uploadDataParams: {
+                    bucketName: '.hidoc'
+                }
             },
             lockUser: {}
         };
@@ -306,7 +308,7 @@ export default {
             // 标记当前页面为活动状态
             this.loadStatus = 'active';
             this.collected = res.meta.collected;
-            this.uploadDataParams.collectedId = this.collected.id;
+            this.uploadSet.uploadDataParams.collectedId = this.collected.id;
 
             switch (docId) {
                 case '_create':
@@ -395,7 +397,7 @@ export default {
             });
         }
     },
-    components: { VideoFileUpload },
+    components: { DocFileUpload },
     methods: {
         heartbeat() {
             return request({
@@ -439,26 +441,65 @@ export default {
             });
         },
         uploadCallback(files) {
-            console.log(files);
+            debugger;
             if (files) {
                 for (let i = 0; i < files.length; i++) {
-                    this.$refs.editor.insert(selected => {
-                        const prefix = '<video width="600" controls="controls" src="#hd.uname://';
-                        const suffix = '"></video>';
-                        const content = selected || files[i].uname;
+                    // 根据文件名，获取文件后缀
+                    const fileName = files[i].fileName;
+                    const uname = files[i].uname;
+                    const id = files[i].id;
+                    const fileSuffix = fileName.substring(fileName.lastIndexOf('.') + 1);
 
-                        return {
-                            // 要插入的文本
-                            text: `${prefix}${content}${suffix}`
-                        };
-                    });
+                    // 根据不同后缀的文件类型，扩展不同的显示方式
+                    switch (fileSuffix) {
+                        case 'mp4':
+                            {
+                                this.$refs.editor.insert(selected => {
+                                    const prefix = '<video width="600" controls="controls" src="#hd.uname://';
+                                    const suffix = '"></video>';
+                                    const content = selected || uname;
+
+                                    return {
+                                        // 要插入的文本
+                                        text: `${prefix}${content}${suffix}`
+                                    };
+                                });
+                            }
+                            break;
+                        case 'doc':
+                        case 'docx':
+                        case 'xls':
+                        case 'xlsx':
+                        case 'ppt':
+                        case 'pptx':
+                        case 'pdf':
+                        case 'txt':
+                        case 'zip':
+                        case 'rar':
+                        case '7z':
+                        default:
+                            {
+                                this.$refs.editor.insert(selected => {
+                                    const prefix = `<div data-hd-file="${id}">`;
+                                    const suffix = `</div>`;
+                                    const content = selected || fileName;
+
+                                    return {
+                                        // 要插入的文本
+                                        text: `${prefix}${content}${suffix}`
+                                    };
+                                });
+                            }
+                            break;
+                    }
                 }
             }
         },
         // 打开上传文件窗口
-        openUploadDialog() {
-            this.dialogUploadVisible = true;
-            this.$refs['videoFileUpload'].openPanel();
+        openUploadFileDialog(fileType) {
+            this.uploadSet.dialogVisible = true;
+            this.uploadSet.uploadDataParams.fileType = fileType;
+            this.$refs['docFileUpload'].openPanel();
         },
         // handleClose(tag) {
         //     this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1);
@@ -663,8 +704,6 @@ export default {
             //             let inCodeBlock = false;
             //             _(contentArray).forEach(function (value) {
             //                 if(value.startsWith('```')) includes = true;
-
-
             //                 console.log(value);
             //             });
             //         }

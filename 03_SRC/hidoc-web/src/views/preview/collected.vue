@@ -565,7 +565,7 @@ export default {
                     this.isShowTitle = _titleDefaultSame;
 
                     // 预览前对文本进行处理，然后再渲染预览
-                    this.doc.content = mdFormat(this.doc.content);
+                    this.doc.content = mdFormat(this.doc.content, res.meta);
 
                     document.title = this.doc.title;
                     this.contributors = [];

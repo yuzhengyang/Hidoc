@@ -3,13 +3,19 @@ package com.yuzhyn.hidoc.app.application.controller.doc;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
+import com.yuzhyn.azylee.core.datas.regexs.RegexTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.*;
+import com.yuzhyn.hidoc.app.application.entity.file.File;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLiteOnline;
 import com.yuzhyn.hidoc.app.application.mapper.doc.*;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineStatusLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
+import com.yuzhyn.hidoc.app.application.model.doc.DocLinkVo;
 import com.yuzhyn.hidoc.app.application.service.DocAccessLogService;
 import com.yuzhyn.hidoc.app.application.service.doc.DocParseService;
 import com.yuzhyn.hidoc.app.common.enums.ResponseCode;
@@ -79,6 +85,12 @@ public class DocController {
 
     @Autowired
     DocCommentMapper docCommentMapper;
+
+    @Autowired
+    FileMapper fileMapper;
+
+    @Autowired
+    FileCursorMapper fileCursorMapper;
 
     @PostMapping("get")
     public ResponseData get(@RequestBody Map<String, Object> params) {
@@ -199,6 +211,32 @@ public class DocController {
                 // 阅读人员列表
                 List<Map> readUserList = docAccessLogMapper.readerList(doc.getId());
                 responseData.putDataMap("readUserList", readUserList);
+
+                // 解析文档中的文件连接内容，并查询相关信息返回，格式为：<div data-hd-file="101640650151165952">文件名称</div>
+                Map<String, Map<String, Object>> docFileMap = new HashMap<>();
+                if (StringTool.ok(doc.getContent())) {
+                    // 根据 <div data-hd-file="101640650151165952">文件名称</div> 进行正则匹配
+                    String docFileKey = "data-hd-file=\"";
+                    List<String> cursorIdList = RegexTool.getMatchs(doc.getContent(), "<div data-hd-file=\".*?\">.*?</div>");
+                    if (ListTool.ok(cursorIdList)) {
+                        for (String item : cursorIdList) {
+                            int docFileIdBeg = item.indexOf(docFileKey) + docFileKey.length();
+                            int docFileIdEnd = item.indexOf("\"", docFileIdBeg);
+                            String cursorId = item.substring(docFileIdBeg, docFileIdEnd);
+                            FileCursor fileCursor = fileCursorMapper.selectById(cursorId);
+                            if (fileCursor != null) {
+                                File file = fileMapper.selectById(fileCursor.getFileId());
+                                if (file != null && fileCursor != null) {
+                                    Map<String, Object> map = new HashMap<>();
+                                    map.put("file", file);
+                                    map.put("fileCursor", fileCursor);
+                                    docFileMap.put(cursorId, map);
+                                }
+                            }
+                        }
+                    }
+                }
+                responseData.putDataMap("docFileMap", docFileMap);
 
                 return responseData;
             }
