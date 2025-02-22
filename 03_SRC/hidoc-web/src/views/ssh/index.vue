@@ -38,7 +38,7 @@
                                 <span style="color: #888; font-size: 14px">{{ item.description }}</span>
                             </div>
                             <div v-if="item.teamExecuteList.length > 0" style="padding: 10px">
-                                <el-tag v-for="team in item.teamExecuteList" :key="team.id" type="success" size="small">{{ team.name }}</el-tag>
+                                <el-tag style="margin-right: 5px; cursor: pointer" v-for="team in item.teamExecuteList" :key="team.id" type="success" size="small">{{ team.name }}</el-tag>
                             </div>
                         </template>
                     </el-card>
