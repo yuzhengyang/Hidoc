@@ -1,4 +1,9 @@
 
+INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('app', 'name', 'HIDOC', '必填，应用名称', 1) ON CONFLICT ("item","key") DO NOTHING;
+INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('app', 'cn-name', 'HIDOC文档', '必填，应用中文名称', 2) ON CONFLICT ("item","key") DO NOTHING;
+
+
+
 INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('elastic', 'enable', '1', '必填，是否启用elastic，启用数据收集和日志收集能力', 1) ON CONFLICT ("item","key") DO NOTHING;
 INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('elastic', 'hosts', 'https://www.youaddress.com:9999', '可选，服务地址', 2) ON CONFLICT ("item","key") DO NOTHING;
 INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('elastic', 'username', 'elastic', '可选，账号', 3) ON CONFLICT ("item","key") DO NOTHING;

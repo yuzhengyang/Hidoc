@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS public.sys_user (
 	create_time timestamp NULL,
 	update_time timestamp NULL,
 	"password" varchar(255) NULL,
+	"totp_seed" varchar(255) NULL,
+	"totp_create_time" timestamp NULL,
 	is_frozen bool NULL,
 	online_time timestamp NULL,
 	login_time timestamp NULL,
@@ -24,6 +26,8 @@ SELECT * FROM sysdb_add_column('sys_user', 'online_time', 'timestamp NULL');
 SELECT * FROM sysdb_add_column('sys_user', 'login_time', 'timestamp NULL');
 SELECT * FROM sysdb_add_column('sys_user', 'vip_level', 'int4');
 SELECT * FROM sysdb_add_column('sys_user', 'roles', 'jsonb NULL');
+SELECT * FROM sysdb_add_column('sys_user', 'totp_seed', 'varchar(255) NULL');
+SELECT * FROM sysdb_add_column('sys_user', 'totp_create_time', 'timestamp NULL');
 
 
 SELECT * FROM sysdb_add_unique_index('sys_user', 'uidx_sys_user_name', '"name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST');
