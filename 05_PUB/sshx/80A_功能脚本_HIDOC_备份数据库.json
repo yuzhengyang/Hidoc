@@ -5,7 +5,7 @@
     ["wait", "2"],
     ["cmd", "cd /appdata/hidoc/app"],
     ["cmd", "sh ./db-backup-hidoc.sh"],
-    ["wait", "60"],
+    ["wait", "120"],
     ["downfile", "/appdata/hidoc/app/db-backup-hidoc.sql", "\\备份数据库文件\\db-backup-hidoc.sql"]
   ]
 }
