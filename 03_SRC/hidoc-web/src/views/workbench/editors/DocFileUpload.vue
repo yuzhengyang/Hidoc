@@ -91,10 +91,10 @@ export default {
                 return false;
             }
 
-            const isLt2M = file.size / 1024 / 1024 < 1024;
+            const isLt10G = file.size / 1024 / 1024 < 1024; // updated limit to 10 GB
 
-            if (!isLt2M) {
-                this.$message.error('上传文件大小不能超过 1024MB');
+            if (!isLt10G) {
+                this.$message.error('上传文件大小不能超过 1 GB');
                 return false;
             }
         },

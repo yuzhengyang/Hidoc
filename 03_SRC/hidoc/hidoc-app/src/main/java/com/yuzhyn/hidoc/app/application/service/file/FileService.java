@@ -101,6 +101,7 @@ public class FileService {
      * @return
      */
     public List<FileCursor> uploadFiles(String collectedId, LocalDateTime expiryTime, String bucketName, MultipartFile[] files, SysUser curUser) {
+        log.info("上传文件");
         List<FileCursor> sysFileList = new ArrayList<>();
         if (null == bucketName) bucketName = UUIDTool.get();
         if (null == expiryTime) expiryTime = LocalDateTimeTool.max();
@@ -113,6 +114,7 @@ public class FileService {
                     File existFile = null;
                     if (saveToDisk.getT2()) existFile = saveToDisk.getT3();
                     if (saveToDisk.getT1()) {
+                        log.info("保存文件到磁盘成功，现在将保存到数据库记录信息");
                         FileCursor cursor = saveDb(sysFile, existFile, bucketName, collectedId, expiryTime);
                         if (cursor != null) sysFileList.add(cursor);
                     }
@@ -149,6 +151,7 @@ public class FileService {
                 sysFile.setIsDelete(false);
                 sysFile.setIsClean(false);
                 sysFile.setDownloadCount(0L);
+                log.info("创建文件实体，文件名称为：" + fileName);
                 return sysFile;
             }
         }
@@ -168,6 +171,7 @@ public class FileService {
         try {
             // 存储文件到临时文件夹
             java.io.File dest = new java.io.File(DirTool.combine(R.Paths.SysFileTemp, sysFile.getId().toString()));
+            log.info("存储文件到临时文件夹：" + dest.getAbsolutePath());
             file.transferTo(dest);
             sysFile.setMd5(FileCharCodeTool.md5(dest));
             sysFile.setSha1(FileCharCodeTool.sha1(dest));
@@ -179,6 +183,7 @@ public class FileService {
                     .eq(File::getSize, sysFile.getSize()));
             // 查询到已经有相同文件，重置文件实体类
             if (record != null) {
+                log.info("查询到已经有相同文件，删除本次上传的文件，减少空间占用");
                 FileTool.delete(DirTool.combine(R.Paths.SysFileTemp, sysFile.getId().toString()));
                 return Tuples.of(true, true, record);
             }
@@ -191,6 +196,7 @@ public class FileService {
             String target = DirTool.combine(R.Paths.SysFile, path);
             boolean fileMoveFlag = FileTool.move(source, target);
             if (fileMoveFlag) {
+                log.info("文件移动成功，文件名称为：" + sysFile.getName());
                 return Tuples.of(true, false, new File());
             }
         } catch (Exception ex) {
