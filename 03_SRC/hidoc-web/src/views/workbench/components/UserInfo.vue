@@ -62,6 +62,8 @@
                     </el-form>
                 </el-col>
             </el-row>
+
+            <canvas ref="qrCodeCanvas"></canvas>
         </el-tab-pane>
         <el-tab-pane label="登录设备">
             <el-row style="padding: 50px">
@@ -121,6 +123,28 @@
                 </el-col>
             </el-row>
         </el-tab-pane>
+        <el-tab-pane label="动态口令">
+            <el-row>
+                <el-col :span="12">
+                    <p>‌TOTP（Time-based One-Time Password）是一种基于时间同步的一次性密码算法‌。</p>
+                    <p>它通过客户端和服务器之间的时间比对，每60秒或30秒生成一个新的密码，确保了密码的动态性和不可预测性，从而提高了安全性‌。</p>
+                    <p></p>
+                    <el-button @click="generateTotpQrCode">生成动态口令绑定二维码</el-button>
+                    <p></p>
+                    <p><el-text type="danger">注意：</el-text></p>
+                    <p><el-text type="danger">生成后，上一次的二维码将自动失效</el-text></p>
+                    <p><el-text type="danger">二维码仅显示一次，请扫码完成绑定</el-text></p>
+                    <p><el-text type="danger">可使用支持TOTP的应用扫描（如：Microsoft Authenticator）</el-text></p>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="12">
+                    <div v-if="totpUri.length > 0">
+                        <qrcode-vue :value="totpUri" size="200" level="H" render-as="svg" />
+                    </div>
+                </el-col>
+            </el-row>
+        </el-tab-pane>
     </el-tabs>
 </template>
 
@@ -130,6 +154,8 @@ import request from '../../../utils/request.js';
 import { avatarImage } from '../../../utils/users.js';
 import { config } from '@/utils/config';
 import { getToken } from '@/utils/auth';
+import QrcodeVue from 'qrcode.vue';
+
 export default {
     data() {
         return {
@@ -137,8 +163,12 @@ export default {
             fileUploadUrl: '',
             user: {},
             fileConf: {},
-            tableData: []
+            tableData: [],
+            totpUri: ''
         };
+    },
+    components: {
+        QrcodeVue
     },
     mounted() {
         this.headers['Access-Token'] = getToken();
@@ -222,6 +252,28 @@ export default {
                     });
                 }
                 this.getLoginUserInfo();
+            });
+        },
+        generateTotpQrCode() {
+            request({
+                url: '/user/createTotpUri',
+                method: 'post',
+                data: { type: 'totp' }
+            }).then(res => {
+                if (res.code == 0 && res.meta && res.meta.uri) {
+                    this.totpUri = res.meta.uri;
+                    ElMessage({
+                        message: '生成成功',
+                        type: 'success',
+                        duration: 5 * 1000
+                    });
+                } else {
+                    ElMessage({
+                        message: '生成失败',
+                        type: 'warning',
+                        duration: 5 * 1000
+                    });
+                }
             });
         }
     }

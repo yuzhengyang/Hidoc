@@ -31,9 +31,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public final class R {
 
-    public static final String AppName = "Hidoc";
-    public static final String AppNameCH = "Hidoc文档";
-    public static final String AppNameCHShort = "文档";
+    public static String AppName = "Hidoc";
+    public static String AppNameCn = "Hidoc文档";
     public static final String AppId = "";
     public static final LocalDateTime StartTime = LocalDateTime.now();
     public static String MachineId = "";

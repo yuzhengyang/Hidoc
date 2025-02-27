@@ -109,6 +109,13 @@ public class AppLiveManager {
         log.info("********** 加载全部配置选项 **********");
         List<AppConf> appConfList = appConfMapper.selectList(null);
 
+        log.info("********** 加载应用信息 **********");
+        R.AppName = MapTool.getString(AppConf.toMap(appConfList, "app"), "name", R.AppName);
+        R.AppNameCn = MapTool.getString(AppConf.toMap(appConfList, "app"), "name-cn", R.AppNameCn);
+
+        log.info("AppName: " + R.AppName);
+        log.info("AppNameCn: " + R.AppNameCn);
+
         log.info("********** 加载通知邮箱配置 **********");
         R.Maps.emailConfig = AppConf.toMap(appConfList, "notice-email");
 

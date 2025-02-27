@@ -39,6 +39,10 @@ public class SysUser {
 
     private Integer vipLevel;
 
+    private String totpSeed;
+
+    private LocalDateTime totpCreateTime;
+
     @TableField(typeHandler = JsonbTypeHandler.class)
     private JSONArray roles;
 }

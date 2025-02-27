@@ -3,7 +3,7 @@
         <el-main>
             <el-row class="login-main">
                 <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
-                    <div class="grid-content" style="text-align: center; cursor: pointer;margin-top: 50px;" @click="home">
+                    <div class="grid-content" style="text-align: center; cursor: pointer; margin-top: 50px" @click="home">
                         <img alt="logo" src="../..//assets/logo.png" width="96" />
                         <div style="height: 150px">
                             <div style="text-align: center; font-weight: bold">hidoc</div>
@@ -17,6 +17,9 @@
                         </el-form-item>
                         <el-form-item label="密码" prop="password">
                             <el-input id="password" type="password" v-model="form.password" maxlength="64" autocomplete="off" placeholder="请输入您的密码"></el-input>
+                        </el-form-item>
+                        <el-form-item label="验证码" prop="totpcode">
+                            <verification-code :callback="totpCallback" />
                         </el-form-item>
                         <el-form-item>
                             <el-button type="primary" @click="onSubmit()" style="width: 200px">登录</el-button>
@@ -78,17 +81,20 @@
 import { ref, watch } from 'vue';
 import request from '../../utils/request.js';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import VerificationCode from '../../components/VerificationCode.vue';
+
 export default {
     data() {
         return {
             resetPasswordDialogVisible: false,
             form: {
                 username: '',
-                password: ''
+                password: '',
+                totpcode: ''
             },
             rules: {
-                username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
-                password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+                username: [{ required: true, message: '请输入账号', trigger: 'blur' }]
+                // password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
             },
             resetPasswordForm: {
                 username: '',
@@ -99,6 +105,9 @@ export default {
                 passwordConfirm: ''
             }
         };
+    },
+    components: {
+        VerificationCode
     },
     setup() {},
     mounted() {
@@ -124,10 +133,10 @@ export default {
             this.$router.push({ path: '/register', params: {} });
         },
         onSubmit() {
-            console.log('submit!');
+            console.log('login form check');
             this.$refs.loginForm.validate(valid => {
                 if (valid) {
-                    // alert('submit!');
+                    console.log('login submit');
                     // this.loading = true;
                     console.log(this.$route);
                     let redirectSign = 'redirect=';
@@ -187,6 +196,14 @@ export default {
                     this.resetPasswordDialogVisible = false;
                 }
             });
+        },
+        totpCallback(code) {
+            this.form.totpcode = code;
+            console.log(`totpcode is: ${code}`);
+            // 如果收到了6位的验证码，则登录
+            if(this.form.totpcode.length === 6) {
+                this.onSubmit();
+            }
         }
     }
 };

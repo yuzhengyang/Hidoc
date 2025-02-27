@@ -1,6 +1,6 @@
 
 INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('app', 'name', 'HIDOC', '必填，应用名称', 1) ON CONFLICT ("item","key") DO NOTHING;
-INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('app', 'cn-name', 'HIDOC文档', '必填，应用中文名称', 2) ON CONFLICT ("item","key") DO NOTHING;
+INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('app', 'name-cn', 'HIDOC文档', '必填，应用中文名称', 2) ON CONFLICT ("item","key") DO NOTHING;
 
 
 

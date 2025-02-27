@@ -33,6 +33,7 @@ import com.yuzhyn.hidoc.app.application.service.file.FileBucketService;
 import com.yuzhyn.hidoc.app.application.service.sys.AuthCodeService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
+import com.yuzhyn.hidoc.app.utils.TOTPGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -208,59 +209,73 @@ public class UserController {
      */
     @PostMapping("login")
     public ResponseData login(@RequestBody Map<String, Object> params) {
-        if (MapTool.ok(params, "username", "password")) {
-            String username = MapTool.get(params, "username", "").toString();
-            String password = MapTool.get(params, "password", "").toString();
+        String username = MapTool.get(params, "username", "").toString();
+        String password = MapTool.get(params, "password", "").toString();
+        String totpcode = MapTool.get(params, "totpcode", "").toString();
 
-            // 如果输入的账号包括@字符，则认为是使用了邮箱进行登录，通过邮箱查询对应的账号来登录
-            if (username.contains("@")) {
-                List<SysUser> emailUsers = sysUserMapper.selectList(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, username));
-                if (ListTool.ok(emailUsers)) {
-                    username = emailUsers.get(0).getName();
-                }
-            }
+        if (!StringTool.ok(username)) return ResponseData.error("登录失败，账号不正确");
+        if(!StringTool.ok(password) && !StringTool.ok(totpcode)) return ResponseData.error("登录失败，密码或验证码没有输入");
 
+        // 先根据邮箱查询用户信息，如果没有再根据用户名查询
+        SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, username));
+        if (user == null) user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getName, username));
+        if (user == null) return ResponseData.error("邮箱不存在");
+
+        if (StringTool.ok(totpcode) && totpcode.length() == 6) {
+
+            // 使用动态口令进行登录
+            if (!StringTool.ok(user.getTotpSeed())) return ResponseData.error("账号未设置动态口令");
+            if (user.getTotpCreateTime() == null) return ResponseData.error("账号动态口令未生效");
+            String userId = user.getId();
+            String seed = user.getTotpSeed();
+            LocalDateTime totpCreateTime = user.getTotpCreateTime();
+            String secret = TOTPGenerator.generateSecret(userId, seed, DateTimeFormat.toStr(totpCreateTime));
+            if (!TOTPGenerator.generateNumber(secret, 30, 6).equals(totpcode)) return ResponseData.error("验证码错误");
+            // 验证成功，设置用户为登录状态
+            return loginAfterCheck(user);
+
+        } else if (StringTool.ok(password)) {
+
+            // 使用密码进行登录
             // password 要设置加密后的字符串，0除外，0为重置密码，允许直接登录
             if (!password.equals("0")) password = MixdeTool.md5Mix(username, password);
-            String pwdParam = password;
+            if(!user.getPassword().equals(password))return ResponseData.error("登录失败，账号或密码不正确");
+            // 验证成功，设置用户为登录状态
+            return loginAfterCheck(user);
 
-            LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<SysUser>().eq(SysUser::getName, username);
-            wrapper.and(p -> p.eq(SysUser::getPassword, pwdParam).or().eq(SysUser::getPassword, pwdParam));
-            SysUser user = sysUserMapper.selectOne(wrapper);
-
-            if (user != null) {
-
-                user.setLoginTime(LocalDateTime.now());
-                sysUserMapper.updateById(user);
-
-                // 判断账号是否冻结
-                if (user.getIsFrozen()) {
-                    return ResponseData.error("账号为冻结状态，新注册账号请联系管理员启用。");
-                }
-
-                user.setPassword("");
-                ResponseData rs = ResponseData.okData("sysUser", user);
-                SysUserFileConf conf = sysUserFileConfMapper.selectById(user.getId());
-                rs.putDataMap("sysUserFileConf", conf);
-
-                // 登录成功后，缓存登录用户信息数据
-                UserInfo userInfo = new UserInfo();
-                userInfo.setUser(user);
-                userInfo.setUserFileConf(conf);
-                userInfo.setToken(UUIDTool.get());
-                userInfo.setIp(CurrentUserManager.ip.get());
-                userInfo.setLoginTime(LocalDateTime.now());
-                userInfo.setExpiryTime(LocalDateTime.now().plusHours(8));
-                R.Caches.UserInfo.put(userInfo.getToken(), userInfo);
-                UserInfo userinfoCache = R.Caches.UserInfo.getIfPresent(userInfo.getToken());
-
-                // 登录成功根据个人通知配置，发送登录通知信息到邮箱
-
-                rs.setToken(userInfo.getToken());
-                return rs;
-            }
         }
         return ResponseData.error("登录失败，账号或密码不正确");
+    }
+
+    private ResponseData loginAfterCheck(SysUser user) {
+        user.setLoginTime(LocalDateTime.now());
+        sysUserMapper.updateById(user);
+
+        // 判断账号是否冻结
+        if (user.getIsFrozen()) {
+            return ResponseData.error("账号为冻结状态，新注册账号请联系管理员启用。");
+        }
+
+        user.setPassword("");
+        ResponseData rs = ResponseData.okData("sysUser", user);
+        SysUserFileConf conf = sysUserFileConfMapper.selectById(user.getId());
+        rs.putDataMap("sysUserFileConf", conf);
+
+        // 登录成功后，缓存登录用户信息数据
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUser(user);
+        userInfo.setUserFileConf(conf);
+        userInfo.setToken(UUIDTool.get());
+        userInfo.setIp(CurrentUserManager.ip.get());
+        userInfo.setLoginTime(LocalDateTime.now());
+        userInfo.setExpiryTime(LocalDateTime.now().plusHours(8));
+        R.Caches.UserInfo.put(userInfo.getToken(), userInfo);
+        UserInfo userinfoCache = R.Caches.UserInfo.getIfPresent(userInfo.getToken());
+
+        // 登录成功根据个人通知配置，发送登录通知信息到邮箱
+        // 暂定
+        rs.setToken(userInfo.getToken());
+        return rs;
     }
 
     /**
@@ -511,6 +526,34 @@ public class UserController {
         }
         return ResponseData.okData(list);
     }
+
+    /**
+     * 创建用户的TOTP的URI
+     * 重复创建将替换掉之前的TOTP信息
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("createTotpUri")
+    public ResponseData createTotpUri(@RequestBody Map<String, Object> params) {
+        String userId = CurrentUserManager.getUser().getId();
+        String seed = UUIDTool.get();
+        LocalDateTime now = LocalDateTime.now();
+        String secret = TOTPGenerator.generateSecret(userId, seed, DateTimeFormat.toStr(now));
+
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user != null) {
+            user.setTotpSeed(seed);
+            user.setTotpCreateTime(now);
+            int flag = sysUserMapper.updateById(user);
+            if (flag > 0) {
+                String uri = TOTPGenerator.generateUri(R.AppNameCn, user.getRealName(), secret, 6, 30);
+                return ResponseData.okData("uri", uri);
+            }
+        }
+        return ResponseData.ok();
+    }
+
 
     @PostMapping("setAdmin")
     public ResponseData setAdmin(@RequestBody Map<String, Object> params) {
