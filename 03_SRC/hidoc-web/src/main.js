@@ -6,6 +6,7 @@ import 'element-plus/dist/index.css';
 import App from './App.vue';
 import router from './router';
 import store from './store';
+import i18n from './i18n';
 
 import VMdEditor from '@kangc/v-md-editor/lib/codemirror-editor';
 import '@kangc/v-md-editor/lib/style/codemirror-editor.css';
@@ -108,6 +109,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 const app = createApp(App);
 app.use(router);
 app.use(store);
+app.use(i18n);
 app.use(ElementPlus);
 app.use(VMdEditor);
 app.use(VMdPreview);

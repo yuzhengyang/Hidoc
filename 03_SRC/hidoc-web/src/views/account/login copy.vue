@@ -10,35 +10,20 @@
                         </div>
                     </div>
                 </el-col>
-                <el-col :xs="24" :sm="12" :md="10" :lg="10" :xl="10">
-                    <el-tabs v-model="activeName">
-                        <el-tab-pane label="邮箱登录" name="first" style="padding: 10px; height: 250px">
-                            <el-form ref="loginForm" :model="form" :rules="rules" status-icon label-width="80px">
-                                <el-row><el-row :span="24" class="login-form-label">邮箱</el-row></el-row>
-                                <div style="width: 300px">
-                                    <el-input id="username" v-model="form.username" maxlength="64" placeholder="请输入邮箱或账号"></el-input>
-                                </div>
-                                <el-row><el-row :span="24" class="login-form-label">密码</el-row></el-row>
-                                <div style="width: 300px">
-                                    <el-input id="password" type="password" v-model="form.password" maxlength="64" autocomplete="off" placeholder="请输入您的密码"></el-input>
-                                </div>
-                                <div style="width: 300px; margin-top: 30px">
-                                    <el-button type="primary" @click="onSubmit()" style="width: 200px">{{ $t('login') }}</el-button>
-                                </div>
-                            </el-form>
-                        </el-tab-pane>
-                        <el-tab-pane label="动态码登录" name="second" style="padding: 10px; height: 250px">
-                            <el-form ref="loginForm" :model="form" :rules="rules" status-icon label-width="80px">
-                                <el-row><el-row :span="24" class="login-form-label">邮箱</el-row></el-row>
-                                <div style="width: 300px">
-                                    <el-input id="username" v-model="form.username" maxlength="64" placeholder="请输入邮箱或账号"></el-input>
-                                </div>
-                                <el-row><el-row :span="24" class="login-form-label">动态码</el-row></el-row>
-                                <verification-code :callback="totpCallback" />
-                            </el-form>
-                        </el-tab-pane>
-                    </el-tabs>
+                <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
                     <el-form ref="loginForm" :model="form" :rules="rules" status-icon label-width="80px">
+                        <el-form-item label="账号" prop="username">
+                            <el-input id="username" v-model="form.username" maxlength="64" placeholder="请输入账号或邮箱"></el-input>
+                        </el-form-item>
+                        <el-form-item label="密码" prop="password">
+                            <el-input id="password" type="password" v-model="form.password" maxlength="64" autocomplete="off" placeholder="请输入您的密码"></el-input>
+                        </el-form-item>
+                        <el-form-item label="验证码" prop="totpcode">
+                            <verification-code :callback="totpCallback" />
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="onSubmit()" style="width: 200px">登录</el-button>
+                        </el-form-item>
                         <el-form-item>
                             <el-button type="text" @click="back">
                                 <i class="el-icon-back"></i>
@@ -101,7 +86,6 @@ import VerificationCode from '../../components/VerificationCode.vue';
 export default {
     data() {
         return {
-            activeName: 'first',
             resetPasswordDialogVisible: false,
             form: {
                 username: '',
@@ -217,7 +201,7 @@ export default {
             this.form.totpcode = code;
             console.log(`totpcode is: ${code}`);
             // 如果收到了6位的验证码，则登录
-            if (this.form.totpcode.length === 6) {
+            if(this.form.totpcode.length === 6) {
                 this.onSubmit();
             }
         }
@@ -240,12 +224,5 @@ export default {
     text-align: center;
     margin-left: 60px;
     margin-right: 60px;
-}
-.login-form-label {
-    font-size: 14px;
-    font-weight: bold;
-    color: #aaaaaa;
-    padding-top: 20px;
-    padding-bottom: 10px;
 }
 </style>

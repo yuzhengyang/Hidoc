@@ -45,7 +45,7 @@
                 <div v-else class="grid-content">
                     <el-link :underline="false" @click="workbench" style="font-size: 12px">
                         <el-icon><Monitor /></el-icon>
-                        <span>&nbsp;工作台</span>
+                        <span>&nbsp;{{ $t('workbench') }}</span>
                     </el-link>
                     <el-link :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
                     <el-dropdown style="vertical-align: middle; z-index: 99999 !important">
@@ -57,9 +57,13 @@
                         <template #dropdown>
                             <el-dropdown-menu>
                                 <el-dropdown-item>😀 hi~ {{ this.$store.state.user.name }}</el-dropdown-item>
+                                <el-dropdown-item @click="changeLocale">
+                                    <el-icon><Orange /></el-icon>
+                                    {{ $t('changeLanguage') }}
+                                </el-dropdown-item>
                                 <el-dropdown-item @click="changePasswordDialogVisible = true">
                                     <el-icon><Key /></el-icon>
-                                    修改密码
+                                    {{ $t('changePassword') }}
                                 </el-dropdown-item>
                                 <el-dropdown-item @click="logout">
                                     <el-icon><CircleClose /></el-icon>
@@ -124,10 +128,18 @@ export default {
         };
     },
     mounted() {
+        // 从localStorage中获取locale
+        const locale = localStorage.getItem('locale');
+        if (locale) {
+            this.$i18n.locale = locale;
+        }
+
         this.getHomeFunctionCode();
 
         var user = this.$store.state.user;
+        console.log('user info is: ');
         console.log(user);
+
         if (user && user.realName && user.email) {
             watermark.set(user.realName, user.email);
         }
@@ -140,6 +152,19 @@ export default {
     },
     created() {},
     methods: {
+        changeLocale() {
+            const i18n = this.$i18n;
+            console.log(`Locale now is: ${i18n.locale}`);
+            if (i18n.locale === 'zh') {
+                i18n.locale = 'en';
+            } else {
+                i18n.locale = 'zh';
+            }
+            // 保存到localStorage
+            localStorage.setItem('locale', i18n.locale);
+
+            // this.$forceUpdate();
+        },
         getHomeFunctionCode() {
             return request({
                 url: '/openapi/appconf/function',

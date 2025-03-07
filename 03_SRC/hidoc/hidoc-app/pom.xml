@@ -20,6 +20,8 @@
         <druid.version>1.2.15</druid.version>
         <postgresql.version>42.7.5</postgresql.version>
         <poi.version>5.2.3</poi.version>
+        <hutool.version>5.8.26</hutool.version>
+        <zxing.version>3.4.1</zxing.version>
     </properties>
 
     <dependencies>
@@ -222,9 +224,14 @@
         <dependency>
             <groupId>com.google.zxing</groupId>
             <artifactId>javase</artifactId>
-            <version>3.4.1</version>
+            <version>${zxing.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>

@@ -3,7 +3,7 @@
         <el-main>
             <el-row class="login-main">
                 <el-col :xs="24" :sm="10" :md="10" :lg="10" :xl="10">
-                    <div class="grid-content" style="text-align: center; cursor: pointer;margin-top: 50px;" @click="home">
+                    <div class="grid-content" style="text-align: center; cursor: pointer; margin-top: 50px" @click="home">
                         <img alt="logo" src="../..//assets/logo.png" width="96" />
                         <div style="height: 50px">
                             <div style="text-align: center; font-weight: bold">hidoc</div>
@@ -32,13 +32,20 @@
                             </el-row>
                         </el-popover>
                     </div>
-                    <el-form ref="form" :model="form" :rules="rules" status-icon label-width="130px">
+                    <el-form ref="form" :model="form" :rules="rules" status-icon label-width="80px">
                         <el-form-item label="头像" v-show="false">
                             <el-input v-model="form.avatar" maxlength="64"></el-input>
                         </el-form-item>
-                        <el-form-item label="登录账号" prop="username">
-                            <el-input id="username" v-model="form.username" maxlength="64" placeholder="请输入姓名拼音或工号，至少6位，可使用字母数字下划线"></el-input>
-                        </el-form-item>
+                        <el-space fill>
+                            <el-alert type="info" show-icon :closable="false">
+                                <span>账号可输入6位以上字母、数字或下划线</span>
+                                <br />
+                                <span>用于用户个性化URL和个人目录的设置</span>
+                            </el-alert>
+                            <el-form-item label="账号" prop="username">
+                                <el-input id="username" v-model="form.username" maxlength="64" placeholder="请输入账号"></el-input>
+                            </el-form-item>
+                        </el-space>
                         <el-form-item label="姓名" prop="realname">
                             <el-input v-model="form.realname" maxlength="16" placeholder="请输入您的姓名，中文名"></el-input>
                         </el-form-item>
