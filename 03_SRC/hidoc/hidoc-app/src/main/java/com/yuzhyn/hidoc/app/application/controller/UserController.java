@@ -15,6 +15,7 @@ import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocCollected;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocLite;
 import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLogin;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocCollectedMapper;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocLiteMapper;
@@ -27,10 +28,12 @@ import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteOnlineMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLoginMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserMapper;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.application.service.file.FileBucketService;
 import com.yuzhyn.hidoc.app.application.service.sys.AuthCodeService;
+import com.yuzhyn.hidoc.app.application.service.sys.SysUserLoginService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import com.yuzhyn.hidoc.app.utils.TOTPGenerator;
@@ -84,6 +87,9 @@ public class UserController {
 
     @Autowired
     FileBucketService fileBucketService;
+
+    @Autowired
+    SysUserLoginService sysUserLoginService;
 
     /**
      * 用户注册
@@ -214,7 +220,7 @@ public class UserController {
         String totpcode = MapTool.get(params, "totpcode", "").toString();
 
         if (!StringTool.ok(username)) return ResponseData.error("登录失败，账号不正确");
-        if(!StringTool.ok(password) && !StringTool.ok(totpcode)) return ResponseData.error("登录失败，密码或验证码没有输入");
+        if (!StringTool.ok(password) && !StringTool.ok(totpcode)) return ResponseData.error("登录失败，密码或验证码没有输入");
 
         // 先根据邮箱查询用户信息，如果没有再根据用户名查询
         SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, username));
@@ -238,8 +244,8 @@ public class UserController {
 
             // 使用密码进行登录
             // password 要设置加密后的字符串，0除外，0为重置密码，允许直接登录
-            if (!password.equals("0")) password = MixdeTool.md5Mix(username, password);
-            if(!user.getPassword().equals(password))return ResponseData.error("登录失败，账号或密码不正确");
+            if (!password.equals("0")) password = MixdeTool.md5Mix(user.getName(), password);
+            if (!user.getPassword().equals(password)) return ResponseData.error("登录失败，账号或密码不正确");
             // 验证成功，设置用户为登录状态
             return loginAfterCheck(user);
 
@@ -269,8 +275,9 @@ public class UserController {
         userInfo.setIp(CurrentUserManager.ip.get());
         userInfo.setLoginTime(LocalDateTime.now());
         userInfo.setExpiryTime(LocalDateTime.now().plusHours(8));
-        R.Caches.UserInfo.put(userInfo.getToken(), userInfo);
-        UserInfo userinfoCache = R.Caches.UserInfo.getIfPresent(userInfo.getToken());
+
+        // 这里记录登录信息缓存到数据库
+        sysUserLoginService.updateUserLoginData(userInfo);
 
         // 登录成功根据个人通知配置，发送登录通知信息到邮箱
         // 暂定
@@ -448,11 +455,8 @@ public class UserController {
         String token = MapTool.get(params, "token", "").toString();
 
         if (StringTool.ok(ip, token)) {
-            // 注销指定token的用户
-            UserInfo user = R.Caches.UserInfo.getIfPresent(token);
-            if (user != null && StringTool.ok(user.getIp()) && user.getIp().equals(ip)) {
-                R.Caches.UserInfo.invalidate(token);
-            }
+            // 注销指定token的用户，从数据库删除
+            sysUserLoginService.deleteUserLoginData(token);
 
         } else {
             // 注销当前登录用户
@@ -473,15 +477,7 @@ public class UserController {
      */
     @PostMapping("getLoginUserInfo")
     public ResponseData getLoginUserInfo() {
-
-        List<UserInfo> userInfoList = new ArrayList<>();
-
-        for (String key : R.Caches.UserInfo.asMap().keySet()) {
-            UserInfo item = R.Caches.UserInfo.asMap().get(key);
-            if (CurrentUserManager.getUser().getId().equals(item.getUser().getId()) && item.getExpired() == false) {
-                userInfoList.add(item);
-            }
-        }
+        List<UserInfo> userInfoList = sysUserLoginService.getUserInfoList(CurrentUserManager.getUser().getId());
         return ResponseData.okData(userInfoList);
     }
 
@@ -499,6 +495,7 @@ public class UserController {
             // 查询用户的空间用量信息
             List<String> userIds = list.stream().map(SysUserLite::getId).collect(Collectors.toList());
             List<SysUserFileConf> confList = sysUserFileConfMapper.selectList(new LambdaQueryWrapper<SysUserFileConf>().in(SysUserFileConf::getUserId, userIds));
+            List<UserInfo> userInfoList = sysUserLoginService.getUserInfoList(CurrentUserManager.getUser().getId());
 
             for (SysUserLite liteItem : list) {
                 // 补充用户的空间用量信息
@@ -515,8 +512,7 @@ public class UserController {
                 }
 
                 // 补充用户的在线状态
-                for (String key : R.Caches.UserInfo.asMap().keySet()) {
-                    UserInfo item = R.Caches.UserInfo.getIfPresent(key);
+                for (UserInfo item : userInfoList) {
                     if (liteItem.getId().equals(item.getUser().getId())) {
                         liteItem.setIsOnline(true);
                         break;

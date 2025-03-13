@@ -54,7 +54,7 @@ public final class R {
     public static EsTool EsTool = null;
 
     public static class Caches {
-        public static Cache<String, UserInfo> UserInfo = CacheBuilder.newBuilder().build();
+//        public static Cache<String, UserInfo> UserInfo = CacheBuilder.newBuilder().build();
         public static Cache<String, FileCursor> SysFileCursor = CacheBuilder.newBuilder().build();
         public static Cache<String, File> SysFile = CacheBuilder.newBuilder().build();
         /**
@@ -102,6 +102,7 @@ public final class R {
         public static final String MachineInfo = DirTool.combine(Paths.Properties, "machine_info.properties");
         public static final String AccessInfo = DirTool.combine(Paths.Properties, "access_info.properties");
         public static final String StatusInfo = DirTool.combine(Paths.Properties, "status_info.properties");
+        public static final String FilesInfo = DirTool.combine(Paths.Properties, "files_info.txt");
     }
 
     public static class Buckets {

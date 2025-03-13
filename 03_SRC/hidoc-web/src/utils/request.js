@@ -53,7 +53,7 @@ service.interceptors.response.use(
         // 是否必须登录才能访问数据
         // 目前是为了在外网访问时，前端要求登录，数据仍可访问并返回，但是前端不予展示
         // 后续完善组织或团队的概念后，可由后端进行数据保护
-        if (config().mastLogin && (store.getters.token == undefined || store.getters.token == '')) {
+        if (config().mastLogin && (store.getters.token == undefined || store.getters.token == '' || store.getters.name == undefined || store.getters.name == '')) {
             debugger;
             var url = response.config.url;
 

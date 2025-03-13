@@ -24,6 +24,7 @@ import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.application.service.doc.DocCollectedService;
 import com.yuzhyn.hidoc.app.application.service.doc.DocParseService;
+import com.yuzhyn.hidoc.app.application.service.sys.SysUserLoginService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,9 @@ public class DocCollectedController {
     @Autowired
     TeamMemberMapper teamMemberMapper;
 
+    @Autowired
+    SysUserLoginService sysUserLoginService;
+
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "name", "token")) {
@@ -89,7 +93,7 @@ public class DocCollectedController {
                 DocCollected docCollected = new DocCollected();
                 docCollected.setId(R.SnowFlake.nexts());
                 docCollected.setCreateTime(LocalDateTime.now());
-                UserInfo userInfo = R.Caches.UserInfo.getIfPresent(token);
+                UserInfo userInfo = sysUserLoginService.getUserLoginData(token);
                 Alog.i("Thread.currentThread: " + Thread.currentThread());
                 docCollected.setCreateUserId(userInfo.getUser().getId());
                 docCollected.setOwnerUserId(userInfo.getUser().getId());

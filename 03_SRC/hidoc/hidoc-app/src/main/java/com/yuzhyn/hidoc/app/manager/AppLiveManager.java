@@ -1,15 +1,23 @@
 package com.yuzhyn.hidoc.app.manager;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.app.AppConf;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysMachine;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLogin;
 import com.yuzhyn.hidoc.app.application.mapper.app.AppConfMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLoginMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserMapper;
+import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.application.service.sys.EmailService;
+import com.yuzhyn.hidoc.app.application.service.sys.SysUserLoginService;
 import com.yuzhyn.hidoc.app.utils.EsTool;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -46,6 +54,9 @@ public class AppLiveManager {
 
     @Autowired
     private SysUserMapper sysUserMapper;
+
+    @Autowired
+    SysUserLoginService sysUserLoginService;
 
     @Autowired
     private EmailService emailService;
