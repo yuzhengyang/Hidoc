@@ -86,10 +86,13 @@ function psFileCards(str, extData) {
     // 在文件卡片中，有标签包括id信息（data-hd-file），这里根据id获取详细数据用于展示
     // 例如：data-hd-file="5f7c7b1b9f4a5c0001e6b4d3"
     // 通过id获取文件信息，然后展示在卡片中
-    let reg = /data-hd-file="(.+?)"/g;
-    let fileIdMatch = reg.exec(str);
+    const idReg = /data-hd-file="(.+?)"/g;
+    let fileIdMatch = idReg.exec(str);
     let fileId = fileIdMatch ? fileIdMatch[1] : null;
-    let fileName = '未知文件';
+    const nameReg = /<div.*?>(.*?)<\/div>/;
+    let nameMatch = nameReg.exec(str);
+    let fileName = nameMatch ? nameMatch[1] : '保存后预览';
+    let fileHtml = '';
     let downloadCount = 0;
     let fileSize = 0;
     let createTime = '';
@@ -121,8 +124,11 @@ function psFileCards(str, extData) {
     if (ext === 'exe' || ext === 'msi') fileIcon = require('../assets/filetype/exe.png');
     if (ext === 'html' || ext === 'htm') fileIcon = require('../assets/filetype/html.png');
 
-    let borderStyle = ''; // 'border: 1px solid gray;';
+    let borderStyle = '';//'border: 1px solid gray;';
     let backgroundStyle = `background-color: rgba(197, 197, 197, 0.3); backdrop-filter: blur(5px); border-radius: 10px;box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);`;
+    let downloadHerf = `<span style="font-size: 12px;">保存后预览</span>`;
+    if (uname && uname.length > 0) downloadHerf = `<a href="${config().baseServer + 'f/d/u/' + uname}" style="font-size: 12px;" download>立即下载</a>`;
+
     let html = `<div class="no-select" style="${backgroundStyle} width: 370px; height: 120px; padding: 15px; margin: 40px 0px;">
     	<div style="${borderStyle} width: 60px; height: 60px; float: left">
     		<img src="${fileIcon}" style="width: 50px; height: 50px; border-radius: 10px;">
@@ -130,17 +136,19 @@ function psFileCards(str, extData) {
     	<div style="${borderStyle} width: 300px; height: 28px; float: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
         ${fileName}
     	</div>
-    	<div style="${borderStyle} width: 300px; height: 28px; float: left">
+    	<div style="${borderStyle} width: 120px; height: 28px; float: left">
     		<span style="font-size: 12px;">大小: ${convertFileSize(fileSize)}</span>
     	</div>
-    	<div style="${borderStyle} width: 300px; height: 28px; float: left">
+    	<div style="${borderStyle} width: 120px; height: 28px; float: left">
             <span style="font-size: 12px;">${downloadCount} 次下载</span>
     	</div>
-    	<div style="${borderStyle} width: 300px; height: 28px; float: left">
-    		<span style="font-size: 12px;">创建于 ${createTime}</span>
+    	<div style="${borderStyle} width: 260px; height: 28px; float: left">
+    		<span style="font-size: 12px;">上传于 ${createTime}</span>
     	</div>
-    	<div style="${borderStyle} width: 40px; height: 28px; float: right;">
-    		<a href="${config().baseServer + 'f/d/u/' + uname}" download>下载</a>
+    	<div style="${borderStyle} width: 60px; height: 28px; float: left;">
+    	</div>
+    	<div style="${borderStyle} width: 80px; height: 28px; float: left;">
+    		${downloadHerf}
     	</div>
     </div>
     `;
