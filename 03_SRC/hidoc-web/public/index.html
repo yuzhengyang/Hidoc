@@ -1,102 +1,203 @@
 <!DOCTYPE html>
 <html lang="">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-        <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
-        <title><%= htmlWebpackPlugin.options.title %></title>
-        <script src="/config.js"></script>
 
-        <!-- <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script> -->
-        <!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.min.js"></script> -->
-        <script src="/js/mermaid.min.js"></script>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+    <title>
+        <%= htmlWebpackPlugin.options.title %>
+    </title>
+    <script src="/config.js"></script>
 
-        <!-- katex 渲染公式，使用meraid的npm方式引入，还没测试 -->
-        <!-- <link rel="stylesheet" href="./static/katex.min.css" />
+    <!-- <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.min.js"></script> -->
+    <script src="/js/mermaid.min.js"></script>
+
+    <!-- katex 渲染公式，使用meraid的npm方式引入，还没测试 -->
+    <!-- <link rel="stylesheet" href="./static/katex.min.css" />
         <script src="./static/katex.min.js"></script> -->
-        <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" />
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" />
         <script src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"></script> -->
 
-        <!-- mermaid 渲染流程图，使用meraid的npm方式引入 -->
-        <!-- <script src="./static/mermaid.min.js"></script> -->
-        <!-- <script src="https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js"></script> -->
-        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.14.0/mermaid.min.js" integrity="sha512-vLumCjg7NKEQKGM+xAgBYTvQ90DVu6Eo7vS1T/iPf2feNLcrpGxvumuUUmE3CPiCUPgviyKbtpWGDbhnVnmJxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    <!-- mermaid 渲染流程图，使用meraid的npm方式引入 -->
+    <!-- <script src="./static/mermaid.min.js"></script> -->
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/mermaid/9.2.2/mermaid.min.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/8.14.0/mermaid.min.js" integrity="sha512-vLumCjg7NKEQKGM+xAgBYTvQ90DVu6Eo7vS1T/iPf2feNLcrpGxvumuUUmE3CPiCUPgviyKbtpWGDbhnVnmJxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
 
-        <!-- <script type="text/javascript" src="./static/mermaid.core.js"></script>
+    <!-- <script type="text/javascript" src="./static/mermaid.core.js"></script>
         <script type="text/javascript" src="./static/mermaid.core.js.map"></script>
         <script type="text/javascript" src="./static/mermaid.esm.min.mjs"></script>
         <script type="text/javascript" src="./static/mermaid.js"></script>
         <script type="text/javascript" src="./static/mermaid.min.js"></script> -->
 
-        <!-- mermaid 原地址访问非常慢 -->
-        <!-- <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script> -->
+    <!-- mermaid 原地址访问非常慢 -->
+    <!-- <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script> -->
 
-        <!-- <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script> -->
+    <!-- <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script> -->
 
-        <script>
-            console.log('--------------------------------------');
-            console.log('当前host: ' + window.location.host);
-            console.log(configs);
-            var defaultConfig = {}; // 默认配置
-            var currentConfig = {}; // 匹配host的配置
-            for (var i = 0; i < configs.length; i++) {
-                var itemConfig = configs[i];
+    <script>
+        console.log('--------------------------------------');
+        console.log('当前host: ' + window.location.host);
+        console.log(configs);
+        var defaultConfig = {}; // 默认配置
+        var currentConfig = {}; // 匹配host的配置
+        for (var i = 0; i < configs.length; i++) {
+            var itemConfig = configs[i];
 
-                if (itemConfig.host === window.location.host) {
-                    currentConfig = itemConfig;
+            if (itemConfig.host === window.location.host) {
+                currentConfig = itemConfig;
 
-                    console.log('currentConfig:');
-                    console.log(itemConfig);
-                }
-
-                if (itemConfig.host === '*') {
-                    defaultConfig = itemConfig;
-
-                    console.log('defaultConfig:');
-                    console.log(itemConfig);
-                }
+                console.log('currentConfig:');
+                console.log(itemConfig);
             }
-            if (currentConfig.host != undefined && currentConfig.host != null) {
-                // 如果有符合host的配置，则优先使用
-                localStorage.setItem('config', JSON.stringify(currentConfig));
-                console.log('当前使用配置: currentConfig');
-            } else {
-                // 如果没有匹配host的配置，则使用默认配置*
-                localStorage.setItem('config', JSON.stringify(defaultConfig));
-                console.log('当前使用配置: defaultConfig');
-            }
-            console.log('--------------------------------------');
-            var pointId = localStorage.getItem('pointId');
-            if (pointId == undefined || pointId == null || pointId == '' || pointId.length < 8) {
-                pointId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                    var r = (Math.random() * 16) | 0,
-                        v = c == 'x' ? r : (r & 0x3) | 0x8;
-                    return v.toString(16);
-                });
-            }
-            console.log('pointId: ' + pointId);
-            localStorage.setItem('pointId', pointId);
-            console.log('--------------------------------------');
 
-            // 反调试
-            // setInterval(function () { debugger }, 100);
-        </script>
-        <style>
-            
+            if (itemConfig.host === '*') {
+                defaultConfig = itemConfig;
+
+                console.log('defaultConfig:');
+                console.log(itemConfig);
+            }
+        }
+        if (currentConfig.host != undefined && currentConfig.host != null) {
+            // 如果有符合host的配置，则优先使用
+            localStorage.setItem('config', JSON.stringify(currentConfig));
+            console.log('当前使用配置: currentConfig');
+        } else {
+            // 如果没有匹配host的配置，则使用默认配置*
+            localStorage.setItem('config', JSON.stringify(defaultConfig));
+            console.log('当前使用配置: defaultConfig');
+        }
+        console.log('--------------------------------------');
+        var pointId = localStorage.getItem('pointId');
+        if (pointId == undefined || pointId == null || pointId == '' || pointId.length < 8) {
+            pointId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (Math.random() * 16) | 0,
+                    v = c == 'x' ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+            });
+        }
+        console.log('pointId: ' + pointId);
+        localStorage.setItem('pointId', pointId);
+        console.log('--------------------------------------');
+
+        // 反调试
+        // setInterval(function () { debugger }, 100);
+    </script>
+    <style>
         /* 禁止选择 div 内的文本 */
         .no-select {
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+ */
-            user-select: none; /* 标准语法 */
+            -webkit-user-select: none;
+            /* Safari */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* IE10+ */
+            user-select: none;
+            /* 标准语法 */
         }
-        </style>
-    </head>
-    <body>
-        <noscript>
-            <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-        </noscript>
-        <div id="app"></div>
-    </body>
+
+        /* 创建鼠标粒子效果 */
+        #particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            /* 调整颜色透明度，让颜色更浅 */
+            background-color: rgba(0, 0, 255, 0.1);
+            animation: smokeEffect 2s ease-in-out forwards;
+        }
+
+        @keyframes smokeEffect {
+            0% {
+                opacity: 0.8;
+                transform: scale(1) translate(0, 0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(3) translate(var(--move-x), var(--move-y));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <noscript>
+        <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+                Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+
+    <!-- 这里增加一个鼠标移动的粒子效果容器 -->
+    <div id="particle-container"></div>
+    <script>
+        // 这里创建鼠标移动时的粒子效果
+        const particleContainer = document.getElementById('particle-container');
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        // mousemove
+        // document.addEventListener('mousemove', doParticle);
+        // 粒子效果的实现函数
+        function doParticle(event) {
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+
+            // 计算鼠标移动向量
+            const dx = mouseX - lastMouseX;
+            const dy = mouseY - lastMouseY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // 增加生成粒子所需的鼠标移动阈值，减少初始密集度
+            if (distance > 5) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+
+                // 随机化粒子大小
+                const size = Math.random() * 10 + 5;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+
+                // 结合鼠标移动方向和随机因素确定粒子飘散方向和距离
+                const randomAngleOffset = (Math.random() - 0.5) * Math.PI / 2;
+                const mainAngle = Math.atan2(dy, dx);
+                const finalAngle = mainAngle + randomAngleOffset;
+                const randomDistance = Math.random() * 50 + 20;
+                const moveX = Math.cos(finalAngle) * randomDistance;
+                const moveY = Math.sin(finalAngle) * randomDistance;
+                particle.style.setProperty('--move-x', moveX + 'px');
+                particle.style.setProperty('--move-y', moveY + 'px');
+
+                particle.style.left = mouseX + 'px';
+                particle.style.top = mouseY + 'px';
+
+                // 随机化动画持续时间
+                const duration = Math.random() * 1 + 1.5;
+                particle.style.animationDuration = duration + 's';
+
+                particleContainer.appendChild(particle);
+
+                // 一段时间后移除粒子
+                setTimeout(() => {
+                    particle.remove();
+                }, duration * 1000);
+
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+            }
+        }
+    </script>
+</body>
+
 </html>
