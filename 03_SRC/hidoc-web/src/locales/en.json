@@ -8,8 +8,10 @@
     "home": "Home",
     "workbench": "Workbench",
     "changePassword": "Change Password",
-
-
+    "doc": "DOC",
+    "file": "FILE",
+    "code": "CODE",
+    "ssh": "SSH",
 
     "about": "About Us"
 }

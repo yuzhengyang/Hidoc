@@ -8,9 +8,10 @@
     "home": "首页",
     "workbench": "工作台",
     "changePassword": "修改密码",
+    "doc": "文集",
+    "file": "文件",
+    "code": "代码",
+    "ssh": "SSH",
 
-
-
-    
     "about": "关于我们"
 }

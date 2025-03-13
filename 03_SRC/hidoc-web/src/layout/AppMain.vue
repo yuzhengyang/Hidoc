@@ -6,15 +6,15 @@
                 <div class="grid-content bg-purple" @click="home" style="cursor: pointer; height: 40px; width: 55px; float: left"><img alt="logo" src="../assets/logo.png" height="40" @click="gotoPage('preview')" /></div>
                 <!-- <div style="cursor: pointer; height: 40px; width: 55px; float: left; font-weight: bold; font-size: 14px" @click="gotoPage('preview')">hidoc</div> -->
                 <div style="float: left; font: 14px">
-                    <el-button v-if="functionCode.includes('doc')" type="text" size="small" @click="gotoPage('preview')" style="margin: 0">文集</el-button>
-                    <el-button v-if="functionCode.includes('file')" type="text" size="small" @click="gotoPage('fileshare')" style="margin: 0">文件</el-button>
-                    <el-button v-if="functionCode.includes('code')" type="text" size="small" @click="gotoPage('javadoc')" style="margin: 0">代码</el-button>
-                    <el-button v-if="functionCode.includes('ssh')" type="text" size="small" @click="gotoPage('ssh')" style="margin: 0">SSH</el-button>
+                    <el-button v-if="functionCode.includes('doc')" type="text" size="small" @click="gotoPage('preview')" style="margin: 0">{{ $t('doc') }}</el-button>
+                    <el-button v-if="functionCode.includes('file')" type="text" size="small" @click="gotoPage('fileshare')" style="margin: 0">{{ $t('file') }}</el-button>
+                    <el-button v-if="functionCode.includes('code')" type="text" size="small" @click="gotoPage('javadoc')" style="margin: 0">{{ $t('code') }}</el-button>
+                    <el-button v-if="functionCode.includes('ssh')" type="text" size="small" @click="gotoPage('ssh')" style="margin: 0">{{ $t('ssh') }}</el-button>
                 </div>
             </div>
 
             <div style="float: right">
-                <div v-if="this.$store.state.user.token == undefined || this.$store.state.user.token == ''" class="grid-content">
+                <div v-if="this.$store.state.user.token == undefined || this.$store.state.user.token == '' || this.$store.state.user.name == undefined || this.$store.state.user.name == ''" class="grid-content">
                     <el-link :underline="false" @click="register" style="font-size: 12px">
                         <el-icon><User /></el-icon>
                         <span>&nbsp;注册</span>
