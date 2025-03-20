@@ -1,23 +1,33 @@
 <template>
     <el-container style="height: 100%">
-        <el-aside id="doc-menu-aside" width="280px" style="height: 100%; padding-right: 10px; border-right: 1px solid #bbb">
+        <el-aside id="doc-menu-aside" width="280px"
+            style="height: 100%; padding-right: 10px; border-right: 1px solid #bbb">
             <el-row>
                 <el-col :span="24">
                     <el-input placeholder="请输入内容" v-model="keyword" @keydown="searchEnter">
                         <template #suffix>
-                            <el-icon><Search style="cursor: pointer" @click="search" /></el-icon>
+                            <el-icon>
+                                <Search style="cursor: pointer" @click="search" />
+                            </el-icon>
                         </template>
                     </el-input>
                 </el-col>
             </el-row>
             <el-row>
-                <el-col :span="24" style="line-height: 46px; text-align: center; border-bottom: 1px solid #bbb; font-size: 16px; font-weight: bold; cursor: pointer" @click="indexPage">{{ this.collected.name }}</el-col>
+                <el-col :span="24"
+                    style="line-height: 46px; text-align: center; border-bottom: 1px solid #bbb; font-size: 16px; font-weight: bold; cursor: pointer"
+                    @click="indexPage">{{ this.collected.name }}</el-col>
             </el-row>
-            <el-tree :data="this.collected.docLites" node-key="id" default-expand-all :expand-on-click-node="false" @node-click="goDocPage">
+            <el-tree :data="this.collected.docLites" node-key="id" default-expand-all :expand-on-click-node="false"
+                @node-click="goDocPage">
                 <template #default="{ data }">
-                    <span v-if="length(data.title) < 35" :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
+                    <span v-if="length(data.title) < 35"
+                        :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{
+                    data.title }}</span>
                     <el-tooltip v-else effect="dark" :content="data.title" placement="right">
-                        <span :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
+                        <span
+                            :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{
+                    data.title }}</span>
                     </el-tooltip>
                 </template>
             </el-tree>
@@ -28,26 +38,37 @@
                 <!-- 这里是为了手机端查看文集，做了适配，这段代码算是冗余代码，后续有空了再优化 -->
                 <div id="doc-menu-button" v-if="isShowMenuButton">
                     <el-affix :offset="60">
-                        <el-button type="primary" style="margin-left: 16px" @click="isShowDrawerMenu = true">导航</el-button>
+                        <el-button type="primary" style="margin-left: 16px"
+                            @click="isShowDrawerMenu = true">导航</el-button>
                     </el-affix>
-                    <el-drawer v-model="isShowDrawerMenu" title="I am the title" :with-header="false" direction="ltr" size="80%">
+                    <el-drawer v-model="isShowDrawerMenu" title="I am the title" :with-header="false" direction="ltr"
+                        size="80%">
                         <el-row>
                             <el-col :span="24">
                                 <el-input placeholder="请输入内容" v-model="keyword" @keydown="searchEnter">
                                     <template #suffix>
-                                        <el-icon><Search style="cursor: pointer" @click="search" /></el-icon>
+                                        <el-icon>
+                                            <Search style="cursor: pointer" @click="search" />
+                                        </el-icon>
                                     </template>
                                 </el-input>
                             </el-col>
                         </el-row>
                         <el-row>
-                            <el-col :span="24" style="line-height: 46px; text-align: center; border-bottom: 1px solid #bbb; font-size: 16px; font-weight: bold; cursor: pointer" @click="indexPage">{{ this.collected.name }}</el-col>
+                            <el-col :span="24"
+                                style="line-height: 46px; text-align: center; border-bottom: 1px solid #bbb; font-size: 16px; font-weight: bold; cursor: pointer"
+                                @click="indexPage">{{ this.collected.name }}</el-col>
                         </el-row>
-                        <el-tree :data="this.collected.docLites" node-key="id" default-expand-all :expand-on-click-node="false" @node-click="goDocPage">
+                        <el-tree :data="this.collected.docLites" node-key="id" default-expand-all
+                            :expand-on-click-node="false" @node-click="goDocPage">
                             <template #default="{ data }">
-                                <span v-if="length(data.title) < 35" :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
+                                <span v-if="length(data.title) < 35"
+                                    :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{
+                    data.title }}</span>
                                 <el-tooltip v-else effect="dark" :content="data.title" placement="right">
-                                    <span :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{ data.title }}</span>
+                                    <span
+                                        :style="{ padding: '0px', cursor: 'pointer', fontSize: '14px', marginTop: '2px', fontWeight: data.id === this.docId ? '900' : 'normal', width: '260px', color: data.id === this.docId ? '#409eff' : '#3c3d40' }">{{
+                    data.title }}</span>
                                 </el-tooltip>
                             </template>
                         </el-tree>
@@ -56,7 +77,9 @@
 
                 <div v-if="pageMode === 'index'">
                     <el-row>
-                        <el-col :span="24" style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">{{ this.collected.name }}</el-col>
+                        <el-col :span="24"
+                            style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">{{
+                    this.collected.name }}</el-col>
                     </el-row>
                     <el-row>
                         <el-col :span="24">&nbsp;</el-col>
@@ -65,7 +88,9 @@
                         <el-col :span="20" :offset="2">
                             <el-tabs v-model="activeName" @tab-click="handleTabClick">
                                 <el-tab-pane label="简介" name="first">
-                                    <textarea readonly style="border: 0; width: 100%; height: 500px; resize: none; outline: none; font-size: 16px; font-family: Avenir, Helvetica, Arial, sans-serif" v-model="this.collected.description"></textarea>
+                                    <textarea readonly
+                                        style="border: 0; width: 100%; height: 500px; resize: none; outline: none; font-size: 16px; font-family: Avenir, Helvetica, Arial, sans-serif"
+                                        v-model="this.collected.description"></textarea>
                                 </el-tab-pane>
                                 <el-tab-pane label="目录" name="second">
                                     <el-table :data="this.collected.docLites" style="width: 100%">
@@ -86,7 +111,8 @@
                                     </el-table>
                                 </el-tab-pane>
                                 <el-tab-pane label="知识网络" name="ilinkRelation">
-                                    <doc-ilink-relation v-bind:data="this.collected" ref="docIlinkRef"></doc-ilink-relation>
+                                    <doc-ilink-relation v-bind:data="this.collected"
+                                        ref="docIlinkRef"></doc-ilink-relation>
                                 </el-tab-pane>
                             </el-tabs>
                         </el-col>
@@ -96,7 +122,8 @@
                     <!-- 文档标题 -->
                     <el-row v-if="this.isShowTitle">
                         <el-col :span="23" style="text-align: center">
-                            <span style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">{{ this.doc.title }}</span>
+                            <span style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">{{
+                    this.doc.title }}</span>
                         </el-col>
                         <el-col :span="1"></el-col>
                         <!-- <el-col :span="2" style="cursor:pointer;" @click="docFocus()">🔍</el-col> -->
@@ -104,21 +131,27 @@
                     <el-row>
                         <el-col :span="23" style="text-align: center">
                             <span v-if="this.lockUser && this.lockUser.realName">
-                                <el-tag class="ml-2" type="warning" size="small" effect="plain">{{ this.lockUser.realName }} 编辑锁定</el-tag>
+                                <el-tag class="ml-2" type="warning" size="small" effect="plain">{{
+                    this.lockUser.realName }}
+                                    编辑锁定</el-tag>
                             </span>
                         </el-col>
                     </el-row>
 
                     <!-- 文档内容 -->
-                    <v-md-editor v-model="this.doc.content" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+                    <v-md-editor v-model="this.doc.content" mode="preview" ref="editor"
+                        @copy-code-success="handleCopyCodeSuccess" />
 
                     <!-- 点赞及点赞人员 -->
                     <el-row>
                         <el-col :span="24" :offset="0" style="height: 100px"></el-col>
                         <el-col :span="24" :offset="0" style="font-size: 14px; text-align: center">
                             <p>
-                                <el-button :type="this.myThumb.isSupporter ? 'primary' : ''" circle style="width: 60px; height: 60px" @click="createThumb">
-                                    <el-icon style="font-size: 28px"><Pointer /></el-icon>
+                                <el-button :type="this.myThumb.isSupporter ? 'primary' : ''" circle
+                                    style="width: 60px; height: 60px" @click="createThumb">
+                                    <el-icon style="font-size: 28px">
+                                        <Pointer />
+                                    </el-icon>
                                 </el-button>
                                 <!-- <el-button v-else circle style="width: 80px; height: 80px" @click="createThumb">
                                     <el-icon><Pointer /></el-icon>
@@ -127,16 +160,22 @@
                             <p>{{ this.thumbCount }} 人点赞</p>
                         </el-col>
                         <el-col :span="24" :offset="0" style="text-align: center">
-                            <el-popover :width="300" placement="top" trigger="hover" v-for="item in thumbUserList" :key="item">
+                            <el-popover :width="300" placement="top" trigger="hover" v-for="item in thumbUserList"
+                                :key="item">
                                 <template #reference>
                                     <el-avatar :size="60" :src="currentAvatar(item.avatar)" style="margin: 10px" />
                                 </template>
                                 <template #default>
-                                    <div class="demo-rich-conent" style="display: flex; gap: 16px; flex-direction: column; padding: 20px">
-                                        <el-avatar :size="120" :src="currentAvatar(item.avatar)" style="margin-bottom: 8px" />
+                                    <div class="demo-rich-conent"
+                                        style="display: flex; gap: 16px; flex-direction: column; padding: 20px">
+                                        <el-avatar :size="120" :src="currentAvatar(item.avatar)"
+                                            style="margin-bottom: 8px" />
                                         <div>
-                                            <p class="demo-rich-content__name" style="margin: 0; font-weight: 500">{{ item.realName }}</p>
-                                            <p class="demo-rich-content__mention" style="margin: 0; font-size: 14px; color: var(--el-color-info)">{{ item.email }}</p>
+                                            <p class="demo-rich-content__name" style="margin: 0; font-weight: 500">{{
+                    item.realName }}</p>
+                                            <p class="demo-rich-content__mention"
+                                                style="margin: 0; font-size: 14px; color: var(--el-color-info)">{{
+                    item.email }}</p>
                                         </div>
 
                                         <p class="demo-rich-content__desc" style="margin: 0">暂无描述</p>
@@ -151,27 +190,36 @@
                         <el-col :span="22" :offset="1" style="font-size: 14px; color: #8a8f8d; text-align: left">
                             <el-tooltip class="item" effect="dark" content="参与编辑" placement="top">
                                 <span>
-                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px"><User /></el-icon>
+                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px">
+                                        <User />
+                                    </el-icon>
                                     <span v-for="ctor in contributors" :key="ctor" style="padding-right: 8px">
                                         {{ ctor.realName }}
                                     </span>
                                 </span>
                             </el-tooltip>
-                            <el-tooltip class="item" effect="dark" :content="'更新于 ' + this.doc.updateTime + ''" placement="top">
+                            <el-tooltip class="item" effect="dark" :content="'更新于 ' + this.doc.updateTime + ''"
+                                placement="top">
                                 <span style="padding-left: 20px">
-                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px"><Clock /></el-icon>
+                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px">
+                                        <Clock />
+                                    </el-icon>
                                     <span>{{ this.doc.updateTime }}</span>
                                 </span>
                             </el-tooltip>
                             <el-tooltip class="item" effect="dark" :content="'浏览次数：' + this.readCount" placement="top">
                                 <span style="padding-left: 20px">
-                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px"><Reading /></el-icon>
+                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px">
+                                        <Reading />
+                                    </el-icon>
                                     <span>{{ this.readCount }}</span>
                                 </span>
                             </el-tooltip>
                             <el-tooltip class="item" effect="dark" :content="'评论：' + this.commentCount" placement="top">
                                 <span style="padding-left: 20px">
-                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px"><ChatDotSquare /></el-icon>
+                                    <el-icon style="padding-right: 3px; vertical-align: middle; font-size: 14px">
+                                        <ChatDotSquare />
+                                    </el-icon>
                                     <span>{{ this.commentCount }}</span>
                                 </span>
                             </el-tooltip>
@@ -182,7 +230,8 @@
                     <el-row>
                         <el-col :span="24" :offset="0" style="height: 100px"></el-col>
                         <el-col :span="24" :offset="0" style="font-size: 14px; text-align: center">
-                            <el-tag v-for="item in readUserList" :key="item" type="" size="small" effect="plain" round style="margin: 2px; border-radius: 30px">
+                            <el-tag v-for="item in readUserList" :key="item" type="" size="small" effect="plain" round
+                                style="margin: 2px; border-radius: 30px">
                                 {{ item.realName }}
                             </el-tag>
                             <p>{{ this.readUserList.length }} 人已读</p>
@@ -198,13 +247,17 @@
                             <div v-for="item in commentList" :key="item.id" style="float: left">
                                 <el-divider />
                                 <div style="width: 45px; float: left">
-                                    <el-avatar :size="35" :src="currentAvatar(item.createUser.avatar)">{{ item.createUser.realName }}</el-avatar>
+                                    <el-avatar :size="35" :src="currentAvatar(item.createUser.avatar)">{{
+                    item.createUser.realName }}</el-avatar>
                                 </div>
                                 <div style="width: 280px; float: left; font-size: 10px">
                                     <span>{{ item.createUser.realName }}</span>
-                                    <span style="color: red; cursor: pointer" @click="replyComment(item.id, item.replyUserId)">{{ item.replyUser && item.replyUser.realName ? ' 回复 ' + item.replyUser.realName : '' }}</span>
+                                    <span style="color: red; cursor: pointer"
+                                        @click="replyComment(item.id, item.replyUserId)">{{ item.replyUser &&
+                    item.replyUser.realName ? ' 回复 ' + item.replyUser.realName : '' }}</span>
                                     <span>&nbsp;&nbsp;{{ item.createTime }}</span>
-                                    <span style="color: blue; cursor: pointer" @click="replyComment(item.id, item.createUserId)">&nbsp;&nbsp;回复&nbsp;&nbsp;</span>
+                                    <span style="color: blue; cursor: pointer"
+                                        @click="replyComment(item.id, item.createUserId)">&nbsp;&nbsp;回复&nbsp;&nbsp;</span>
                                 </div>
                                 <div style="width: 280px; float: left; font-size: 14px; color: black; padding: 5px">
                                     <a>{{ item.content }}</a>
@@ -214,12 +267,16 @@
 
                         <el-col :span="22" :offset="1">
                             <div style="margin: 10px" v-if="isLogin" id="docCommentBlock">
-                                <el-input v-model="inputComment.text" maxlength="500" placeholder="请发表有价值的评论， 请勿灌水，良好的团队氛围需大家一起维护。" show-word-limit type="textarea" />
+                                <el-input v-model="inputComment.text" maxlength="500"
+                                    placeholder="请发表有价值的评论， 请勿灌水，良好的团队氛围需大家一起维护。" show-word-limit type="textarea" />
                                 <div style="height: 5px"></div>
-                                <el-select v-model="inputComment.replyUserId" class="m-2" placeholder="回复..." size="small" clearable>
-                                    <el-option v-for="item in replyUserList" :key="item.id" :label="item.realName" :value="item.id" />
+                                <el-select v-model="inputComment.replyUserId" class="m-2" placeholder="回复..."
+                                    size="small" clearable>
+                                    <el-option v-for="item in replyUserList" :key="item.id" :label="item.realName"
+                                        :value="item.id" />
                                 </el-select>
-                                <el-button style="float: right" type="primary" size="small" round @click="createComment()">评论</el-button>
+                                <el-button style="float: right" type="primary" size="small" round
+                                    @click="createComment()">评论</el-button>
                             </div>
                         </el-col>
                     </el-row>
@@ -233,10 +290,17 @@
         </el-container>
         <!-- 大纲导航 -->
         <el-aside id="doc-anchor-aside" v-if="pageMode === 'detail' && isShowAnchor" width="250px" style="height: 100%">
-            <div style="padding: 45px 10px 100px 10px; font-size: 12px">
+            <!-- <div style="padding: 45px 10px 100px 10px; font-size: 12px">
                 <div v-for="anchor in titles" :key="anchor" class="anchor-item" :style="{ padding: `4px 0 4px ${anchor.indent * 10}px` }" @click="handleAnchorClick(anchor)">
                     <a>{{ anchor.title }}</a>
                 </div>
+            </div> -->
+            <div style="padding: 45px 10px 100px 10px; font-size: 12px">
+                <el-anchor :container="'#docContainer'" direction="vertical" type="default">
+                    <el-anchor-link v-for="anchor in titles" :key="anchor" :href="`#${anchor.titleId}`">
+                        <span :style="{ padding: `0px 0px 0px ${anchor.indent * 12}px` }">{{ anchor.title }}</span>
+                    </el-anchor-link>
+                </el-anchor>
             </div>
         </el-aside>
     </el-container>
@@ -246,33 +310,45 @@
         <div style="position: fixed; bottom: 50px; right: 20px; z-index: 9999">
             <el-badge :value="this.commentCount" class="item" :hidden="this.commentCount == 0">
                 <el-button circle @click="this.scrollToBlock('comment')" style="box-shadow: 0px 0px 3px 3px #ddd">
-                    <el-icon><ChatDotSquare /></el-icon>
+                    <el-icon>
+                        <ChatDotSquare />
+                    </el-icon>
                 </el-button>
             </el-badge>
         </div>
         <div style="position: fixed; bottom: 100px; right: 20px; z-index: 9999">
             <el-badge :value="this.thumbCount" class="item" :hidden="this.thumbCount == 0">
-                <el-button v-if="this.myThumb.isSupporter" type="primary" circle @click="createThumb" style="box-shadow: 0px 0px 3px 3px #ddd">
-                    <el-icon><Pointer /></el-icon>
+                <el-button v-if="this.myThumb.isSupporter" type="primary" circle @click="createThumb"
+                    style="box-shadow: 0px 0px 3px 3px #ddd">
+                    <el-icon>
+                        <Pointer />
+                    </el-icon>
                 </el-button>
                 <el-button v-else circle @click="createThumb" style="box-shadow: 0px 0px 3px 3px #ddd">
-                    <el-icon><Pointer /></el-icon>
+                    <el-icon>
+                        <Pointer />
+                    </el-icon>
                 </el-button>
             </el-badge>
         </div>
         <div style="position: fixed; bottom: 150px; right: 20px; z-index: 9999">
             <el-button circle @click="this.scrollToBlock('top')" style="box-shadow: 0px 0px 3px 3px #ddd">
-                <el-icon><CaretTop /></el-icon>
+                <el-icon>
+                    <CaretTop />
+                </el-icon>
             </el-button>
         </div>
         <div style="position: fixed; bottom: 200px; right: 20px; z-index: 9999">
             <el-button circle @click="this.copyShareUrl()" style="box-shadow: 0px 0px 3px 3px #ddd">
-                <el-icon><Share /></el-icon>
+                <el-icon>
+                    <Share />
+                </el-icon>
             </el-button>
         </div>
         <!-- ========== ========== ========== 右侧快捷按钮：工具条 ========== ========== ==========  -->
         <!-- z-index: 9999;  -->
-        <div v-if="isShowFunctionButton && this.$store.state.user.token != undefined && this.$store.state.user.token != ''" style="position: fixed; top: 50px; right: 70px">
+        <div v-if="isShowFunctionButton && this.$store.state.user.token != undefined && this.$store.state.user.token != ''"
+            style="position: fixed; top: 50px; right: 70px">
             <!-- <el-popover placement="left" title="标题" width="200" trigger="hover">
                 <div>456456</div>
                 <el-button type="primary" icon="el-icon-menu" circle>click 激活</el-button>
@@ -280,32 +356,42 @@
             <el-popover placement="left" :width="360" trigger="click">
                 <template #reference>
                     <el-button type="primary" circle>
-                        <el-icon><Menu /></el-icon>
+                        <el-icon>
+                            <Menu />
+                        </el-icon>
                     </el-button>
                 </template>
                 <div style="font-size: 14px">
                     <el-row>
                         <el-col :span="6" v-if="this.collectedPermission.detail" style="color: red">
                             <span style="cursor: pointer">
-                                <el-icon><Warning /></el-icon>
+                                <el-icon>
+                                    <Warning />
+                                </el-icon>
                                 -详情
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.focus">
                             <span style="cursor: pointer" @click="docFocus()">
-                                <el-icon><FullScreen /></el-icon>
+                                <el-icon>
+                                    <FullScreen />
+                                </el-icon>
                                 -预览
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.his">
                             <span style="cursor: pointer" @click="history()">
-                                <el-icon><TakeawayBox /></el-icon>
+                                <el-icon>
+                                    <TakeawayBox />
+                                </el-icon>
                                 -历史
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.member" style="color: red">
                             <span style="cursor: pointer">
-                                <el-icon><User /></el-icon>
+                                <el-icon>
+                                    <User />
+                                </el-icon>
                                 -协作
                             </span>
                         </el-col>
@@ -313,25 +399,33 @@
                     <el-row style="padding-top: 14px">
                         <el-col :span="6" v-if="this.collectedPermission.create">
                             <span style="cursor: pointer" @click="createDoc()">
-                                <el-icon><CirclePlus /></el-icon>
+                                <el-icon>
+                                    <CirclePlus />
+                                </el-icon>
                                 -新建
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.create">
                             <span style="cursor: pointer" @click="createChildDoc()">
-                                <el-icon><CirclePlus /></el-icon>
+                                <el-icon>
+                                    <CirclePlus />
+                                </el-icon>
                                 -子文档
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.edit">
                             <span style="cursor: pointer" @click="editDoc()">
-                                <el-icon><Edit /></el-icon>
+                                <el-icon>
+                                    <Edit />
+                                </el-icon>
                                 -编辑
                             </span>
                         </el-col>
                         <el-col :span="6" v-if="this.collectedPermission.copy">
                             <span style="cursor: pointer" @click="copyDoc()">
-                                <el-icon><DocumentCopy /></el-icon>
+                                <el-icon>
+                                    <DocumentCopy />
+                                </el-icon>
                                 -复制
                             </span>
                         </el-col>
@@ -344,14 +438,18 @@
         <!-- z-index: 9999;  -->
         <div v-if="isShowFunctionButton" style="position: fixed; top: 50px; right: 20px">
             <el-button type="success" circle @click="isShowAnchor = !isShowAnchor">
-                <el-icon><Tickets /></el-icon>
+                <el-icon>
+                    <Tickets />
+                </el-icon>
             </el-button>
         </div>
     </div>
     <div v-else>
         <div style="position: fixed; bottom: 50px; right: 20px; z-index: 9999">
             <el-button circle @click="this.colFocus()" style="box-shadow: 0px 0px 3px 3px #ddd">
-                <el-icon><Reading /></el-icon>
+                <el-icon>
+                    <Reading />
+                </el-icon>
             </el-button>
         </div>
     </div>
@@ -435,7 +533,7 @@ export default {
         window.removeEventListener('storage', this.HandleUiMsg);
         window.removeEventListener('resize', this.handleResize);
     },
-    created() {},
+    created() { },
     methods: {
         handleResize(event) {
             this.fullWidth = document.documentElement.clientWidth;
@@ -611,13 +709,26 @@ export default {
                             this.titles = [];
                             // return;
                         } else {
+                            // 这里给titles设置id，方便后续通过id来定位
+                            titles.forEach((title, index) => {
+                                try {
+                                    title.setAttribute('id', `doc-title-${parseInt(index) + 1}`);
+                                } catch (err) {
+                                    console.log('设置标题定位ID失败');
+                                }
+                            });
                             const hTags = Array.from(new Set(titles.map(title => title.tagName))).sort();
+                            // 展示一共有几级标题，如：H1、H2、H3，后续使用排序来确认层级
+                            console.log(hTags);
                             this.titles = titles.map(el => ({
                                 title: el.innerText,
                                 lineIndex: el.getAttribute('data-v-md-line'),
-                                indent: hTags.indexOf(el.tagName)
+                                indent: hTags.indexOf(el.tagName),
+                                titleId: el.getAttribute('id'),
                             }));
                         }
+                        console.log('titles:');
+                        console.log(this.titles);
 
                         // 界面处理-2：锚点定位（定位可能失败，增加异常处理）
                         // 支持两种锚点：
@@ -791,16 +902,17 @@ export default {
             const heading = editor.$el.querySelector(`.v-md-editor-preview [data-v-md-line="${lineIndex}"]`);
 
             if (heading) {
+                // 正常滚动
                 console.log('handleAnchorClick:' + heading.offsetTop);
                 document.getElementById('docContainer').scrollTop = heading.offsetTop;
-                // this.$refs.docContainer.scrollTop = heading.offsetTop;
-
-                //     debugger;
-                //     editor.previewScrollToTarget({
-                //         target: heading,
-                //         scrollContainer: editor.target,
-                //         top: 60
+                // 平滑滚动（经测试，不怎么平滑，有点抽风，可能是参数没调整正确）
+                // const targetElement = document.getElementById(anchor.titleId);
+                // if (targetElement) {
+                //     targetElement.scrollIntoView({
+                //         behavior: 'smooth',
+                //         block: 'start'
                 //     });
+                // }
             } else {
                 document.getElementById('docContainer').scrollTop = 0;
             }
@@ -937,6 +1049,7 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 /* 大纲导航特效 */
 .anchor-item {
     cursor: pointer;
@@ -946,6 +1059,7 @@ export default {
     position: relative;
     color: #636363;
 }
+
 .anchor-item:before {
     transition: all 0.2s linear;
     content: '';
@@ -956,19 +1070,23 @@ export default {
     top: 0;
     left: 0;
 }
+
 .anchor-item:hover:before {
     background: #59a1ff46;
     width: 100%;
 }
+
 /* 修复markdown代码带滚动条问题 */
 .vuepress-markdown-body {
     overflow: hidden;
 }
+
 @media screen and (max-width: 800px) {
     #doc-menu-aside {
         display: none;
     }
 }
+
 /* @media screen and (max-width: 1000px) {
     #doc-anchor-aside {
         display: none;
