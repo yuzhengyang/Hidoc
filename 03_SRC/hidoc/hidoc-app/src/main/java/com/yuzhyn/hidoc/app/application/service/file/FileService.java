@@ -34,6 +34,7 @@ import reactor.util.function.Tuples;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
@@ -75,8 +76,7 @@ public class FileService {
      */
     public boolean checkSpaceLimit(String userId, long fileSize) {
         SysUserFileConf conf = sysUserFileConfMapper.selectById(userId);
-        if (null != conf && conf.getUsedSpace() < conf.getSpaceLimit() &&
-                fileSize < (conf.getSpaceLimit() - conf.getUsedSpace())) {
+        if (null != conf && conf.getUsedSpace() < conf.getSpaceLimit() && fileSize < (conf.getSpaceLimit() - conf.getUsedSpace())) {
             return true;
         }
         return false;
@@ -176,11 +176,7 @@ public class FileService {
             sysFile.setMd5(FileCharCodeTool.md5(dest));
             sysFile.setSha1(FileCharCodeTool.sha1(dest));
             // 查询重复文件（依据文件特征码）
-            File record = fileMapper.selectOne(new LambdaQueryWrapper<File>()
-                    .eq(File::getIsDelete, false)
-                    .eq(File::getMd5, sysFile.getMd5())
-                    .eq(File::getSha1, sysFile.getSha1())
-                    .eq(File::getSize, sysFile.getSize()));
+            File record = fileMapper.selectOne(new LambdaQueryWrapper<File>().eq(File::getIsDelete, false).eq(File::getMd5, sysFile.getMd5()).eq(File::getSha1, sysFile.getSha1()).eq(File::getSize, sysFile.getSize()));
             // 查询到已经有相同文件，重置文件实体类
             if (record != null) {
                 log.info("查询到已经有相同文件，删除本次上传的文件，减少空间占用");
@@ -225,9 +221,7 @@ public class FileService {
         if (fileSaveFlag) {
             // 验证当前用户的Bucket是否存在
             // 如果不存在，则创建新的Bucket
-            FileBucket bucket = fileBucketMapper.selectOne(new LambdaQueryWrapper<FileBucket>()
-                    .eq(FileBucket::getUserId, sysFile.getUserId())
-                    .eq(FileBucket::getName, bucketName));
+            FileBucket bucket = fileBucketMapper.selectOne(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, sysFile.getUserId()).eq(FileBucket::getName, bucketName));
             boolean bucketSaveFlag = (null != bucket);
             if (null == bucket) {
                 bucket = new FileBucket();
@@ -277,19 +271,13 @@ public class FileService {
      */
     public Tuple2<FileCursor, File> getDownloadFile(String userPrefix, String bucketName, String fileName) {
         if (StringTool.ok(userPrefix, bucketName, fileName)) {
-            SysUserFileConf conf = sysUserFileConfMapper.selectOne(new LambdaQueryWrapper<SysUserFileConf>()
-                    .eq(SysUserFileConf::getUrlPrefix, userPrefix));
+            SysUserFileConf conf = sysUserFileConfMapper.selectOne(new LambdaQueryWrapper<SysUserFileConf>().eq(SysUserFileConf::getUrlPrefix, userPrefix));
 
             if (conf != null) {
-                FileBucket bucket = fileBucketMapper.selectOne(new LambdaQueryWrapper<FileBucket>()
-                        .eq(FileBucket::getUserId, conf.getUserId()).eq(FileBucket::getName, bucketName));
+                FileBucket bucket = fileBucketMapper.selectOne(new LambdaQueryWrapper<FileBucket>().eq(FileBucket::getUserId, conf.getUserId()).eq(FileBucket::getName, bucketName));
 
                 if (bucket != null) {
-                    List<FileCursor> cursorList = fileCursorMapper.selectList(new LambdaQueryWrapper<FileCursor>()
-                            .eq(FileCursor::getUserId, conf.getUserId())
-                            .eq(FileCursor::getBucketId, bucket.getId())
-                            .eq(FileCursor::getFileName, fileName)
-                            .orderByDesc(FileCursor::getVersion));
+                    List<FileCursor> cursorList = fileCursorMapper.selectList(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, conf.getUserId()).eq(FileCursor::getBucketId, bucket.getId()).eq(FileCursor::getFileName, fileName).orderByDesc(FileCursor::getVersion));
                     FileCursor cursor = null;
                     if (ListTool.ok(cursorList)) cursor = cursorList.get(0);
                     if (null != cursor && null != cursor.getExpiryTime() && LocalDateTime.now().isBefore(cursor.getExpiryTime())) {
@@ -310,8 +298,7 @@ public class FileService {
      */
     public Tuple2<FileCursor, File> getDownloadFileByCursor(String cursorId) {
         if (null != cursorId) {
-            FileCursor cursor = fileCursorMapper.selectOne(new LambdaQueryWrapper<FileCursor>()
-                    .eq(FileCursor::getId, cursorId));
+            FileCursor cursor = fileCursorMapper.selectOne(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getId, cursorId));
             if (null != cursor && null != cursor.getExpiryTime() && LocalDateTime.now().isBefore(cursor.getExpiryTime())) {
                 File sysFile = fileMapper.selectById(cursor.getFileId());
                 return Tuples.of(cursor, sysFile);
@@ -329,8 +316,7 @@ public class FileService {
     public Tuple2<FileCursor, File> getDownloadFileByUname(String uname) {
         if (null != uname) {
 //            try{
-            FileCursor cursor = fileCursorMapper.selectOne(new LambdaQueryWrapper<FileCursor>()
-                    .eq(FileCursor::getUname, uname));
+            FileCursor cursor = fileCursorMapper.selectOne(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUname, uname));
             if (null != cursor && null != cursor.getExpiryTime() && LocalDateTime.now().isBefore(cursor.getExpiryTime())) {
                 File sysFile = fileMapper.selectById(cursor.getFileId());
                 return Tuples.of(cursor, sysFile);
@@ -397,6 +383,34 @@ public class FileService {
                 log.error(ExceptionTool.getStackTrace(ex));
             }
         }
+    }
+
+    public java.io.File getIoFile(FileCursor sysFileCursor, File sysFile) {
+        java.io.File file = null;
+        if (sysFileCursor == null || sysFile == null) return file;
+        try {
+            try {
+                FileDownloadLog log = new FileDownloadLog();
+                log.setId(R.SnowFlake.nexts());
+                log.setIp("");
+                log.setCreateTime(LocalDateTime.now());
+                log.setCursorId(sysFileCursor.getId());
+                log.setFileName(sysFile.getName());
+                log.setFileId(sysFile.getId());
+                R.Queues.FileDownloadLogQueue.add(log);
+            } catch (Exception ex) {
+            }
+
+            String pathName = DirTool.combine(R.Paths.SysFile, sysFile.getRealPath());
+
+            log.info("下载文件路径检查：" + pathName);
+            if (FileTool.isExist(pathName)) {
+                file = new java.io.File(pathName);
+            }
+        } catch (Exception ex) {
+            log.error(ExceptionTool.getStackTrace(ex));
+        }
+        return file;
     }
     //endregion
 }

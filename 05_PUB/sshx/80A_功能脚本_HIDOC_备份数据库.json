@@ -4,10 +4,8 @@
   "CmdLines": [
     ["wait", "2"],
     ["cmd", "cd /home/hidoc/app"],
-    ["cmd", "sh ./db-backup-hidoc.sh"],
+    ["cmd", "sh ./db-backup-hidoc.sh dbname=hidoc filename=db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
     ["wait", "180"],
-    ["cmd", "mv /home/hidoc/app/db-backup-hidoc.sql /home/hidoc/app/db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
-    ["wait", "10"],
     ["cmd", "md5sum /home/hidoc/app/db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
     ["wait", "10"],
     ["downfile", "/home/hidoc/app/db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql", "\\备份数据库文件\\db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],

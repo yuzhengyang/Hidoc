@@ -1,7 +1,6 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
@@ -9,27 +8,20 @@ import com.yuzhyn.azylee.core.ios.dirs.DirTool;
 import com.yuzhyn.azylee.core.ios.files.FileCharCodeTool;
 import com.yuzhyn.azylee.core.ios.files.FileTool;
 import com.yuzhyn.azylee.core.ios.txts.TxtTool;
+import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.application.entity.datacoll.DataColl;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
-import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
-import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
-import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -40,8 +32,8 @@ public class FileCheckSchedule {
     @Autowired
     FileMapper fileMapper;
 
-    // 每到50分钟，检查文件
-    @Scheduled(cron = "0 */50 * * * ?")
+    // 每间隔4小时，检查文件
+    @Scheduled(cron = "0 0 */4 * * ?")
     public void job() {
         // 查询1000个没有删除的并且没有进行检查或者最近1天没进行检查的文件
 //        LocalDateTime localDateTime = LocalDateTime.now().minusDays(1);
@@ -91,6 +83,9 @@ public class FileCheckSchedule {
                         + item.getPath()
                         + ", "
                         + item.getName());
+
+                // 检查一个文件要等待一下，避免CPU占用高
+                Sleep.s(1);
             }
 
             // 写入到文件信息文件中
