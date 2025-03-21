@@ -2,197 +2,199 @@
 
 ## Introduction
 
-Hidoc is a lightweight and simple **online knowledge document sharing system**, suitable for teams to share documents.
+Hidoc is a lightweight and simple **online knowledge documentation sharing system**, suitable for team document sharing.
 
-## Version Description
-Since it is an independent project with a high degree of freedom, the versions of components will be updated and upgraded significantly at irregular intervals.
+Chinese documentation please refer to: [README.md](README.md)
+English documentation please refer to: [README.EN.md](README.EN.md)
 
-After the key components are upgraded, development will continue on the main branch for further research.
+## Version Information
 
-Of course, for the old versions without component upgrades, branches will be created for backup, and the backup information will be continuously recorded.
+As an independent project with high flexibility, the component versions will be updated and upgraded periodically.
+
+After upgrading key components, development will continue on the main branch for further research.
+
+Older versions without component upgrades will be backed up in branches, and backup information will be continuously recorded.
 
 ### Branch Information
-| Creation Date | Branch | Status | Technical Specifications |
-|------------|----------------------------------|------------|------------|
-| - | main | In progress | JDK17 + SPRING 3.0 + PostgreSQL13^ |
-| 2023-11-13 | 2.0.0 | Completed | JDK17 + SPRING 3.0 + PostgreSQL13^  |
-| 2023-09-25 | 1.0.0 | Completed | JDK8 + SPRING 2.7.2 + PostgreSQL13^ |
+| Creation Date | Branch                         | Status     | Technical Details |
+|---------------|--------------------------------|------------|-------------------|
+| -             | main                           | In Progress | JDK21 + SPRING 3.0 + PostgreSQL13^ |
+| 2023-11-13    | 2.0.0                          | Completed  | JDK17 + SPRING 3.0 + PostgreSQL13^ |
+| 2023-09-25    | 1.0.0                          | Completed  | JDK8 + SPRING 2.7.2 + PostgreSQL13^ |
 
 ## Features
 
 ### Quick Writing
 1. Create documents using standard `Markdown`.
-2. Support `defining templates` and applying `template` content.
-3. Support `referencing documents` and inserting `associated document links` to build a `knowledge network diagram`.
-4. Support quick document copying.
-5. Support automatic uploading of copied and pasted images.
-6. Support inserting `code` with `code highlighting` and `line highlighting` for multiple languages.
-7. Support `mermaid` diagrams, enabling custom diagrams such as `flowcharts` and `mind maps`.
-8. Record all modification records and retain `history`.
+2. Support for `template definition` and applying `template` content.
+3. Support for `referencing documents` to insert `related document links` and build a `knowledge graph`.
+4. Quickly duplicate documents.
+5. Copy-paste images for automatic upload.
+6. Insert `code` with support for multiple languages, `syntax highlighting`, and `line highlighting`.
+7. Support for `mermaid` diagrams, enabling `flowcharts`, `mind maps`, and other custom illustrations.
+8. Record all modification history and retain `version history`.
 
-### Collaborative Processing
-1. Open `collaboration` processing, allowing `inviting members` to jointly maintain.
-2. Collaboration provides a `lock` mechanism to avoid editing conflicts.
+### Collaboration
+1. Open `collaboration` features, allowing `team members` to co-maintain documents.
+2. Collaboration includes a `locking` mechanism to avoid editing conflicts.
 
 ### Permission Management
 1. Rich permission management capabilities to ensure security.
-2. Registered users support `restricting corporate email addresses`.
-3. The front end supports `host` filtering, allowing certain entry `hosts` to be restricted to `require login for use`.
-4. Support setting the `open` and `private` status of document collections.
-5. Support setting document collections to `require login to view`.
-6. Support inviting `collaborating members` to edit document collections.
+2. Registration supports `enterprise email restrictions`.
+3. Frontend supports `host` filtering to restrict certain entry `hosts` to `login-only` usage.
+4. Document collections can be set to `public` or `private`.
+5. Document collections can require `login to view`.
+6. Invite `collaborators` to edit document collections.
 
 ### Comfortable Reading
 1. Provide a `table of contents` for an overview of all documents.
-2. Provide an `outline` for quickly locating specific `chapters`.
-3. Support `full-text search and filtering` within document collections for convenient querying.
-4. Display in `large font` for comfortable reading.
-5. Provide editing information display for intuitive viewing of editors and editing times.
-6. Support `reading statistics` to understand document popularity.
+2. Provide an `outline panel` for quick navigation to specific `sections`.
+3. Support `full-text search` within document collections for easy querying.
+4. `Large font` display for comfortable reading.
+5. Display editing information, showing editors and edit timestamps.
+6. Support for `reading statistics` to understand document popularity.
 
-### Various Interactions
-1. Support `comments` and `replies` for easy Q&A.
-2. The workspace provides a `comment summary` to avoid missing information.
-3. Support `liking` to enhance the author's `happiness`.
+### Interactive Features
+1. Support for `comments` and `replies` for simple Q&A.
+2. A `comment summary` in the workspace ensures no information is missed.
+3. Support for `likes` to enhance author `satisfaction`.
 
 ### Online Cloud Storage
-1. Provide a `simplified` `cloud storage` service for uploading and downloading files.
-2. Download by username as the `url`, which is unique.
-3. Support `multi-version management` of files with the same name, and the same link automatically uses the `latest version`.
-4. Precise `file quota` control for controllable user space usage.
-5. Provide file `deletion` and `recovery from the recycle bin`, supporting file recovery within `180 days`.
-6. Files support `fingerprint` extraction, and files with the same fingerprint do not occupy additional space.
-7. Fixed download links can support some simple `software update` capabilities.
+1. Provide a `streamlined` `cloud storage` service for uploading and downloading files.
+2. Unique `URL` for downloads based on username.
+3. Support for `multi-version management` of files with the same name, automatically using the `latest version`.
+4. Precise `file quota` control to manage user storage usage.
+5. Support for file `deletion` and `recovery` from the recycle bin for up to `180 days`.
+6. Extract file `fingerprints` to avoid duplicate storage for files with the same fingerprint.
+7. Fixed download links to support simple `software updates`.
 
 ### Code Documentation
-1. Support documenting `code comments` for easy `retrieval`, viewing, and display.
-2. Support batch uploading of packaged code and `structured` analysis and storage.
-3. Support rich `blocking` of comments, allowing settings for descriptions, scenarios, directories, restrictions, examples, modification records, etc.
-4. Support multiple `views` for viewing code, such as search mode, directory mode, and package mode.
-5. Visually display code and comment information on the page.
+1. Support for `code comments` documentation for easy `searching`, viewing, and display.
+2. Support for bulk uploading and `structural analysis` of packaged code.
+3. Rich comment `segmentation` support, including descriptions, scenarios, directories, constraints, examples, and modification records.
+4. Support for multiple `views` to browse code, such as search mode, directory mode, and package mode.
+5. Intuitive display of code and comment information on the page.
 
 ### Data Collection
-1. Support custom `data collection plans`.
-2. Support `receiving data` information through interfaces.
-3. Support setting the `start and end times` for data collection.
+1. Support for custom `data collection plans`.
+2. Support for `API-based data` reception.
+3. Support for setting `start and end times` for data collection.
 
 ### Service Management
-1. Support configuring `SSH` connections to `Linux` servers.
-2. Support `SSH` remote calls and viewing `execution results`.
+1. Support for configuring `SSH` connections to `Linux` servers.
+2. Support for `SSH` remote execution and viewing of `execution results`.
 
 ### Rule Restrictions
-1. Support setting `restrictions` based on rule matching.
-2. Support lightweight `authorization restriction` information for client software.
+1. Support for rule-based `restriction` settings.
+2. Support for lightweight client software `authorization restrictions`.
 
-### Multiple Languages
-1. Support extended settings for multiple languages.
-2. Languages can be dynamically switched during use.
+### Multi-Language Support
+1. Support for multi-language extension settings.
+2. Dynamic language switching during usage.
 
 ### Flexible Deployment
-1. Front-end and back-end separation, allowing `flexible deployment` as needed.
-2. The front end can be deployed multiple times to support `different login requirements`.
-3. The back end starts with a separate `jar` package, with `one-click startup`, which is extremely convenient.
-4. The database uses the powerful `PostgreSQL`, with excellent performance and easy support for `hundreds of millions` of data.
-5. Files are stored in a specified `directory` for easy `migration` and `backup`.
-6. Support deployment in various network environments to suit different users and protect data security.
+1. Frontend and backend separation for `flexible deployment` as needed.
+2. Multiple frontend deployments to support `different login requirements`.
+3. Backend runs as a standalone `jar` package with `one-click startup` for convenience.
+4. Database uses the powerful `PostgreSQL`, offering excellent performance and supporting `billion-level` data.
+5. Files are stored in a specified `directory`, facilitating `migration` and `backup`.
+6. Suitable for deployment in various network environments, ensuring data security for different users.
 
 ### Continuous Improvement
-1. The product is updated irregularly and continuously improved.
+1. The product is updated periodically for continuous improvement.
 
-### Let Yourself Go~
-1. Add various interesting features irregularly.
-2. Online Cloud Storage: File sharing and downloading (see the above description).
-3. Code Documentation: Building code comments (see the above description).
-4. Data Collection: Data collection and aggregation (see the above description).
-5. Service Management: SSH calls for services (see the above description).
-6. Rule Restrictions: Rule matching interfaces (see the above description).
+### Creative Additions
+1. Periodically add interesting features.
+2. Online cloud storage: File sharing and downloading (see above description).
+3. Code documentation: Code comment construction (see above description).
+4. Data collection: Data collection and summary (see above description).
+5. Service management: SSH service invocation (see above description).
+6. Rule restrictions: Restriction matching interface (see above description).
 
-## Scenarios
+## Use Cases
 
-### Document Organization and Construction
-Structured document organization is required for easy management, classification, viewing, and reading.
+### Document Organization
+Structure and organize documents for easy management, classification, and readability.
 
-### Team Knowledge Inheritance
-With a large number of team members, it is suitable for knowledge summarization and precipitation, which is beneficial to the long-term development of the team.
+### Team Knowledge Sharing
+Ideal for summarizing and preserving team knowledge, fostering long-term team development.
 
-### Standardized Document Manuals
-Summarize standardized documents and introductory manuals for new employees to reduce training costs and accelerate the integration of members.
+### Standardized Manuals
+Create standardized manuals and onboarding guides for new members to reduce training costs and accelerate integration.
 
 ### Knowledge Tutorials
-After researching some technologies, organize documents for everyone to learn and make progress together.
+Document technical research for team learning and collective progress.
 
-### File Sharing and Downloading
-Manage public files and share some software or documents.
+### File Sharing
+Manage public files and share software or documents.
 
-### Code Documentation Construction
-There is a need for code documentation construction, requiring structured viewing and retrieval.
+### Code Documentation
+Build structured and searchable code documentation.
 
-### Data Collection and Aggregation
-There is a need for collecting random and discrete data.
+### Data Collection
+Collect and summarize random and discrete data.
 
-### Service SSH Calls
-Linux servers are used in the team, and some SSH scripts and automatic processing are allowed.
+### SSH Service Invocation
+Use Linux servers within the team and allow SSH scripts and automated processing.
 
-## Demonstration Address
+## Demo
 
-[Demonstration Address](https://www.yuzhyn.top/)
-Account and password: duanyu / duanyu
+[Demo Link](https://www.yuzhyn.top/)  
+Account/Password: duanyu / duanyu
 
 ## Technical Features
 
-Developed based on Java SpringBoot, it can support various scalable development based on the Spring family of technologies.
+Developed with Java SpringBoot, it supports scalable development based on the Spring ecosystem.
 
-It is very suitable for developers using the current VUE and SpringBoot technology stack for use and expansion, with high playability.
+Highly suitable for developers using the VUE and SpringBoot technology stack, offering great flexibility and extensibility.
 
-> Note: Heavyweight middleware will not be introduced in the current construction concept.
+> Note: The current development approach avoids using heavyweight middleware.
 
-### Front-end Technologies
-- VUE3 front-end framework
-- [ElementUI Plus](https://element-plus.gitee.io/#/zh-CN) front-end UI framework
-- [v-md-editor](https://ckang1229.gitee.io/vue-markdown-editor/zh/) Markdown editor
+### Frontend Technology
+- VUE3 frontend framework
+- [ElementUI Plus](https://element-plus.gitee.io/#/en-US) frontend UI framework
+- [v-md-editor](https://ckang1229.gitee.io/vue-markdown-editor/en/) Markdown editor
 
-### Back-end Technologies
+### Backend Technology
 - SpringBoot
 - Mybatis & MybatisPlus
-- ehcache in-memory cache
+- ehcache in-memory caching
 - lombok
-- fastjson JSON processing
+- fastjson for JSON processing
 - druid database connection pool
-- javaparser Java code parser
-- jsoup HTML text parser
-- javax.mail email sending
-- emoji-java emoji expression processing
+- javaparser for Java code parsing
+- jsoup for HTML text parsing
+- javax.mail for email sending
+- emoji-java for emoji processing
 
 ### Database Technology
 - PostgreSQL
 
-## Release and Deployment
+## Deployment
 
 ### Database
 
 Install PostgreSQL 13.
 
-Note: Due to the use of JSON types and other features of the PG database, only the PG database is currently supported.
+Note: Due to the use of JSON types and other features of PostgreSQL, only PostgreSQL is supported.
 
-After installing the database, you need to configure the yml configuration file of the Java service and modify the database connection information.
+After installation, configure the database connection information in the Java service's yml configuration file.
 
-### Front-end WEB
+### Frontend Web
 
-First, modify the address for the front end to access the back end. In the config.js file in the front-end directory, you need to modify the IP address and port number.
+First, modify the backend address in the frontend directory's `config.js` file by updating the IP address and port.
 
-The configuration content is as follows:
+Configuration example:
 
 ```javascript
 var config = {
     name: 'yuzhengyang',
-    baseServer: 'http:///101.132.159.3:24001/',
+    baseServer: 'http://101.132.159.3:24001/',
     imageServer: 'http://101.132.159.3:24001/f/d/u/'
 };
 ```
 
-The front end is deployed and started using nginx.
-
-The configuration is as follows:
+Deploy the frontend using nginx with the following configuration:
 
 ```nginx
 user   root;
@@ -219,24 +221,22 @@ http {
 }
 ```
 
-### Back-end JAVA Service
+### Backend Java Service
 
-The back end is started directly using the packaged Jar package.
-
-Startup command:
+Run the backend as a packaged Jar file with the following command:
 
 ```bash
-nohup java -Dfile.encoding=utf-8 -jar hidoc-app-0.0.1-SNAPSHOT.jar --spring.config.location=application.yml> ./nohup_output &
+nohup java -Dfile.encoding=utf-8 -jar hidoc-app-0.0.1-SNAPSHOT.jar --spring.config.location=application.yml > ./nohup_output &
 ```
 
-## Agreement
+## License
 
-Please comply with the GPL-3.0 license agreement.
+Please comply with the GPL-3.0 license.
 
-Users of the open-source version must retain the copyright identification related to "Hidoc Documentation" and are prohibited from modifying or deleting the copyright identification related to "Hidoc Documentation".
+Users of the open-source version must retain the `Hidoc Documentation` copyright notice and are prohibited from modifying or removing it.
 
-If violated, the developers reserve the right to hold the infringer accountable.
+Violation of this rule may result in legal action by the developer.
 
 ## About the Author
 
-Email：[yuzhyn@163.com](mailto:yuzhyn@163.com)
+Email: [yuzhyn@163.com](mailto:yuzhyn@163.com)
