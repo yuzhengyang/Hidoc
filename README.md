@@ -5,11 +5,8 @@
 Hidoc 是一款轻量简单的 **在线知识文档分享系统**，适合团队分享文档。
 
 
-
-中文文档请查看：[README.md](README.md)
-
-英文文档请查看：[README.EN.md](README.EN.md)
-
+Chinese documentation please refer to: [README.md](README.md)
+English documentation please refer to: [README.EN.md](README.EN.md)
 
 
 
