@@ -151,7 +151,7 @@ English documentation please refer to: [README.EN.md](README.EN.md)
 
 ## 演示地址
 
-[演示地址](https://www.yuzhyn.top/)
+[演示地址](https://hidoc.maozi.io/)
 账号密码：duanyu / duanyu
 
 

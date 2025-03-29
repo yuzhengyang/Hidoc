@@ -139,7 +139,7 @@ Use Linux servers within the team and allow SSH scripts and automated processing
 
 ## Demo
 
-[Demo Link](https://www.yuzhyn.top/)  
+[Demo Link](https://hidoc.maozi.io/)  
 Account/Password: duanyu / duanyu
 
 ## Technical Features
