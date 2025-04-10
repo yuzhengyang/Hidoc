@@ -1,7 +1,12 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
@@ -23,6 +28,7 @@ import com.yuzhyn.hidoc.app.application.entity.file.FileDownloadLog;
 import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocQueryLog;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManExeLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysMachine;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysStatusLog;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileDownloadLogMapper;
@@ -30,6 +36,7 @@ import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
 import com.yuzhyn.hidoc.app.application.mapper.javadoc.JavaDocQueryLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManExeLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysAccessLogMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysStatusLogMapper;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import com.yuzhyn.hidoc.app.utils.EsTool;
@@ -72,6 +79,8 @@ public class AppDefaultSchedule {
     @Autowired
     JavaDocQueryLogMapper javaDocQueryLogMapper;
 
+    @Autowired
+    SysMachineMapper sysMachineMapper;
 
     @Value("${app-custom.env:}")
     private String CeKey;
@@ -104,6 +113,53 @@ public class AppDefaultSchedule {
 
         // 清理30分钟前的ssh连接
         cleanSshConnection();
+
+        // 定时刷新密钥
+        resetSecretKey();
+
+        // 定时获取其他的服务信息
+        getOtherSysMachine();
+
+    }
+
+    public void getOtherSysMachine() {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime twoMinutesAgo = now.minusMinutes(2);
+            String machineId = R.MachineId;
+            List<SysMachine> list = sysMachineMapper.selectList(new LambdaQueryWrapper<SysMachine>()
+                    .ne(SysMachine::getMachineId, machineId)
+                    .gt(SysMachine::getUpdateTime, twoMinutesAgo)
+                    .isNotNull(SysMachine::getApiUrl)
+                    .ne(SysMachine::getApiUrl, "").orderByAsc(SysMachine::getSecretKey));
+            if (ObjectUtil.isNotEmpty(list)) {
+                for (SysMachine sysMachine : list) {
+                    try {
+                        R.Caches.sysMachines.put(sysMachine.getMachineId(), sysMachine);
+                        R.OtherSysMachineId = sysMachine.getMachineId();
+                    } catch (Exception ex) {
+                        log.error(ExceptionUtil.stacktraceToString(ex, 10));
+                    }
+                }
+            }
+        } catch (Exception ex) {
+        }
+    }
+
+    public void resetSecretKey() {
+        try {
+            String machineId = R.MachineId;
+            String uuid = UUIDTool.get();
+            if (ObjectUtil.isNotEmpty(machineId) && ObjectUtil.isNotEmpty(uuid)) {
+                UpdateWrapper<SysMachine> updateWrapper = new UpdateWrapper<SysMachine>()
+                        .set("secret_key", uuid)
+                        .set("update_time", LocalDateTime.now())
+                        .eq("machine_id", machineId);
+                sysMachineMapper.update(updateWrapper);
+                R.Caches.ServerSecretKey.put(uuid, LocalDateTime.now());
+            }
+        } catch (Exception ex) {
+        }
     }
 
     public void saveSysAccessLog() {

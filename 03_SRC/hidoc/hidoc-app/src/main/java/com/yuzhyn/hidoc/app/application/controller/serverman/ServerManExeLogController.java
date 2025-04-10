@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.controller.serverman;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,8 +12,10 @@ import com.yuzhyn.azylee.core.ios.txts.TxtTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManCmd;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManExeLog;
+import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManOutput;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManCmdMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManExeLogMapper;
+import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManOutputMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +40,9 @@ public class ServerManExeLogController {
 
     @Autowired
     ServerManExeLogMapper serverManExeLogMapper;
+
+    @Autowired
+    ServerManOutputMapper serverManOutputMapper;
 
     @PostMapping({"pageList", "pl"})
     public ResponseData pageList(@RequestBody Map<String, Object> params) {
@@ -76,6 +82,21 @@ public class ServerManExeLogController {
         }
         ResponseData responseData = ResponseData.ok();
         responseData.putDataMap("fileDetail", fileDetail.toString());
+        return responseData;
+    }
+
+    @PostMapping({"serverManOutput"})
+    public ResponseData serverManOutput(@RequestBody Map<String, Object> params) {
+        String dialogId = MapTool.getString(params, "dialogId", "");
+        Long serialNumber = MapTool.getLong(params, "serialNumber", 0L);
+        if (ObjectUtil.isEmpty(dialogId) || serialNumber == 0) {
+            return ResponseData.ok();
+        }
+        List<ServerManOutput> list = serverManOutputMapper.selectList(new LambdaQueryWrapper<ServerManOutput>()
+                .eq(ServerManOutput::getDialogId, dialogId)
+                .ge(ServerManOutput::getSerialNumber, serialNumber));
+        ResponseData responseData = ResponseData.ok();
+        responseData.putData(list);
         return responseData;
     }
 }

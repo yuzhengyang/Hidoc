@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "public"."sys_lock" (
   "create_time" timestamp(0) NOT NULL,
   "expire_time" timestamp(0) NOT NULL,
   "lock_count" int8 NOT NULL DEFAULT 0,
-  CONSTRAINT "sys_lock_pkey" PRIMARY KEY ("key", "val")
+  CONSTRAINT "sys_lock_pkey" PRIMARY KEY ("key")
 )
 ;
 

@@ -28,4 +28,7 @@ public interface FileMapper extends BaseMapper<File> {
 
     @Select("SELECT * FROM file WHERE is_delete = false AND ( check_time IS NULL OR check_time < #{checkTime} ) LIMIT #{limit}")
     List<File> selectNeedCheckFileList(@Param("checkTime") LocalDateTime checkTime, @Param("limit") int limit);
+
+    @Select("SELECT * FROM file WHERE is_delete = false AND id IN (SELECT file_id FROM file_cursor WHERE is_delete = false)")
+    List<File> selectHealthyFileList();
 }

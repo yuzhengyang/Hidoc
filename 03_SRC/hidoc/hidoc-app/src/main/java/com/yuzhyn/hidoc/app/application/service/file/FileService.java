@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.service.file;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
@@ -8,6 +9,7 @@ import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
 import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
 import com.yuzhyn.hidoc.app.application.entity.file.FileDownloadLog;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysMachine;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserFileConf;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileBucketMapper;
@@ -16,6 +18,7 @@ import com.yuzhyn.hidoc.app.application.mapper.file.FileDownloadLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
 import com.yuzhyn.hidoc.app.utils.ClientIPTool;
+import com.yuzhyn.hidoc.app.utils.http.FileFetchTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -340,22 +343,11 @@ public class FileService {
         if (sysFileCursor != null && sysFile != null) {
             try {
                 log.info("download log: " + ClientIPTool.getIp(request) + ", file: " + sysFile.getName());
-
-                try {
-                    FileDownloadLog log = new FileDownloadLog();
-                    log.setId(R.SnowFlake.nexts());
-                    log.setIp(ClientIPTool.getIp(request));
-                    log.setCreateTime(LocalDateTime.now());
-                    log.setCursorId(sysFileCursor.getId());
-                    log.setFileName(sysFile.getName());
-                    log.setFileId(sysFile.getId());
-                    R.Queues.FileDownloadLogQueue.add(log);
-                } catch (Exception ex) {
-                }
+                transfer(sysFile, sysFileCursor);
 
                 String pathName = DirTool.combine(R.Paths.SysFile, sysFile.getRealPath());
-
                 log.info("下载文件路径检查：" + pathName);
+
                 if (FileTool.isExist(pathName)) {
                     java.io.File file = new java.io.File(pathName);
                     // 配置文件下载
@@ -378,9 +370,53 @@ public class FileService {
                         log.error(ExceptionTool.getStackTrace(e));
                         log.error("Download  failed!");
                     }
+
+                    try {
+                        FileDownloadLog log = new FileDownloadLog();
+                        log.setId(R.SnowFlake.nexts());
+                        log.setIp(ClientIPTool.getIp(request));
+                        log.setCreateTime(LocalDateTime.now());
+                        log.setCursorId(sysFileCursor.getId());
+                        log.setFileName(sysFile.getName());
+                        log.setFileId(sysFile.getId());
+                        R.Queues.FileDownloadLogQueue.add(log);
+                    } catch (Exception ex) {
+                    }
                 }
             } catch (Exception ex) {
                 log.error(ExceptionTool.getStackTrace(ex));
+            }
+        }
+    }
+
+    /**
+     * 文件不存在的补偿机制，去其他服务器下载文件
+     *
+     * @param sysFile
+     * @param sysFileCursor
+     * @throws IOException
+     */
+    public void transfer(File sysFile, FileCursor sysFileCursor) throws IOException {
+        String pathName = DirTool.combine(R.Paths.SysFile, sysFile.getRealPath());
+        // 如果文件不存在，则去其他服务进行预先下载
+        if (!FileTool.isExist(pathName) && ObjectUtil.isEmpty(R.Caches.NotExistFile.getIfPresent(sysFile.getId()))) {
+            // 这里找一台其他服务器
+            SysMachine machine = R.Caches.sysMachines.getIfPresent(R.OtherSysMachineId);
+            if (ObjectUtil.isNotEmpty(machine)) {
+                // 为了避免循环下载，这里需要记录本文件不存在的标志，防止其他服务再来本服务下载文件
+                R.Caches.NotExistFile.put(sysFile.getId(), sysFile);
+
+                String url = machine.getApiUrl() + "/openapi/file/transfer/{serverSecretKey}/{cursorId}";
+                url = url.replace("{serverSecretKey}", machine.getSecretKey());
+                url = url.replace("{cursorId}", sysFileCursor.getId());
+                // 先下载到临时目录
+                String uuid = UUIDTool.get();
+                String tempPathName = DirTool.combine(R.Paths.SysFileTemp, uuid);
+
+                FileFetchTool.download(url, tempPathName, (downloadInfo) -> null);
+                DirTool.create(FileTool.getPath(pathName));
+                boolean fileMoveFlag = FileTool.move(tempPathName, pathName);
+                if (!fileMoveFlag) log.error("文件已下载，但是移动失败");
             }
         }
     }

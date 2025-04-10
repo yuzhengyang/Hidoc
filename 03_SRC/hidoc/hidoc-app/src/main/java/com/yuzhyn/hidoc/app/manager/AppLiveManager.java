@@ -19,6 +19,7 @@ import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
 import com.yuzhyn.hidoc.app.application.service.sys.EmailService;
 import com.yuzhyn.hidoc.app.application.service.sys.SysUserLoginService;
 import com.yuzhyn.hidoc.app.utils.EsTool;
+import com.yuzhyn.hidoc.app.utils.Telemeter;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +95,9 @@ public class AppLiveManager {
                 sysMachine.setMac("00:00:00:00:00:00");
                 sysMachine.setDataCenterId(R.DataCenterId);
                 sysMachine.setWorkerId(R.WorkerId);
+                sysMachine.setCreateTime(LocalDateTime.now());
+                sysMachine.setUpdateTime(LocalDateTime.now());
+                sysMachine.setSecretKey(UUIDTool.get());
                 sysMachineMapper.insert(sysMachine);
             }
         }
@@ -166,6 +170,7 @@ public class AppLiveManager {
         FlowManager.readRules();
 
         log.info("********** 配置加载完毕 **********");
+        Telemeter.send();
     }
 
     /**

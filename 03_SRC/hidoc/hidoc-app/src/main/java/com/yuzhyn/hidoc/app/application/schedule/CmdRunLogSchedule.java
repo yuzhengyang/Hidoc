@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
+import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormatPattern;
@@ -16,10 +17,12 @@ import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.doc.DocAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManExeLog;
+import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManOutput;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysStatusLog;
 import com.yuzhyn.hidoc.app.application.mapper.doc.DocAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManExeLogMapper;
+import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManOutputMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysAccessLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysStatusLogMapper;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
@@ -56,6 +59,9 @@ public class CmdRunLogSchedule {
     @Autowired
     ServerManExeLogMapper serverManExeLogMapper;
 
+    @Autowired
+    ServerManOutputMapper serverManOutputMapper;
+
 
 //    @Async // 是否等待上一线程执行完毕再执行，使用是不等待，直接创建执行，会产生并行执行
 
@@ -64,7 +70,7 @@ public class CmdRunLogSchedule {
      */
     @Scheduled(cron = "*/2 * * * * ?")
     public void job1() {
-        Map<String, List<String>> groupMap = new HashMap<>();
+        Map<String, List<CmdRunLog>> groupMap = new HashMap<>();
         for (int i = 0; i < 1000; i++) {
             CmdRunLog cmdRunLog = R.Queues.CmdRunLogQueue.poll();
             if (cmdRunLog == null) break;
@@ -73,14 +79,24 @@ public class CmdRunLogSchedule {
                 groupMap.put(cmdRunLog.getDialogId(), new ArrayList<>());
             }
 
-            groupMap.get(cmdRunLog.getDialogId()).add(new String(cmdRunLog.getTextBytes()));
+            groupMap.get(cmdRunLog.getDialogId()).add(cmdRunLog);
         }
 
+        List<ServerManOutput> readyToSaveList = new ArrayList<>();
         for (String dialogId : groupMap.keySet()) {
             StringBuilder stringBuilder = new StringBuilder();
-            for (String text : groupMap.get(dialogId)) {
+            for (CmdRunLog cmdRunLog : groupMap.get(dialogId)) {
+                String text = new String(cmdRunLog.getTextBytes());
                 stringBuilder.append(text);
                 stringBuilder.append(StringConst.NEWLINE);
+
+                ServerManOutput output = new ServerManOutput();
+                output.setId(R.SnowFlake.nexts());
+                output.setDialogId(dialogId);
+                output.setSerialNumber(R.Atomic.ServerManOutput.incrementAndGet());
+                output.setCreateTime(cmdRunLog.getCreateTime());
+                output.setOutput(text);
+                readyToSaveList.add(output);
 
                 // 如果读取到了特殊识别标记，则根据标记操作（关闭链接）
                 // [[##hidoc->serverman.run::end.succ//blablablabla]]
@@ -106,5 +122,11 @@ public class CmdRunLogSchedule {
             String file = DirTool.combine(R.Paths.ServerManSsh, dialogId + ".txt");
             TxtTool.append(file, stringBuilder.toString());
         }
+        // 批量插入到数据库
+        try{
+            if(ListTool.ok(readyToSaveList)){
+                serverManOutputMapper.insert(readyToSaveList);
+            }
+        }catch (Exception ex){}
     }
 }

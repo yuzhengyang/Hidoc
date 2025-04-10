@@ -15,6 +15,7 @@ import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocQueryLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysAccessLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysFlowLog;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysFlowRule;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysMachine;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
 import com.yuzhyn.hidoc.app.utils.EsTool;
 import com.yuzhyn.hidoc.app.utils.ssh.SshManager;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class R {
 
@@ -52,8 +55,15 @@ public final class R {
 
     public static EsTool EsTool = null;
 
+    public static String OtherSysMachineId = "";
+
+    // 原子计数器
+    public static class Atomic {
+        public static AtomicLong ServerManOutput = new AtomicLong(0);
+    }
+
     public static class Caches {
-//        public static Cache<String, UserInfo> UserInfo = CacheBuilder.newBuilder().build();
+        //        public static Cache<String, UserInfo> UserInfo = CacheBuilder.newBuilder().build();
         public static Cache<String, FileCursor> SysFileCursor = CacheBuilder.newBuilder().build();
         public static Cache<String, File> SysFile = CacheBuilder.newBuilder().build();
         /**
@@ -61,6 +71,9 @@ public final class R {
          * value: 访问记录列表
          */
         public static Cache<String, Map<Long, SysFlowLog>> SysFlowLogs = CacheBuilder.newBuilder().build();
+        public static Cache<String, LocalDateTime> ServerSecretKey = CacheBuilder.newBuilder().expireAfterAccess(3, TimeUnit.MINUTES).build();
+        public static Cache<String, SysMachine> sysMachines = CacheBuilder.newBuilder().expireAfterAccess(3, TimeUnit.MINUTES).build();
+        public static Cache<String, File> NotExistFile =CacheBuilder.newBuilder().build();
     }
 
     public static class Queues {

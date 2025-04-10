@@ -94,9 +94,11 @@ export default {
                 cmd: {},
                 log: {},
                 output: '',
+                prepareOutput: '',
                 refreshTimer: '',
                 refreshCount: 0,
-                runFinish: false
+                runFinish: false,
+                serialNumber: 1
             }
         };
     },
@@ -160,37 +162,70 @@ export default {
             });
         },
         refreshCmdLogOutput() {
+            let that = this;
             this.currentRunning.refreshCount--;
             if (this.currentRunning.log && this.currentRunning.refreshCount > 0) {
                 return request({
-                    url: '/serverManExeLog/fileDetail',
+                    url: '/serverManExeLog/serverManOutput',
                     method: 'post',
-                    data: { token: this.$store.state.user.token, id: this.currentRunning.log.id }
+                    data: { token: this.$store.state.user.token, dialogId: this.currentRunning.log.id, serialNumber: this.currentRunning.serialNumber }
                 }).then(res => {
-                    if (res.code == 0) {
-                        this.currentRunning.output = '```bash' + '\r\n' + res.meta.fileDetail + '\r\n' + '```';
+                    if (res.code == 0 && res.count > 0) {
+                        // 循环组装输出的内容
+                        for (let i = 0; i < res.data.length; i++) {
+                            // 设置序号为最新值，来防止重复获取数据
+                            this.currentRunning.serialNumber = res.data[i].serialNumber + 1;
+                            this.currentRunning.prepareOutput = this.currentRunning.prepareOutput + res.data[i].output;
 
-                        // 前端判断是否已经执行成功了，有执行成功的标记则不再刷新了
-                        if (res.meta.fileDetail.indexOf('##hidoc->serverman.run::end') > 0) {
-                            this.currentRunning.runFinish = true;
-                            clearInterval(this.currentRunning.refreshTimer);
+                            // 前端判断是否已经执行成功了，有执行成功的标记则不再刷新了
+                            if (res.data[i].output.indexOf('##hidoc->serverman.run::end') > 0) {
+                                this.currentRunning.runFinish = true;
+                                clearInterval(this.currentRunning.refreshTimer);
+                            }
                         }
+                        this.currentRunning.output = '```bash' + '\r\n' + this.currentRunning.prepareOutput + '\r\n' + '```';
 
                         // 应用滚动
                         this.$nextTick(() => {
                             let outputElement = document.getElementById('outputContainer').parentElement;
                             outputElement.scrollTop = outputElement.scrollHeight - outputElement.clientHeight;
                         });
-                        // console.log(`scrollHeight: ${outputElement.scrollHeight}, scrollTop: ${outputElement.scrollTop}, clientHeight: ${outputElement.clientHeight}`);
-                        // 这里根据高度判断来向下滚动不合适，输出的文本会突然变大，把高度撑的很高，就没有办法满足吸附条件了
-                        // if (outputElement.scrollHeight - outputElement.scrollTop - outputElement.clientHeight < 1000) {
-                        //     console.log('滚动条已经滚动到底部，将自动向下滚动');
-                        //     outputElement.scrollTop = outputElement.scrollHeight - outputElement.clientHeight;
-                        // }
                     }
                 });
             }
         },
+        // refreshCmdLogOutput() {
+        //     this.currentRunning.refreshCount--;
+        //     if (this.currentRunning.log && this.currentRunning.refreshCount > 0) {
+        //         return request({
+        //             url: '/serverManExeLog/fileDetail',
+        //             method: 'post',
+        //             data: { token: this.$store.state.user.token, id: this.currentRunning.log.id }
+        //         }).then(res => {
+        //             if (res.code == 0) {
+        //                 this.currentRunning.output = '```bash' + '\r\n' + res.meta.fileDetail + '\r\n' + '```';
+
+        //                 // 前端判断是否已经执行成功了，有执行成功的标记则不再刷新了
+        //                 if (res.meta.fileDetail.indexOf('##hidoc->serverman.run::end') > 0) {
+        //                     this.currentRunning.runFinish = true;
+        //                     clearInterval(this.currentRunning.refreshTimer);
+        //                 }
+
+        //                 // 应用滚动
+        //                 this.$nextTick(() => {
+        //                     let outputElement = document.getElementById('outputContainer').parentElement;
+        //                     outputElement.scrollTop = outputElement.scrollHeight - outputElement.clientHeight;
+        //                 });
+        //                 // console.log(`scrollHeight: ${outputElement.scrollHeight}, scrollTop: ${outputElement.scrollTop}, clientHeight: ${outputElement.clientHeight}`);
+        //                 // 这里根据高度判断来向下滚动不合适，输出的文本会突然变大，把高度撑的很高，就没有办法满足吸附条件了
+        //                 // if (outputElement.scrollHeight - outputElement.scrollTop - outputElement.clientHeight < 1000) {
+        //                 //     console.log('滚动条已经滚动到底部，将自动向下滚动');
+        //                 //     outputElement.scrollTop = outputElement.scrollHeight - outputElement.clientHeight;
+        //                 // }
+        //             }
+        //         });
+        //     }
+        // },
         openDrawerPanel(machine, cmd) {
             this.currentRunning.machine = machine;
             this.currentRunning.cmd = cmd;

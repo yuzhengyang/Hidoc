@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.schedule;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
@@ -11,7 +12,11 @@ import com.yuzhyn.azylee.core.ios.txts.TxtTool;
 import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
+import com.yuzhyn.hidoc.app.application.entity.file.FileCursor;
+import com.yuzhyn.hidoc.app.application.mapper.file.FileCursorMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
+import com.yuzhyn.hidoc.app.application.service.file.FileService;
+import com.yuzhyn.hidoc.app.application.service.sys.SysLockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -32,14 +37,23 @@ public class FileCheckSchedule {
     @Autowired
     FileMapper fileMapper;
 
+    @Autowired
+    FileCursorMapper fileCursorMapper;
+
+    @Autowired
+    FileService fileService;
+
+    @Autowired
+    SysLockService sysLockService;
+
     // 每间隔4小时，检查文件
-    @Scheduled(cron = "0 0 */4 * * ?")
+    @Scheduled(cron = "0 0 */1 * * ?")
     public void job() {
-        // 查询1000个没有删除的并且没有进行检查或者最近1天没进行检查的文件
-//        LocalDateTime localDateTime = LocalDateTime.now().minusDays(1);
-//        List<File> fileList = fileMapper.selectNeedCheckFileList(localDateTime, 1000);
-        // 这里变更一下，查找所有文件，检查状态
-        List<File> fileList = fileMapper.selectList(new LambdaQueryWrapper<File>().eq(File::getIsDelete, false));
+        long expireSeconds = (4L * 3600L) - 100L;
+        String lockKey = sysLockService.lock("FileCheckSchedule" + R.MachineId, expireSeconds, "");
+        if (ObjectUtil.isEmpty(lockKey)) return;
+
+        List<File> fileList = fileMapper.selectHealthyFileList();
         if (ListTool.ok(fileList)) {
             List<String> txts = new ArrayList<>();
             for (File item : fileList) {
@@ -57,6 +71,20 @@ public class FileCheckSchedule {
                 flag[1] = 'N';
                 flag[2] = 'N';
                 flag[3] = 'N';
+
+                // 如果文件不存在，则去其他服务器下载，这里限制只能去下载1GB以内的文件
+                long sizeLimit = 1024L * 1024L * 1024L;
+                if (!FileTool.isExist(target) && item.getSize() < sizeLimit) {
+                    List<FileCursor> cursorList = fileCursorMapper.selectList(new LambdaQueryWrapper<FileCursor>()
+                            .eq(FileCursor::getFileId, item.getId())
+                            .eq(FileCursor::getIsDelete, false));
+                    if (ObjectUtil.isNotEmpty(cursorList)) {
+                        try {
+                            fileService.transfer(item, cursorList.get(0));
+                        } catch (Exception ex) {
+                        }
+                    }
+                }
 
                 // 这里只有存在文件才进行检查，否则不进行检查（没有文件时会有一大堆错误信息）
                 if (FileTool.isExist(target)) {
@@ -88,7 +116,8 @@ public class FileCheckSchedule {
                 Sleep.s(1);
             }
 
-            // 写入到文件信息文件中
+            // 写入到文件信息文件中（先排一下序）
+            txts.sort(String::compareTo);
             FileTool.delete(R.Files.FilesInfo);
             for (String txt : txts) {
                 TxtTool.append(R.Files.FilesInfo, txt);
