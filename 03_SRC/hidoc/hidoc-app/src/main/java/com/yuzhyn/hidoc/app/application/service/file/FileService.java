@@ -339,11 +339,11 @@ public class FileService {
      * @param request
      * @param response
      */
-    public void download(FileCursor sysFileCursor, File sysFile, HttpServletRequest request, HttpServletResponse response) {
+    public void download(String sourceName, FileCursor sysFileCursor, File sysFile, HttpServletRequest request, HttpServletResponse response) {
         if (sysFileCursor != null && sysFile != null) {
             try {
                 log.info("download log: " + ClientIPTool.getIp(request) + ", file: " + sysFile.getName());
-                transfer(sysFile, sysFileCursor);
+                transfer(sysFile, sysFileCursor, sourceName);
 
                 String pathName = DirTool.combine(R.Paths.SysFile, sysFile.getRealPath());
                 log.info("下载文件路径检查：" + pathName);
@@ -396,16 +396,24 @@ public class FileService {
      * @param sysFileCursor
      * @throws IOException
      */
-    public void transfer(File sysFile, FileCursor sysFileCursor) throws IOException {
-        String pathName = DirTool.combine(R.Paths.SysFile, sysFile.getRealPath());
-        // 如果文件不存在，则去其他服务进行预先下载
-        if (!FileTool.isExist(pathName) && ObjectUtil.isEmpty(R.Caches.NotExistFile.getIfPresent(sysFile.getId()))) {
-            // 这里找一台其他服务器
-            SysMachine machine = R.Caches.sysMachines.getIfPresent(R.OtherSysMachineId);
-            if (ObjectUtil.isNotEmpty(machine)) {
-                // 为了避免循环下载，这里需要记录本文件不存在的标志，防止其他服务再来本服务下载文件
-                R.Caches.NotExistFile.put(sysFile.getId(), sysFile);
+    public void transfer(File sysFile, FileCursor sysFileCursor, String controllerName) {
+        // 判断内部处理逻辑的来源，能进入transfer的方法来源有：定时任务和下载文件
+        // 定时任务：FileCheckSchedule
+        // 下载文件：FileController 或 FileApiController
+        // 如果是FileApiController（直接进入transfer接口的，则不能循环再进行transfer调用）
+        if (controllerName.equals("FileApiController")) return;
 
+        // 如果文件已存在，则不需要补偿，则跳过transfer逻辑
+        String pathName = DirTool.combine(R.Paths.SysFile, sysFile.getRealPath());
+        if (FileTool.isExist(pathName)) return;
+
+        // 如果没有其他服务器，则无法补偿，则跳过transfer逻辑
+        if (R.Caches.sysMachines.size() == 0) return;
+
+        for (SysMachine machine : R.Caches.sysMachines.asMap().values()) {
+            if (machine == null) continue;
+
+            try {
                 String url = machine.getApiUrl() + "/openapi/file/transfer/{serverSecretKey}/{cursorId}";
                 url = url.replace("{serverSecretKey}", machine.getSecretKey());
                 url = url.replace("{cursorId}", sysFileCursor.getId());
@@ -415,8 +423,17 @@ public class FileService {
 
                 FileFetchTool.download(url, tempPathName, (downloadInfo) -> null);
                 DirTool.create(FileTool.getPath(pathName));
-                boolean fileMoveFlag = FileTool.move(tempPathName, pathName);
-                if (!fileMoveFlag) log.error("文件已下载，但是移动失败");
+
+                // 检查文件大小和MD5，匹配时才移动到正确位置
+                java.io.File dest = new java.io.File(tempPathName);
+                long size = dest.length();
+                String md5 = FileCharCodeTool.md5(dest);
+                if (size == sysFile.getSize() && sysFile.getMd5().equals(md5)) {
+                    boolean fileMoveFlag = FileTool.move(tempPathName, pathName);
+                    if (!fileMoveFlag) log.error("文件已下载，但是移动失败");
+                }
+            } catch (Exception ex) {
+                log.error(ex.getMessage());
             }
         }
     }

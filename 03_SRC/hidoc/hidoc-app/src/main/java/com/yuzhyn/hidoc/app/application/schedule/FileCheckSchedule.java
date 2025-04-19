@@ -46,12 +46,17 @@ public class FileCheckSchedule {
     @Autowired
     SysLockService sysLockService;
 
-    // 每间隔4小时，检查文件
-    @Scheduled(cron = "0 0 */1 * * ?")
+    // 检查文件，检查一次文件间隔4小时
+    @Scheduled(cron = "0 */1 * * * ?")
     public void job() {
+        String key = "FileCheckSchedule-" + R.MachineId;
         long expireSeconds = (4L * 3600L) - 100L;
-        String lockKey = sysLockService.lock("FileCheckSchedule" + R.MachineId, expireSeconds, "");
-        if (ObjectUtil.isEmpty(lockKey)) return;
+        String lockKey = sysLockService.lock(key, expireSeconds, "");
+        if (ObjectUtil.isEmpty(lockKey)) {
+            log.info(key + "：锁被占用");
+            return;
+        }
+        log.info(key + "：锁定成功：" + lockKey);
 
         List<File> fileList = fileMapper.selectHealthyFileList();
         if (ListTool.ok(fileList)) {
@@ -80,7 +85,7 @@ public class FileCheckSchedule {
                             .eq(FileCursor::getIsDelete, false));
                     if (ObjectUtil.isNotEmpty(cursorList)) {
                         try {
-                            fileService.transfer(item, cursorList.get(0));
+                            fileService.transfer(item, cursorList.get(0), "FileCheckSchedule");
                         } catch (Exception ex) {
                         }
                     }
@@ -113,7 +118,9 @@ public class FileCheckSchedule {
                         + item.getName());
 
                 // 检查一个文件要等待一下，避免CPU占用高
-                Sleep.s(1);
+                try{
+                    Thread.sleep(10);
+                }catch (Exception ex){}
             }
 
             // 写入到文件信息文件中（先排一下序）
