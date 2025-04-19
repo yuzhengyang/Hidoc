@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.service.team;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
@@ -78,6 +79,7 @@ public class TeamService {
     }
 
     public boolean isMember(String teamIds, String userId) {
+        if(ObjectUtil.isEmpty(teamIds)) return false;
         List<TeamMember> teamMemberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, userId));
         if (ListTool.ok(teamMemberList)) {
             for (TeamMember teamMember : teamMemberList) {
