@@ -162,6 +162,9 @@
             <el-form-item label="指令c" :label-width="formLabelWidth">
                 <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="this.cmdForm.prop.contentTc"></el-input>
             </el-form-item>
+            <el-form-item label="执行间隔" :label-width="formLabelWidth">
+                <el-input-number v-model="this.cmdForm.prop.interval" :min="0" :max="3600" />
+            </el-form-item>
         </el-form>
         <template #footer>
             <span class="dialog-footer">
@@ -391,6 +394,7 @@ export default {
             this.cmdForm.prop.contentTa = '';
             this.cmdForm.prop.contentTb = '';
             this.cmdForm.prop.contentTc = '';
+            this.cmdForm.prop.interval = 0;
 
             this.cmdForm.mode = 'create';
             this.cmdForm.dialog = true;
@@ -434,7 +438,8 @@ export default {
                         type: this.cmdForm.prop.type,
                         contentTa: this.cmdForm.prop.contentTa,
                         contentTb: this.cmdForm.prop.contentTb,
-                        contentTc: this.cmdForm.prop.contentTc
+                        contentTc: this.cmdForm.prop.contentTc,
+                        interval: this.cmdForm.prop.interval
                     }
                 }).then(res => {
                     if (res.code == 0) {
@@ -455,7 +460,8 @@ export default {
                         type: this.cmdForm.prop.type,
                         contentTa: this.cmdForm.prop.contentTa,
                         contentTb: this.cmdForm.prop.contentTb,
-                        contentTc: this.cmdForm.prop.contentTc
+                        contentTc: this.cmdForm.prop.contentTc,
+                        interval: this.cmdForm.prop.interval
                     }
                 }).then(res => {
                     if (res.code == 0) {

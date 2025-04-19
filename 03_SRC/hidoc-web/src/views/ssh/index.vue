@@ -23,13 +23,35 @@
                         <div v-for="cmd in item.cmdList" :key="cmd" class="cmd-item">
                             <el-container style="margin: 2px">
                                 <el-main style="font-size: 14px">{{ cmd.name }}</el-main>
-                                <el-aside style="padding: 3px" width="100px" v-if="this.isLogin">
-                                    <el-button type="success" circle @click="runCmd(item, cmd)">
-                                        <el-icon><VideoPlay /></el-icon>
-                                    </el-button>
-                                    <el-button type="primary" circle>
-                                        <el-icon><Operation /></el-icon>
-                                    </el-button>
+                                <el-aside style="padding: 3px" width="80px" v-if="this.isLogin">
+                                    <!-- <el-button type="success" circle @click="runCmd(item, cmd)">
+                                        <el-icon>
+                                            <VideoPlay />
+                                        </el-icon>
+                                    </el-button> -->
+                                    <el-progress class="cust-progress" type="circle" :percentage="cmd._waitProgress"
+                                        :status="cmd._waitProgress == 100 ? 'success' : 'warning'" stroke-width="5"
+                                        width="30" @click="runCmd(item, cmd)"
+                                        :style="{ cursor: cmd._waitProgress == 100 ? 'pointer' : 'not-allowed' }">
+                                        <template #default="{ }">
+                                            <span v-if="cmd._waitProgress">
+                                                <el-icon v-if="cmd._waitProgress == 100" :size="25" color="#13ce66">
+                                                    <VideoPlay />
+                                                </el-icon>
+                                                <span v-else style="font-size: 12px;">{{ cmd._waitSeconds }}</span>
+                                            </span>
+                                            <span v-else style="font-size: 12px;">
+                                                <el-icon :size="20">
+                                                    <More />
+                                                </el-icon>
+                                            </span>
+                                        </template>
+                                    </el-progress>
+                                    <!-- <el-button type="primary" circle>
+                                        <el-icon>
+                                            <Operation />
+                                        </el-icon>
+                                    </el-button> -->
                                 </el-aside>
                             </el-container>
                         </div>
@@ -38,23 +60,27 @@
                                 <span style="color: #888; font-size: 14px">{{ item.description }}</span>
                             </div>
                             <div v-if="item.teamExecuteList.length > 0" style="padding: 10px">
-                                <el-tag style="margin-right: 5px; cursor: pointer" v-for="team in item.teamExecuteList" :key="team.id" type="success" size="small">{{ team.name }}</el-tag>
+                                <el-tag style="margin-right: 5px; cursor: pointer" v-for="team in item.teamExecuteList"
+                                    :key="team.id" type="success" size="small">{{ team.name }}</el-tag>
                             </div>
                         </template>
                     </el-card>
                 </el-col>
             </el-row>
 
-            <el-drawer v-model="drawerPanel.visible" direction="btt" :show-close="false" :before-close="handleClose" size="85%" destroy-on-close="true">
+            <el-drawer v-model="drawerPanel.visible" direction="btt" :show-close="false" :before-close="handleClose"
+                size="85%" destroy-on-close="true">
                 <template #header="{ close, titleId, titleClass }">
                     <div :id="titleId" :class="titleClass">
                         <span style="font-weight: bold; color: #000">🖥️ {{ currentRunning.machine.name }}</span>
                         <span style="font-weight: bold; color: #aaa">（{{ currentRunning.machine.address }}）</span>
                         <span style="font-weight: bold; color: #f00">{{ currentRunning.cmd.name }}</span>
                     </div>
-                    <el-button type="success" @click="refreshCmdLogOutput">刷新结果</el-button>
+                    <!-- <el-button type="success" @click="refreshCmdLogOutput">刷新结果</el-button> -->
                     <el-button type="danger" @click="close">
-                        <el-icon class="el-icon--left"><CircleCloseFilled /></el-icon>
+                        <el-icon class="el-icon--left">
+                            <CircleCloseFilled />
+                        </el-icon>
                         Close
                     </el-button>
                 </template>
@@ -64,9 +90,12 @@
                         <span>{{ currentRunning.cmd.contentTa }}</span>
                     </div>
                     <div style="margin: -0px -40px -0px -40px">
-                        <v-md-editor v-model="currentRunning.output" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+                        <v-md-editor v-model="currentRunning.output" mode="preview" ref="editor"
+                            @copy-code-success="handleCopyCodeSuccess" />
                     </div>
-                    <div v-if="this.currentRunning.runFinish" style="font-size: 14px; font-weight: bold; color: #f00; margin: 40px">执行指令完成！</div>
+                    <div v-if="this.currentRunning.runFinish"
+                        style="font-size: 14px; font-weight: bold; color: #f00; margin: 40px">
+                        执行指令完成！</div>
                 </div>
             </el-drawer>
         </el-main>
@@ -80,6 +109,7 @@ import request from '../../utils/request.js';
 import { config } from '@/utils/config';
 import { getToken } from '@/utils/auth';
 import _ from 'lodash';
+import * as moment from 'moment';
 export default {
     data() {
         return {
@@ -99,11 +129,20 @@ export default {
                 refreshCount: 0,
                 runFinish: false,
                 serialNumber: 1
+            },
+            progressRefresh: {
+                debug: false,
+                refreshTimer: null,
+                refreshCount: 0,
             }
         };
     },
     components: {},
+    created() {
+        console.log('created 钩子函数被调用');
+    },
     mounted() {
+        console.log('mounted 钩子函数被调用');
         document.title = 'Hidoc-SSH';
 
         this.user = this.$store.state.user;
@@ -118,7 +157,49 @@ export default {
         }
         this.getShareList();
     },
+    unmounted() {
+        console.log('unmounted 钩子函数被调用');
+        clearInterval(this.progressRefresh.refreshTimer);
+        clearInterval(this.currentRunning.refreshTimer);
+        console.log('定时器已清除');
+    },
     methods: {
+        progressRefreshFunction() {
+            this.progressRefresh.refreshCount++;
+            if (this.progressRefresh.debug) console.log(`刷新命令执行限制时间，第 ${this.progressRefresh.refreshCount} 次`);
+
+            let nextDo = false;
+            if (this.shareList && this.shareList.length > 0) {
+                let now = moment();
+                if (this.progressRefresh.debug) console.log(`刷新命令执行限制时间，共计 ${this.shareList.length} 个服务器开放指令，当前时间为：${now.format('YYYY-MM-DD HH:mm:ss')}`);
+                for (let i = 0; i < this.shareList.length; i++) {
+                    for (let j = 0; j < this.shareList[i].cmdList.length; j++) {
+                        let pgs = 100; // 进度
+                        let sec = 0; // 等待秒数
+                        let shareItem = this.shareList[i];
+                        let cmdItem = this.shareList[i].cmdList[j];
+                        if (cmdItem.interval && cmdItem.interval > 1 && cmdItem.executeTime) {
+                            let executeTime = moment(cmdItem.executeTime);
+                            let nextExecuteTime = moment(cmdItem.executeTime).add(cmdItem.interval, 'seconds');
+                            sec = nextExecuteTime.diff(now, 'seconds');
+                            pgs = Math.round((1 - (sec / cmdItem.interval)) * 100);
+
+                            if (this.progressRefresh.debug) console.log(`刷新命令执行限制时间，第 ${i + 1} 个服务器，第 ${j + 1} 个指令，执行时间：${executeTime.format('YYYY-MM-DD HH:mm:ss')}，执行间隔：${cmdItem.interval}， 下次执行时间：${nextExecuteTime.format('YYYY-MM-DD HH:mm:ss')}，应该等待：${sec}秒`);
+                            if (sec > 0) {
+                                nextDo = true;
+                                console.log(`${this.progressRefresh.refreshTimer}，服务器：${shareItem.name}，指令：${cmdItem.name}，【冷却进度：${pgs}%】`);
+                            }
+                        }
+                        cmdItem._waitProgress = pgs > 100 ? 100 : pgs;
+                        if (sec > 0) cmdItem._waitSeconds = sec;
+                    }
+                }
+            }
+            if (nextDo == false) {
+                clearInterval(this.progressRefresh.refreshTimer);
+                console.log('所有的进度都已经就绪，定时器已清除');
+            }
+        },
         getCurrentUserInfo() {
             request({
                 url: '/user/currentUserInfo',
@@ -137,13 +218,20 @@ export default {
                     token: this.$store.state.user.token
                 }
             }).then(res => {
+                clearInterval(this.progressRefresh.refreshTimer);
                 if (res.code == 0) {
                     this.shareList = res.data;
+                    this.progressRefresh.refreshTimer = setInterval(this.progressRefreshFunction, 1000);
                 }
             });
         },
         runCmd(machine, cmd) {
             console.log('runCmd: ' + cmd.id);
+
+            // 重置当前正在运行的命令
+            this.currentRunning.serialNumber = 1;
+            this.currentRunning.prepareOutput = '';
+
             return request({
                 url: '/serverManCmd/run',
                 method: 'post',
@@ -159,6 +247,7 @@ export default {
                         duration: 5 * 1000
                     });
                 }
+                this.getShareList();
             });
         },
         refreshCmdLogOutput() {
@@ -265,6 +354,7 @@ export default {
     /* color: #333; */
     text-align: left;
 }
+
 .el-card {
     margin: 8px;
     padding: 0px;
@@ -287,7 +377,7 @@ export default {
 
 /* 命令悬浮特效 */
 .cmd-item {
-    cursor: pointer;
+    /* cursor: pointer; */
     background: transparent;
     border-bottom: 1px solid #d6d6d6;
     border-radius: 0;
@@ -296,6 +386,7 @@ export default {
     padding: 0px;
     margin: 0px;
 }
+
 /* .cmd-item:before {
     transition: all 0.5s linear;
     content: '';
@@ -314,5 +405,11 @@ export default {
 /* 修复markdown代码带滚动条问题 */
 .vuepress-markdown-body {
     overflow: hidden;
+}
+
+.cust-progress {
+    .el-progress__text {
+        min-width: 0px;
+    }
 }
 </style>
