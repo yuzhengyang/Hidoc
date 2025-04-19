@@ -229,7 +229,7 @@ public class FileController {
     @ResponseBody
     public void download(@PathVariable String userPrefix, @PathVariable String bucketName, @PathVariable String fileName, HttpServletRequest request, HttpServletResponse response) {
         Tuple2<FileCursor, File> fileInfo = fileService.getDownloadFile(userPrefix, bucketName, fileName);
-        fileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
+        fileService.download("FileController", fileInfo.getT1(), fileInfo.getT2(), request, response);
     }
 
     /**
@@ -244,7 +244,7 @@ public class FileController {
     @ResponseBody
     public void downloadByCursor(@PathVariable String cursorId, HttpServletRequest request, HttpServletResponse response) {
         Tuple2<FileCursor, File> fileInfo = fileService.getDownloadFileByCursor(cursorId);
-        fileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
+        fileService.download("FileController", fileInfo.getT1(), fileInfo.getT2(), request, response);
     }
 
     /**
@@ -263,7 +263,7 @@ public class FileController {
 
         if (cacheCursor != null && cacheFile != null) {
             // 存在缓存直接走缓存
-            fileService.download(cacheCursor, cacheFile, request, response);
+            fileService.download("FileController", cacheCursor, cacheFile, request, response);
         } else {
             // 不存在缓存，走查询，然后加入到缓存中
             Tuple2<FileCursor, File> fileInfo = fileService.getDownloadFileByUname(uname);
@@ -271,7 +271,7 @@ public class FileController {
                 R.Caches.SysFileCursor.put(uname, fileInfo.getT1());
                 R.Caches.SysFile.put(uname, fileInfo.getT2());
             }
-            fileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
+            fileService.download("FileController", fileInfo.getT1(), fileInfo.getT2(), request, response);
         }
     }
     //endregion

@@ -93,21 +93,21 @@ public class FileApiController {
      * 然后通过文件指针的ID，确认文件信息，下载文件内容
      *
      * @param serverSecretKey 服务器密钥
-     * @param cursorId 文件指针ID
+     * @param cursorId        文件指针ID
      * @param request
      * @param response
      */
     @GetMapping({"transfer/{serverSecretKey}/{cursorId}", "t/{serverSecretKey}/{cursorId}"})
     @ResponseBody
-    public void downloadByCursor(@PathVariable String serverSecretKey, @PathVariable String cursorId, HttpServletRequest request, HttpServletResponse response) {
+    public void transfer(@PathVariable String serverSecretKey, @PathVariable String cursorId, HttpServletRequest request, HttpServletResponse response) {
         // 查询服务器的密钥，服务器密钥每1分钟更新一次，最多缓存两个密钥信息
         // 如果服务器时间差距超过2分钟，则将导致无法进行文件传输操作
         LocalDateTime serverSecretKeyTime = R.Caches.ServerSecretKey.getIfPresent(serverSecretKey);
-        if(serverSecretKeyTime == null)  return; // 密钥不存在，则返回错误信息
-        if(LocalDateTime.now().isAfter(serverSecretKeyTime.plusMinutes(2))) return; // 密钥过期，则返回错误信息
+        if (serverSecretKeyTime == null) return; // 密钥不存在，则返回错误信息
+        if (LocalDateTime.now().isAfter(serverSecretKeyTime.plusMinutes(2))) return; // 密钥过期，则返回错误信息
 
         // 验证密钥后，通过时方可下载文件
         Tuple2<FileCursor, File> fileInfo = fileService.getDownloadFileByCursor(cursorId);
-        fileService.download(fileInfo.getT1(), fileInfo.getT2(), request, response);
+        fileService.download("FileApiController", fileInfo.getT1(), fileInfo.getT2(), request, response);
     }
 }
