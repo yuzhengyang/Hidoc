@@ -137,7 +137,8 @@ public class ServerManMachineController {
     public ResponseData list(@RequestBody Map<String, Object> params) {
         List<ServerManMachine> serverManMachines = serverManMachineMapper.selectList(new LambdaQueryWrapper<ServerManMachine>()
                 .eq(ServerManMachine::getOwnerUserId, CurrentUserManager.getUser().getId())
-                .eq(ServerManMachine::getIsDelete, false).orderByDesc(ServerManMachine::getCreateTime));
+                .eq(ServerManMachine::getIsDelete, false)
+                .orderByAsc(ServerManMachine::getName));
         ResponseData responseData = ResponseData.ok();
         responseData.putDataMap("serverManMachines", serverManMachines);
         return responseData;

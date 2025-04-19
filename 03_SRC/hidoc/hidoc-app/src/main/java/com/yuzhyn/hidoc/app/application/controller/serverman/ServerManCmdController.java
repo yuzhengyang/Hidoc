@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.controller.serverman;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
@@ -14,6 +15,7 @@ import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManCmdMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManExeLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManMachineMapper;
 import com.yuzhyn.hidoc.app.application.model.serverman.CmdRunLog;
+import com.yuzhyn.hidoc.app.application.service.sys.SysLockService;
 import com.yuzhyn.hidoc.app.application.service.team.TeamService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +49,9 @@ public class ServerManCmdController {
     @Autowired
     TeamService teamService;
 
+    @Autowired
+    SysLockService sysLockService;
+
     @PostMapping("create")
     public ResponseData create(@RequestBody Map<String, Object> params) {
         if (MapTool.ok(params, "machineId", "name", "description", "type")) {
@@ -56,6 +62,7 @@ public class ServerManCmdController {
             String contentTa = MapTool.get(params, "contentTa", "").toString();
             String contentTb = MapTool.get(params, "contentTb", "").toString();
             String contentTc = MapTool.get(params, "contentTc", "").toString();
+            long interval = MapTool.getLong(params, "interval", 60);
 
             if (StringTool.ok(name, machineId)) {
                 ServerManCmd serverManCmd = new ServerManCmd();
@@ -73,6 +80,7 @@ public class ServerManCmdController {
                 serverManCmd.setContentTc(contentTc);
                 serverManCmd.setIsDelete(false);
                 serverManCmd.setMachineId(machineId);
+                serverManCmd.setInterval(interval);
 
                 int flag = serverManCmdMapper.insert(serverManCmd);
                 if (flag > 0) {
@@ -95,6 +103,7 @@ public class ServerManCmdController {
             String contentTa = MapTool.get(params, "contentTa", "").toString();
             String contentTb = MapTool.get(params, "contentTb", "").toString();
             String contentTc = MapTool.get(params, "contentTc", "").toString();
+            long interval = MapTool.getLong(params, "interval", 60);
 
             if (StringTool.ok(id, name)) {
                 ServerManCmd serverManCmd = serverManCmdMapper.selectById(id);
@@ -112,6 +121,7 @@ public class ServerManCmdController {
                     serverManCmd.setContentTb(contentTb);
                     serverManCmd.setContentTc(contentTc);
                     serverManCmd.setMachineId(machineId);
+                    serverManCmd.setInterval(interval);
 
                     int flag = serverManCmdMapper.updateById(serverManCmd);
                     if (flag > 0) {
@@ -186,6 +196,11 @@ public class ServerManCmdController {
             String dialogId = R.SnowFlake.nexts();
 
             if (StringTool.ok(id, token)) {
+                // 这里增加锁的机制，避免连续点击产生问题
+                String key = "ServerManCmdController_" + id+"_" + CurrentUserManager.getUserId();
+                String val = sysLockService.lock(key,4L, CurrentUserManager.getUserId());
+                if(!StringTool.ok(val)) return ResponseData.error("操作过于频繁，请稍后再试");
+
                 ServerManCmd cmd = serverManCmdMapper.selectById(id);
                 if (cmd != null) {
                     ServerManMachine machine = serverManMachineMapper.selectById(cmd.getMachineId());
@@ -198,7 +213,7 @@ public class ServerManCmdController {
                                         .eq(ServerManExeLog::getCmdId, id)
                                         .orderByDesc(ServerManExeLog::getBeginTime));
                         if (logPage.getTotal() > 0) {
-                            Long cmdInterval = cmd.getInterval() == null ? 300 : cmd.getInterval(); // 执行间隔时间
+                            Long cmdInterval = cmd.getInterval() == null ? 60 : cmd.getInterval(); // 执行间隔时间
                             LocalDateTime lastTime = logPage.getRecords().get(0).getBeginTime(); // 上次执行时间
                             LocalDateTime allowTime = lastTime.plusSeconds(cmdInterval); // 本次允许的执行时间
                             if (beginTime.isBefore(allowTime)) {
@@ -206,9 +221,14 @@ public class ServerManCmdController {
                             }
                         }
 
-                        // 这里判断权限，团队权限（命令共享），个人权限
-                        if(!teamService.isMember(machine.getTeamsExecute(), CurrentUserManager.getUserId())){
-                            return ResponseData.error("您不在所属的团队中，没有操作权限，详情请咨询管理员。");
+                        // 这里判断权限
+                        if (machine.getOwnerUserId().equals(CurrentUserManager.getUserId())) {
+                            // 如果是本人创建的，则不判断权限
+                        } else {
+                            // 否则判断团队权限（命令共享）
+                            if (!teamService.isMember(machine.getTeamsExecute(), CurrentUserManager.getUserId())) {
+                                return ResponseData.error("您不在所属的团队中，没有操作权限，详情请咨询管理员。");
+                            }
                         }
 
                         // 执行ssh命令
@@ -226,7 +246,16 @@ public class ServerManCmdController {
                             });
 
                             try {
-                                R.SshManager.sendCommandRun(dialogId, cmd.getContentTa());
+                                // 执行命令前进行占位符替换
+                                Map<String, String> repParams = new HashMap<>();
+                                repParams.put("${sshx.exe.yyyyMMdd}", DateTimeFormat.toStr(beginTime, DateTimeFormatPattern.SHORT_DATE));
+                                repParams.put("${sshx.exe.yyyyMMddHHmmss}", DateTimeFormat.toStr(beginTime, DateTimeFormatPattern.SHORT_DATETIME));
+
+                                String cmdline = cmd.getContentTa();
+                                for (Map.Entry<String, String> entry : repParams.entrySet()) {
+                                    cmdline = cmdline.replace(entry.getKey(), entry.getValue());
+                                }
+                                R.SshManager.sendCommandRun(dialogId, cmdline);
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -247,6 +276,11 @@ public class ServerManCmdController {
                         serverManExeLog.setResultTb("");
                         serverManExeLog.setResultTc("");
                         serverManExeLogMapper.insert(serverManExeLog);
+
+                        // 在命令上记录最后一次执行时间
+                        cmd.setExecuteTime(LocalDateTime.now());
+                        serverManCmdMapper.updateById(cmd);
+
                         ResponseData result = ResponseData.ok("执行成功，详细输出信息请查看日志");
                         result.putDataMap("log", serverManExeLog);
                         return result;

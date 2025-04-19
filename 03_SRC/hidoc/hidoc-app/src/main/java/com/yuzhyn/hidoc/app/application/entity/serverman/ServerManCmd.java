@@ -13,6 +13,7 @@ public class ServerManCmd {
     private String description;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+    private LocalDateTime executeTime;
     private String createUserId;
     private String updateUserId;
     private String ownerUserId;

@@ -46,9 +46,13 @@ public class ServerManApiController {
         String machineId = MapTool.getString(params, "machineId", "");
 
         List<ServerManMachine> machineList = new ArrayList<>();
-        List<ServerManMachine> machineDbList = serverManMachineMapper.selectList(new LambdaQueryWrapper<ServerManMachine>().eq(ServerManMachine::getIsDelete, false));
+        List<ServerManMachine> machineDbList = serverManMachineMapper.selectList(new LambdaQueryWrapper<ServerManMachine>()
+                .eq(ServerManMachine::getIsDelete, false)
+                .orderByAsc(ServerManMachine::getName));
 
-        List<ServerManCmd> cmdDbList = serverManCmdMapper.selectList(new LambdaQueryWrapper<ServerManCmd>().eq(ServerManCmd::getIsDelete, false));
+        List<ServerManCmd> cmdDbList = serverManCmdMapper.selectList(new LambdaQueryWrapper<ServerManCmd>()
+                .eq(ServerManCmd::getIsDelete, false)
+                .orderByAsc(ServerManCmd::getName));
 
         List<TeamLite> allTeams = teamService.getAllTeams();
 
