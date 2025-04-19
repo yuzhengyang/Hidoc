@@ -55,8 +55,6 @@ public final class R {
 
     public static EsTool EsTool = null;
 
-    public static String OtherSysMachineId = "";
-
     // 原子计数器
     public static class Atomic {
         public static AtomicLong ServerManOutput = new AtomicLong(0);
@@ -73,7 +71,6 @@ public final class R {
         public static Cache<String, Map<Long, SysFlowLog>> SysFlowLogs = CacheBuilder.newBuilder().build();
         public static Cache<String, LocalDateTime> ServerSecretKey = CacheBuilder.newBuilder().expireAfterAccess(3, TimeUnit.MINUTES).build();
         public static Cache<String, SysMachine> sysMachines = CacheBuilder.newBuilder().expireAfterAccess(3, TimeUnit.MINUTES).build();
-        public static Cache<String, File> NotExistFile =CacheBuilder.newBuilder().build();
     }
 
     public static class Queues {
