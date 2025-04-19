@@ -3,7 +3,7 @@
         <!-- 标题区域 -->
         <el-header class="app-main-header">
             <div>
-                <div class="grid-content bg-purple" @click="home" style="cursor: pointer; height: 40px; width: 55px; float: left"><img alt="logo" src="../assets/logo.png" height="40" @click="gotoPage('preview')" /></div>
+                <div v-if="this.fullWidth>700" class="grid-content bg-purple" @click="home" style="cursor: pointer; height: 40px; width: 55px; float: left"><img alt="logo" src="../assets/logo.png" height="40" @click="gotoPage('preview')" /></div>
                 <!-- <div style="cursor: pointer; height: 40px; width: 55px; float: left; font-weight: bold; font-size: 14px" @click="gotoPage('preview')">hidoc</div> -->
                 <div style="float: left; font: 14px">
                     <el-button v-if="functionCode.includes('doc')" type="text" size="small" @click="gotoPage('preview')" style="margin: 0">{{ $t('doc') }}</el-button>
@@ -43,11 +43,11 @@
                         </el-dropdown> -->
                 </div>
                 <div v-else class="grid-content">
-                    <el-link :underline="false" @click="workbench" style="font-size: 12px">
+                    <el-link v-if="this.fullWidth>700" :underline="false" @click="workbench" style="font-size: 12px">
                         <el-icon><Monitor /></el-icon>
                         <span>&nbsp;{{ $t('workbench') }}</span>
                     </el-link>
-                    <el-link :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
+                    <el-link v-if="this.fullWidth>700" :underline="false" type="text" style="padding-left: 8px; padding-right: 8px">|</el-link>
                     <el-dropdown style="vertical-align: middle; z-index: 99999 !important">
                         <el-link :underline="false" style="font-size: 12px">
                             <el-avatar :size="22" :src="currentAvatar(this.$store.state.user.avatar)" style="margin: 5px" shape="square" />
@@ -57,6 +57,10 @@
                         <template #dropdown>
                             <el-dropdown-menu>
                                 <el-dropdown-item>😀 hi~ {{ this.$store.state.user.name }}</el-dropdown-item>
+                                <el-dropdown-item @click="changeLocale">
+                                    <el-icon><Monitor /></el-icon>
+                                    {{ $t('workbench') }}
+                                </el-dropdown-item>
                                 <el-dropdown-item @click="changeLocale">
                                     <el-icon><Orange /></el-icon>
                                     {{ $t('changeLanguage') }}
