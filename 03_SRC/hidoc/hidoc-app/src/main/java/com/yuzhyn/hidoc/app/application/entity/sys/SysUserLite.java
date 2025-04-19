@@ -27,6 +27,8 @@ public class SysUserLite {
 
     private Boolean isFrozen;
 
+    private Boolean isSleep;
+
     private LocalDateTime createTime;
 
     private LocalDateTime onlineTime;

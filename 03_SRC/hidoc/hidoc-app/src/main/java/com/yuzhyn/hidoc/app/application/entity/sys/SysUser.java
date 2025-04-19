@@ -31,6 +31,8 @@ public class SysUser {
 
     private Boolean isFrozen;
 
+    private Boolean isSleep;
+
     private String password;
 
     private LocalDateTime onlineTime;

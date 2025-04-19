@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.system.interceptor;
 
+import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
 import com.yuzhyn.hidoc.app.application.model.sys.UserInfo;
@@ -68,6 +69,8 @@ public class SecurityInterceptor implements HandlerInterceptor {
         // 获取所有header信息
         log.info("解析并确认当前用户身份");
         Enumeration<String> headerNames = request.getHeaderNames();
+        String accessOrigin = "";
+        String accessHost = "";
         while (headerNames.hasMoreElements()) {
             String name = headerNames.nextElement();
             String value = request.getHeader(name);
@@ -93,13 +96,15 @@ public class SecurityInterceptor implements HandlerInterceptor {
                     }
                 }
             }
+            if (name.equals("access-origin")) accessOrigin = value;
+            if (name.equals("access-host")) accessHost = value;
         }
 
         if (isLogin) {
             log.info("已核对身份，用户信息已载入缓存");
 
             log.info("访问控制和流量控制过滤");
-            if(!FlowManager.check(uri, CurrentUserManager.getUser())){
+            if (!FlowManager.check(uri, CurrentUserManager.getUser())) {
                 log.info("访问过于频繁，已拒绝请求");
                 response.setCharacterEncoding("UTF-8");
                 response.setContentType("application/json; charset=utf-8");
@@ -119,6 +124,7 @@ public class SecurityInterceptor implements HandlerInterceptor {
                 return true;
             }
 
+            // 允许已经标志允许的匿名链接
             if (UrlAccess.isAnonymous(uri)) {
                 log.info("未登录用户，访问开放内容，已准许");
                 return true;

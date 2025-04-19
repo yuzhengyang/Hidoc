@@ -144,6 +144,7 @@ public class UserController {
             user.setPassword(MixdeTool.md5Mix(user.getName(), password));
             user.setCreateTime(LocalDateTime.now());
             user.setLoginTime(LocalDateTime.now());
+            user.setIsSleep(false);
             user.setIsFrozen(false);
             int flag = sysUserMapper.insert(user);
             if (flag > 0) {
@@ -196,6 +197,8 @@ public class UserController {
             SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, email));
             if (user != null) {
                 user.setPassword(MixdeTool.md5Mix(user.getName(), password));
+                user.setLoginTime(LocalDateTime.now());
+                user.setIsSleep(false);
                 int flag = sysUserMapper.updateById(user);
                 if (flag > 0) {
                     return ResponseData.ok("重置成功");
@@ -226,6 +229,7 @@ public class UserController {
         SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, username));
         if (user == null) user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getName, username));
         if (user == null) return ResponseData.error("邮箱不存在");
+        if (user.getIsSleep() != null && user.getIsSleep()) return ResponseData.error("账号长时间未使用，请重置密码后进行登录");
 
         if (StringTool.ok(totpcode) && totpcode.length() == 6) {
 
@@ -254,6 +258,7 @@ public class UserController {
     }
 
     private ResponseData loginAfterCheck(SysUser user) {
+        user.setIsSleep(false);
         user.setLoginTime(LocalDateTime.now());
         sysUserMapper.updateById(user);
 
@@ -326,6 +331,8 @@ public class UserController {
 
             SysUser user = sysUserMapper.selectById(CurrentUserManager.getUser().getId());
             user.setPassword(MixdeTool.md5Mix(user.getName(), password));
+            user.setLoginTime(LocalDateTime.now());
+            user.setIsSleep(false);
             int flag = sysUserMapper.updateById(user);
             if (flag > 0) {
                 return ResponseData.ok("修改成功");

@@ -107,4 +107,10 @@ public class SysUserLoginService {
         }
         return userInfoList;
     }
+
+    public List<SysUserLogin> getAllLoginUser() {
+        List<SysUserLogin> userLoginList = sysUserLoginMapper.selectList(new LambdaQueryWrapper<SysUserLogin>()
+                .ge(SysUserLogin::getExpiryTime, LocalDateTime.now()));
+        return userLoginList;
+    }
 }

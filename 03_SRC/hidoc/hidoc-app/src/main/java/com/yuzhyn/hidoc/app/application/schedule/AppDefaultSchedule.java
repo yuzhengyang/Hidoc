@@ -136,7 +136,6 @@ public class AppDefaultSchedule {
                 for (SysMachine sysMachine : list) {
                     try {
                         R.Caches.sysMachines.put(sysMachine.getMachineId(), sysMachine);
-                        R.OtherSysMachineId = sysMachine.getMachineId();
                     } catch (Exception ex) {
                         log.error(ExceptionUtil.stacktraceToString(ex, 10));
                     }
