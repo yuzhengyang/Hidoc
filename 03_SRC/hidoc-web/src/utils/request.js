@@ -26,6 +26,7 @@ service.interceptors.request.use(
         }
         config.headers['Point-Id'] = localStorage.getItem('pointId');
         config.headers['Access-Origin'] = window.location.origin;
+        config.headers['Access-Host'] = window.location.host;
         return config;
     },
     error => {
