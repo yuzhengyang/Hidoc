@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS "server_man_cmd" (
   "description" varchar(2048) ,
   "create_time" timestamp(6),
   "update_time" timestamp(6),
+  "execute_time" timestamp(6),
   "create_user_id" varchar(20) ,
   "update_user_id" varchar(20) ,
   "owner_user_id" varchar(20) ,
@@ -27,3 +28,4 @@ COMMENT ON TABLE "public"."server_man_cmd" IS '服务管理命令信息';
 
 SELECT * FROM sysdb_add_column('server_man_cmd', 'is_share', 'bool');
 SELECT * FROM sysdb_add_column('server_man_cmd', 'interval', 'int8');
+SELECT * FROM sysdb_add_column('server_man_cmd', 'execute_time', 'timestamp(6)');

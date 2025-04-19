@@ -24,3 +24,5 @@ INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('notice-e
 
 INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('register', 'limit-email', '163.com', '可选，注册限制邮箱后缀', 1) ON CONFLICT ("item","key") DO NOTHING;
 
+-- INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('access-anonymous', 'enable', '1', '可选，启用匿名访问', 1) ON CONFLICT ("item","key") DO NOTHING;
+-- INSERT INTO "app_conf" ("item", "key", "value", "ps", "index") VALUES ('access-anonymous', 'ip-port', '[192.168.14.155]', '可选，允许匿名访问的入口，如[IP:PORT][IP:PORT]', 2) ON CONFLICT ("item","key") DO NOTHING;
