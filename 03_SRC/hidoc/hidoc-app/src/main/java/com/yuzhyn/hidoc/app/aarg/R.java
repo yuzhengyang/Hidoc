@@ -82,12 +82,6 @@ public final class R {
     }
 
     public static class Maps {
-        /**
-         * 验证码
-         * 邮箱：{唯一ID，验证码，生成时间}
-         */
-        public static ConcurrentHashMap<String, Tuple3<String, String, Long>> AuthCode = new ConcurrentHashMap<>();
-
         public static Map<String, String> emailConfig = new HashMap<>();
         public static Map<String, String> registerConfig = new HashMap<>();
         public static Map<String, String> elasticConfig = new HashMap<>();

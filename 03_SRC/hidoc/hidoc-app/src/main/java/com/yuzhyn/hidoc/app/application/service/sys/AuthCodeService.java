@@ -3,6 +3,7 @@ package com.yuzhyn.hidoc.app.application.service.sys;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
 import com.yuzhyn.hidoc.app.aarg.R;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple3;
@@ -11,6 +12,9 @@ import reactor.util.function.Tuples;
 
 @Service
 public class AuthCodeService {
+
+    @Autowired
+    SysLockService sysLockService;
 
     /**
      * 创建验证码
@@ -21,33 +25,32 @@ public class AuthCodeService {
      */
     public Tuple2<String, String> createCode(String email) throws Exception {
         String uid = R.SnowFlake.nexts();
-        String code = UUIDTool.get();
+        String code = UUIDTool.get().substring(0, 6);
+        String key = "AuthCodeService" + ":" + email;
+        String val = uid + ":" + code;
 
-        Tuple3<String, String, Long> codeInfoHis = R.Maps.AuthCode.get(email);
-        if (codeInfoHis != null) {
-            long waitTime = codeInfoHis.getT3() - (System.currentTimeMillis() - (60 * 1000));
-            if (waitTime > 0) {
-                throw new Exception("请求过于频繁，请稍后再试，请等待：" + waitTime / 1000 + "秒");
-            }
+        if (sysLockService.check(key)) {
+            throw new Exception("请求过于频繁，请间隔60秒再试");
         }
 
-        if (StringTool.ok(uid, code)) {
-            code = code.substring(0, 6);
-            Tuple3<String, String, Long> codeInfo = Tuples.of(uid, code, System.currentTimeMillis());
-            R.Maps.AuthCode.put(email, codeInfo);
+        if (sysLockService.lock(key, val, 60L, "")) {
             return Tuples.of(uid, code);
         } else {
-            throw new Exception("code gen failed!");
+            throw new Exception("创建验证码失败");
         }
     }
 
     public Tuple2<Boolean, String> checkCode(String email, String uid, String code) {
-        Tuple3<String, String, Long> codeInfo = R.Maps.AuthCode.get(email);
-        if (codeInfo == null) return Tuples.of(false, "请先获取验证码");
-
         try {
-            if (codeInfo.getT1().equals(uid) && codeInfo.getT2().equals(code)) {
+            if (!StringTool.ok(email, uid, code)) {
+                return Tuples.of(false, "请先获取验证码");
+            }
+            String key = "AuthCodeService" + ":" + email;
+            String val = uid + ":" + code;
+            if (sysLockService.check(key, val)) {
                 return Tuples.of(true, "");
+            } else {
+                return Tuples.of(false, "验证码不正确或已超时");
             }
         } catch (Exception ex) {
         }
