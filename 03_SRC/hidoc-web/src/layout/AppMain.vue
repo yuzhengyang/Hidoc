@@ -1,7 +1,7 @@
 <template>
     <el-container style="height: 100%">
         <!-- 标题区域 -->
-        <el-header class="app-main-header">
+        <el-header class="app-main-header no-select">
             <div>
                 <div v-if="this.fullWidth>700" class="grid-content bg-purple" @click="home" style="cursor: pointer; height: 40px; width: 55px; float: left"><img alt="logo" src="../assets/logo.png" height="40" @click="gotoPage('preview')" /></div>
                 <!-- <div style="cursor: pointer; height: 40px; width: 55px; float: left; font-weight: bold; font-size: 14px" @click="gotoPage('preview')">hidoc</div> -->

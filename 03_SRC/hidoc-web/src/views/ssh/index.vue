@@ -2,7 +2,7 @@
     <el-container style="height: 100%">
         <!-- 内容区域 -->
         <el-main style="height: 100%">
-            <el-row>
+            <el-row class="no-select">
                 <el-col :span="24">
                     <div style="width: 100%">
                         <div v-if="this.$store.state.user.token == undefined || this.$store.state.user.token == ''">
@@ -11,12 +11,13 @@
                     </div>
                 </el-col>
             </el-row>
-            <el-row>
+            <el-row class="no-select">
                 <el-col :xs="24" :sm="12" :md="12" :lg="8" :xl="4" v-for="item in shareList" :key="item">
                     <el-card>
                         <template #header>
-                            <div class="card-header">
-                                <span>🖥️ {{ item.name }}</span>
+                            <div class="card-header" >
+                                <el-image style="height: 18px;width: 28px;" :src="require(item.portOpen?'../../assets/switch/computer_open.svg':'../../assets/switch/computer_close.svg')" fit="scale-down" />
+                                <span >{{ item.name }}</span>
                                 <span style="color: #aaa; font-size: 14px">（{{ item.address }}）</span>
                             </div>
                         </template>
@@ -31,7 +32,7 @@
                                     </el-button> -->
                                     <el-progress class="cust-progress" type="circle" :percentage="cmd._waitProgress"
                                         :status="cmd._waitProgress == 100 ? 'success' : 'warning'" stroke-width="5"
-                                        width="30" @click="runCmd(item, cmd)"
+                                        width="30" @click="runCmd(item, cmd, $event)"
                                         :style="{ cursor: cmd._waitProgress == 100 ? 'pointer' : 'not-allowed' }">
                                         <template #default="{ }">
                                             <span v-if="cmd._waitProgress">
@@ -164,20 +165,20 @@ export default {
         console.log('定时器已清除');
     },
     methods: {
-        progressRefreshFunction() {
+        progressRefreshFunction(shareCmdList) {
             this.progressRefresh.refreshCount++;
             if (this.progressRefresh.debug) console.log(`刷新命令执行限制时间，第 ${this.progressRefresh.refreshCount} 次`);
 
             let nextDo = false;
-            if (this.shareList && this.shareList.length > 0) {
+            if (shareCmdList && shareCmdList.length > 0) {
                 let now = moment();
-                if (this.progressRefresh.debug) console.log(`刷新命令执行限制时间，共计 ${this.shareList.length} 个服务器开放指令，当前时间为：${now.format('YYYY-MM-DD HH:mm:ss')}`);
-                for (let i = 0; i < this.shareList.length; i++) {
-                    for (let j = 0; j < this.shareList[i].cmdList.length; j++) {
+                if (this.progressRefresh.debug) console.log(`刷新命令执行限制时间，共计 ${shareCmdList.length} 个服务器开放指令，当前时间为：${now.format('YYYY-MM-DD HH:mm:ss')}`);
+                for (let i = 0; i < shareCmdList.length; i++) {
+                    for (let j = 0; j < shareCmdList[i].cmdList.length; j++) {
                         let pgs = 100; // 进度
                         let sec = 0; // 等待秒数
-                        let shareItem = this.shareList[i];
-                        let cmdItem = this.shareList[i].cmdList[j];
+                        let shareItem = shareCmdList[i];
+                        let cmdItem = shareCmdList[i].cmdList[j];
                         if (cmdItem.interval && cmdItem.interval > 1 && cmdItem.executeTime) {
                             let executeTime = moment(cmdItem.executeTime);
                             let nextExecuteTime = moment(cmdItem.executeTime).add(cmdItem.interval, 'seconds');
@@ -220,14 +221,21 @@ export default {
             }).then(res => {
                 clearInterval(this.progressRefresh.refreshTimer);
                 if (res.code == 0) {
+                    this.progressRefreshFunction(res.data);
                     this.shareList = res.data;
-                    this.progressRefresh.refreshTimer = setInterval(this.progressRefreshFunction, 1000);
+                    this.progressRefresh.refreshTimer = setInterval(()=>this.progressRefreshFunction(this.shareList), 1000);
                 }
             });
         },
-        runCmd(machine, cmd) {
-            console.log('runCmd: ' + cmd.id);
+        runCmd(machine, cmd, event) {
+            ElMessage({message: `正在执行：${machine.name} ${cmd.name} 指令`, type: 'success', duration: 3 * 1000 });
 
+            console.log('runCmd: ' + cmd.id);
+            if (event.shiftKey) {
+                console.log(`You clicked with the Shift key pressed`);
+            } else {
+                console.log(`You clicked without the Shift key pressed`);
+            }
             // 重置当前正在运行的命令
             this.currentRunning.serialNumber = 1;
             this.currentRunning.prepareOutput = '';
@@ -240,11 +248,13 @@ export default {
                 if (res.code == 0) {
                     console.log(res);
                     this.currentRunning.log = res.meta.log;
-                    this.openDrawerPanel(machine, cmd);
+                    if (!event.shiftKey) {
+                        this.openDrawerPanel(machine, cmd);
+                    }
                     ElMessage({
                         message: res.msg,
                         type: 'success',
-                        duration: 5 * 1000
+                        duration: 3 * 1000
                     });
                 }
                 this.getShareList();
