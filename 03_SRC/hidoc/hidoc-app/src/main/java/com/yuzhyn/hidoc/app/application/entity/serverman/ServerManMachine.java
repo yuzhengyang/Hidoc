@@ -26,6 +26,8 @@ public class ServerManMachine {
     private String password;
     private Boolean isDelete;
     private String teamsExecute;
+    private Boolean portOpen;
+    private LocalDateTime portOpenTime;
 
     // 以下是运行时扩展字段，不存储
 
