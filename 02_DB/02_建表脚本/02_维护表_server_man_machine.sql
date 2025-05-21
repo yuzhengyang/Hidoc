@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS "server_man_machine" (
   "username" varchar(255) ,
   "password" varchar(255) ,
   "is_delete" bool,
+  "port_open" bool default false,
+  "port_open_time" timestamp(6),
   CONSTRAINT server_man_machine_pkey PRIMARY KEY (id)
 )
 ;
@@ -29,3 +31,5 @@ COMMENT ON TABLE "public"."server_man_machine" IS '服务管理服务器信息';
 -- 增加字段
 
 SELECT * FROM sysdb_add_column('server_man_machine', 'teams_execute', 'text NULL');
+SELECT * FROM sysdb_add_column('server_man_machine', 'port_open', 'bool default false');
+SELECT * FROM sysdb_add_column('server_man_machine', 'port_open_time', 'timestamp(6)');
