@@ -17,7 +17,7 @@
         <azylee.version>1.0.8</azylee.version>
         <fastjson.version>1.2.74</fastjson.version>
         <mybatisplus.version>3.5.10.1</mybatisplus.version>
-        <druid.version>1.2.15</druid.version>
+        <druid.version>1.2.23</druid.version>
         <postgresql.version>42.7.5</postgresql.version>
         <poi.version>5.2.3</poi.version>
         <hutool.version>5.8.26</hutool.version>
