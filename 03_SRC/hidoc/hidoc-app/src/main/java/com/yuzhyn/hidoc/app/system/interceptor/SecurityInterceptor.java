@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.system.interceptor;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUser;
@@ -66,38 +67,45 @@ public class SecurityInterceptor implements HandlerInterceptor {
         // 登录信息设置和使用处理
         boolean isLogin = false;
         String uri = request.getRequestURI();
+
         // 获取所有header信息
         log.info("解析并确认当前用户身份");
-        Enumeration<String> headerNames = request.getHeaderNames();
-        String accessOrigin = "";
-        String accessHost = "";
-        while (headerNames.hasMoreElements()) {
-            String name = headerNames.nextElement();
-            String value = request.getHeader(name);
+        try {
+            Enumeration<String> headerNames = request.getHeaderNames();
+            String accessOrigin = "";
+            String accessHost = "";
+            while (headerNames.hasMoreElements()) {
+                String name = headerNames.nextElement();
+                String value = request.getHeader(name);
 //            log.info("header: " + name + " = " + value);
-            if (name.equals("access-token")) {
-                UserInfo userInfo = sysUserLoginService.getUserLoginData(value);
-                if (userInfo != null) {
+                if (name.equals("access-token")) {
+                    UserInfo userInfo = sysUserLoginService.getUserLoginData(value);
+                    if (userInfo != null) {
 
-                    // 判断登录身份有效期
-                    if (LocalDateTime.now().isBefore(userInfo.getExpiryTime())) {
-                        isLogin = true;
-                        CurrentUserManager.set(userInfo);
-                        // 给用户续期有效期
-                        userInfo.setExpiryTime(LocalDateTime.now().plusHours(24));
-                        sysUserLoginService.updateUserLoginData(userInfo);
-                    } else {
-                        response.setCharacterEncoding("UTF-8");
-                        response.setContentType("application/json; charset=utf-8");
-                        ResponseData rs = new ResponseData();
-                        response.setContentLength(rs.toJSONString().getBytes().length);
-                        response.getOutputStream().write(rs.toJSONString().getBytes());
-                        return false;
+                        // 判断登录身份有效期
+                        if (LocalDateTime.now().isBefore(userInfo.getExpiryTime())) {
+                            isLogin = true;
+                            CurrentUserManager.set(userInfo);
+                            // 给用户续期有效期（登陆一次有效48小时）
+                            userInfo.setExpiryTime(LocalDateTime.now().plusHours(48));
+                            sysUserLoginService.updateUserLoginData(userInfo);
+                        }
+                        else {
+                            response.setCharacterEncoding("UTF-8");
+                            response.setContentType("application/json; charset=utf-8");
+                            ResponseData rs = new ResponseData(ResponseCode.LOGIN_TIMEOUT);
+                            response.setContentLength(rs.toJSONString().getBytes().length);
+                            response.getOutputStream().write(rs.toJSONString().getBytes());
+                            return false;
+                        }
                     }
                 }
+                if (name.equals("access-origin")) accessOrigin = value;
+                if (name.equals("access-host")) accessHost = value;
             }
-            if (name.equals("access-origin")) accessOrigin = value;
-            if (name.equals("access-host")) accessHost = value;
+        } catch (Exception ex) {
+            log.info("通过header获取信息失败：{}", ex.getMessage());
+            log.error(ExceptionUtil.stacktraceToString(ex, 10));
         }
 
         if (isLogin) {
