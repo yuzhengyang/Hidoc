@@ -3,14 +3,14 @@
   "ServerName": "公司服务器-HIDOC",
   "CmdLines": [
     ["wait", "2"],
-    ["cmd", "cd /home/hidoc/app"],
-    ["cmd", "sh ./db-backup-hidoc.sh dbname=hidoc filename=db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
+    ["cmd", "cd /home/hidev/pgbak"],
+    ["cmd", "sh ./pgbak.sh dbname=hidoc filename=/home/hidev/pgbak/hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
     ["wait", "180"],
-    ["cmd", "md5sum /home/hidoc/app/db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
+    ["cmd", "md5sum /home/hidev/pgbak/hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
     ["wait", "10"],
-    ["downfile", "/home/hidoc/app/db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql", "\\备份数据库文件\\db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
+    ["downfile", "/home/hidev/pgbak/hidoc-${sshx.exe.yyyyMMddHHmmss}.sql", "\\备份数据库文件\\hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
     ["wait", "10"],
-    ["client-file-md5", "\\备份数据库文件\\db-backup-hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
+    ["client-file-md5", "\\备份数据库文件\\hidoc-${sshx.exe.yyyyMMddHHmmss}.sql"],
     ["wait", "2"]
   ]
 }
