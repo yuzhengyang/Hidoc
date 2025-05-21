@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.common.constant;
 
+import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 public class UrlAccess {
 
     public static boolean isAnonymous(String url) {
+//        if (UUIDTool.get().length() > 0) return true;
         boolean isAccess = false;
         // 根据api列表，放开指定接口
         for (String item : anonymous()) {
@@ -24,13 +26,13 @@ public class UrlAccess {
             }
         }
         // 根据api前缀，控制开放接口
-        if(url.startsWith("/openapi/")){
+        if (url.startsWith("/openapi/")) {
             isAccess = true;
         }
 
-        if(isAccess){
+        if (isAccess) {
             CurrentUserManager.createOpenUser();
-        }else{
+        } else {
             CurrentUserManager.cleanOpenUser();
         }
         return isAccess;
@@ -58,6 +60,8 @@ public class UrlAccess {
         urls.add("/f/d/*");
         // 数据收集器接入
         urls.add("/datacoll/create");
+        // druid监控页面开启
+        urls.add("/druid*");
 //        // javadocapi搜索
 //        urls.add("/javadocapi/search");
 //        urls.add("/javadocapi/projectList");
