@@ -154,7 +154,7 @@ English documentation please refer to: [README.EN.md](README.EN.md)
 [演示地址](https://hidoc.maozi.io/)
 账号密码：duanyu / duanyu
 
-
+> 注意：由于演示地址是静态部署，所以动态路由和URL加路由无法跳转使用，**正式部署没有这个问题**
 
 
 ## 技术特点

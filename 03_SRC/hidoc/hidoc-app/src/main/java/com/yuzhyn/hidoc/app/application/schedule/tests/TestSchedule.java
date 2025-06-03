@@ -1,8 +1,11 @@
 package com.yuzhyn.hidoc.app.application.schedule.tests;
 
+import com.yuzhyn.azylee.core.datas.exceptions.ExceptionTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysMachineStatusLog;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysMachineStatusLogMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysStatusLogMapper;
+import com.yuzhyn.hidoc.app.application.service.sys.SysLockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.*;
@@ -11,6 +14,7 @@ import com.yuzhyn.azylee.core.datas.datetimes.DateTimeFormat;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
 import com.yuzhyn.azylee.core.logs.Alog;
 import com.yuzhyn.azylee.core.threads.sleeps.Sleep;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -22,7 +26,29 @@ import java.util.Date;
 public class TestSchedule {
 
     @Autowired
-    SysMachineStatusLogMapper sysStatusLogMapper;
+    SysStatusLogMapper sysStatusLogMapper;
+
+    @Autowired
+    SysLockService sysLockService;
+
+//    @Async
+//    @Scheduled(cron = "0/1 * * * * *")
+    public void testDbConnect() {
+        testDbConnect2();
+    }
+
+    @Transactional
+    public void testDbConnect2() {
+        try {
+            var log = sysStatusLogMapper.selectById("254366587321057280");
+            log.setAvailableProcessors(1);
+            Sleep.s(50);
+            sysStatusLogMapper.updateById(log);
+        } catch (Exception ex) {
+            log.error(ExceptionTool.getStackTrace(ex));
+        }
+    }
+
 
 //    @Async // 是否等待上一线程执行完毕再执行，使用是不等待，直接创建执行，会产生并行执行
 //    @Scheduled(cron = "*/5 * * * * ?")
@@ -33,7 +59,7 @@ public class TestSchedule {
 //        log.info(id + " [stop-jobtest]");
 //    }
 
-//    @Async
+    //    @Async
 //    @Scheduled(cron = "0/1 * * * * *")
     public void logtest() {
         Thread t = Thread.currentThread();
@@ -49,7 +75,6 @@ public class TestSchedule {
             log.setAppCpu(1);
             log.setAppRam(100L);
             log.setSsLong(UUIDTool.getId1024());
-            int logFlag = sysStatusLogMapper.insert(log);
         }
 
 
@@ -79,7 +104,6 @@ public class TestSchedule {
             log.setAppCpu(1);
             log.setAppRam(100L);
             log.setSsLong(UUIDTool.getId1024());
-            int logFlag = sysStatusLogMapper.insert(log);
 //            Alog.w(DateTimeFormat.toStr(LocalDateTime.now()) + "    sys-status-log: " + logFlag);
 //            Alog.i();
         }
