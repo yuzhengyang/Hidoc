@@ -118,7 +118,7 @@ public class LimitApiController {
 
     private boolean have(String rule, String s) {
         if (StringTool.ok(rule, s)) {
-            String[] array = StringTool.split(rule, ",", true, true);
+            String[] array = StringTool.split(rule, ",", true, true, true);
             if (ListTool.ok(array)) {
                 for (String item : array) {
                     if (item.contains(s)) return true;

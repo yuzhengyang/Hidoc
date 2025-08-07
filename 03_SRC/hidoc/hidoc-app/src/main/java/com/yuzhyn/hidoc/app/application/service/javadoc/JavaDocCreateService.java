@@ -380,7 +380,7 @@ public class JavaDocCreateService {
             for (JavaDocMeta classItem : javaDocClassList) {
                 if (StringTool.ok(classItem.getCommentMenu()) && StringTool.ok(classItem.getCommentMenu().trim())) {
                     String commentMenu = classItem.getCommentMenu().trim().replace('\\', '/');
-                    String[] menuArray = StringTool.split(commentMenu, "/", true, false);
+                    String[] menuArray = StringTool.split(commentMenu, "/", true, false, true);
                     String fmtCommentMenu = StringTool.combineArray(menuArray, "/");
                     classItem.setCommentMenu(fmtCommentMenu);
 

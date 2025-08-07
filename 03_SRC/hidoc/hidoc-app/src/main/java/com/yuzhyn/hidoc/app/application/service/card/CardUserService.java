@@ -130,7 +130,7 @@ public class CardUserService {
             return Tuples.of(false, "设备不可用", null);
 
         List<CardLevel> levels = null;
-        String[] idList = StringTool.split(cardUser.getLevelIds(), ",", true, true);
+        String[] idList = StringTool.split(cardUser.getLevelIds(), ",", true, true, true);
         if (StringTool.ok(cardId) && ListTool.ok(idList)) {
             levels = cardLevelMapper.selectList(new LambdaQueryWrapper<CardLevel>()
                     .eq(CardLevel::getCardId, cardId)

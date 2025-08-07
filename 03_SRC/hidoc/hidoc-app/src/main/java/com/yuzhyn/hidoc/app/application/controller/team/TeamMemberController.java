@@ -16,7 +16,6 @@ import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.application.service.team.TeamService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
-import com.yuzhyn.hidoc.app.utils.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,7 +97,7 @@ public class TeamMemberController {
 
             emailInput = emailInput.replaceAll("\n",",");
             emailInput = emailInput.replaceAll("，",",");
-            String[] emailArray = StrUtil.split(emailInput, ",", true, true, true);
+            String[] emailArray = StringTool.split(emailInput, ",", true, true, true);
 
             int flagCount = 0;
             for (String emailItem : emailArray) {

@@ -9,6 +9,9 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
+/**
+ * 已经迁移
+ */
 public class LinuxSystemStatusTool {
 
     public static float getCpuUseRatio() {

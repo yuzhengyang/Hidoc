@@ -1,8 +1,8 @@
 package com.yuzhyn.hidoc.app.application.service.sys;
 
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
+import com.yuzhyn.azylee.ext.web.mails.EmailTool;
 import com.yuzhyn.hidoc.app.aarg.R;
-import com.yuzhyn.hidoc.app.utils.EmailTool;
 import jakarta.mail.Address;
 import org.springframework.stereotype.Service;
 

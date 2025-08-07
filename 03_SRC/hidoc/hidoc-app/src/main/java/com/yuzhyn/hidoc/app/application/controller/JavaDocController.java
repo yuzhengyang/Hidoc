@@ -18,7 +18,6 @@ import com.yuzhyn.hidoc.app.application.service.javadoc.JavaDocSearchService;
 import com.yuzhyn.hidoc.app.application.service.javadoc.JavaDocUploadService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
-import com.yuzhyn.hidoc.app.utils.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -128,7 +127,7 @@ public class JavaDocController {
             teamsList.addAll(projectList.stream().map(JavaDocProject::getTeamsCode).toList());
             Set<String> teamIds = new HashSet<>();
             for (String teams : teamsList) {
-                String[] teamsArray = StrUtil.split(teams, ",", true, true, true);
+                String[] teamsArray = StringTool.split(teams, ",", true, true, true);
                 if (ListTool.ok(teamsArray)) {
                     teamIds.addAll(Arrays.asList(teamsArray));
                 }
@@ -143,8 +142,8 @@ public class JavaDocController {
                 project.setTeamsCodeList(new ArrayList<>());
                 String teamsCodeString = project.getTeamsCode();
                 String teamsReadString = project.getTeamsRead();
-                String[] teamsCodeArray = StrUtil.split(teamsCodeString, ",", true, true, true);
-                String[] teamsReadArray = StrUtil.split(teamsReadString, ",", true, true, true);
+                String[] teamsCodeArray = StringTool.split(teamsCodeString, ",", true, true, true);
+                String[] teamsReadArray = StringTool.split(teamsReadString, ",", true, true, true);
                 if (ListTool.ok(teamsCodeArray)) {
                     for (String teamId : teamsCodeArray) {
                         if (teamMap.containsKey(teamId)) {

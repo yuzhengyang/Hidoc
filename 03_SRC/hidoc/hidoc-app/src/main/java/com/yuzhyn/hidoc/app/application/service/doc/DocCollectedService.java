@@ -46,7 +46,7 @@ public class DocCollectedService {
         Boolean isTemplet = MapTool.getBoolean(params, "isTemplet", false);
         String collectedRole = MapTool.getString(params, "collectedRole", "");
 
-        String[] keywordArray = StringTool.split(keyword, " ", true, true);
+        String[] keywordArray = StringTool.split(keyword, " ", true, true, true);
         List<String> collectedIds = new ArrayList<>();
         List<String> docIds = new ArrayList<>();
 

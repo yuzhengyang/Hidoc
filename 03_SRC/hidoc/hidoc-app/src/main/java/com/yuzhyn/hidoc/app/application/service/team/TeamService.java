@@ -15,7 +15,6 @@ import com.yuzhyn.hidoc.app.application.mapper.team.TeamMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
-import com.yuzhyn.hidoc.app.utils.StrUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,7 +94,7 @@ public class TeamService {
 
     public List<TeamLite> filterTeamsByIds(List<TeamLite> teams, String ids) {
         List<TeamLite> result = new ArrayList<>();
-        String[] teamsCodeArray = StrUtil.split(ids, ",", true, true, true);
+        String[] teamsCodeArray = StringTool.split(ids, ",", true, true, true);
         if (ListTool.ok(teamsCodeArray) && ListTool.ok(teams)) {
             for (String teamCode : teamsCodeArray) {
                 for (TeamLite team : teams) {

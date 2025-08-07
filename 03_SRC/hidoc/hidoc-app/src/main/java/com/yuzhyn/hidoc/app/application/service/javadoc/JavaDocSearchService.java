@@ -30,7 +30,6 @@ import com.yuzhyn.hidoc.app.application.mapper.javadoc.*;
 import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
-import com.yuzhyn.hidoc.app.utils.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,8 +89,8 @@ public class JavaDocSearchService {
             projectArray = null;
         }
 
-        String[] nameArray = StrUtil.split(name, " ", true, true, true);
-        String[] textArray = StrUtil.split(text, " ", true, true, true);
+        String[] nameArray = StringTool.split(name, " ", true, true, true);
+        String[] textArray = StringTool.split(text, " ", true, true, true);
 
         saveQueryLog(metaType, nameArray, textArray, projectArray);
 

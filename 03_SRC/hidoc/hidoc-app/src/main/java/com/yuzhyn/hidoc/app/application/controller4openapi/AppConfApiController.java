@@ -25,7 +25,7 @@ public class AppConfApiController {
     public ResponseData hello() {
         List<String> list = new ArrayList<>();
         String s = MapTool.getString(R.Maps.functionConfig, "display", "");
-        String[] sArray = StringTool.split(s, ",", true, true);
+        String[] sArray = StringTool.split(s, ",", true, true, true);
         if (ListTool.ok(sArray)) list.addAll(Arrays.asList(sArray));
         return ResponseData.okData(list);
     }

@@ -10,6 +10,7 @@ import com.yuzhyn.azylee.core.ios.files.FileTool;
 import com.yuzhyn.azylee.core.ios.zips.ZipTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
+import org.apache.xmlbeans.impl.xb.xsdschema.AnyDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 @Service
 public class JavaDocUploadService {
@@ -42,7 +45,7 @@ public class JavaDocUploadService {
             file.transferTo(dest);
 
             step.add("解压缩zip");
-            ZipTool.unzip(tempFilePath, tempPath, fileNameNoExt);
+            ZipTool.unzip(tempFilePath, tempPath, fileNameNoExt, stringObjectMap -> true);
 
             step.add("搜索所有java文件");
             List<String> javaFileList = FileFindTool.getAllFiles(DirTool.combine(tempPath, fileNameNoExt), ".java");

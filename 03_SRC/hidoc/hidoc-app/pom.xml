@@ -14,7 +14,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-boot.version>3.4.3</spring-boot.version>
         <lombok.version>1.18.36</lombok.version>
-        <azylee.version>1.0.8</azylee.version>
+        <!--        <azylee.version>1.0.8</azylee.version>-->
+        <azylee.version>3.0.0</azylee.version>
         <fastjson.version>1.2.74</fastjson.version>
         <mybatisplus.version>3.5.10.1</mybatisplus.version>
         <druid.version>1.2.23</druid.version>
@@ -62,6 +63,11 @@
             <artifactId>azylee-core</artifactId>
             <version>${azylee.version}</version>
         </dependency>
+        <dependency>
+            <groupId>top.yuzhyn</groupId>
+            <artifactId>azylee-ext-web</artifactId>
+            <version>${azylee.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -74,7 +80,7 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
-        
+
         <!-- jdk 11+ 引入可选模块 -->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -175,13 +181,6 @@
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
             <version>0.1.55</version>
-        </dependency>
-
-        <!-- 发送邮件 -->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId>
-            <version>2.0.1</version>
         </dependency>
 
 
