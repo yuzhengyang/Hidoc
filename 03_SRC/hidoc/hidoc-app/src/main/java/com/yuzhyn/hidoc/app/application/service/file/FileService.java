@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.datetimes.LocalDateTimeTool;
 import com.yuzhyn.azylee.core.datas.ids.UUIDTool;
+import com.yuzhyn.azylee.ext.web.https.FileFetchTool;
 import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.file.File;
 import com.yuzhyn.hidoc.app.application.entity.file.FileBucket;
@@ -18,7 +19,6 @@ import com.yuzhyn.hidoc.app.application.mapper.file.FileDownloadLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.file.FileMapper;
 import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserFileConfMapper;
 import com.yuzhyn.hidoc.app.utils.ClientIPTool;
-import com.yuzhyn.hidoc.app.utils.http.FileFetchTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -357,18 +357,24 @@ public class FileService {
                     response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(sysFile.getName(), "UTF-8"));
                     response.setContentLengthLong(sysFile.getSize());
                     // 实现文件下载
-                    byte[] buffer = new byte[1024];
-                    try (FileInputStream fis = new FileInputStream(file); BufferedInputStream bis = new BufferedInputStream(fis)) {
-                        OutputStream os = response.getOutputStream();
+                    byte[] buffer = new byte[8192];
+                    try (FileInputStream fis = new FileInputStream(file); 
+                         BufferedInputStream bis = new BufferedInputStream(fis);
+                         OutputStream os = response.getOutputStream()) {
                         int i = bis.read(buffer);
                         while (i != -1) {
                             os.write(buffer, 0, i);
                             i = bis.read(buffer);
                         }
-                        log.info("Download  successfully!");
+                        log.info("Download successfully!");
                     } catch (IOException e) {
+                        log.error("Download failed: " + e.getMessage());
                         log.error(ExceptionTool.getStackTrace(e));
-                        log.error("Download  failed!");
+                        try {
+                            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "File download failed");
+                        } catch (IOException ioException) {
+                            log.error("Failed to send error response: " + ioException.getMessage());
+                        }
                     }
 
                     try {
