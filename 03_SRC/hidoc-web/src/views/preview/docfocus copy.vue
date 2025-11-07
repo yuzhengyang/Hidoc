@@ -1,6 +1,5 @@
 <template>
-    <!-- 计划支持生成markdown格式的文档下载和打印，当然打印存在长度的问题，不建议使用 -->
-    <focus-toolbar @focusExportMd="exportMd"></focus-toolbar>
+    <print-toolbar></print-toolbar>
     <div style="line-height: 60px; text-align: center; font-size: 30px; font-weight: bold">
         {{ this.doc.title }}
     </div>
@@ -19,11 +18,11 @@ import request from '../../utils/request.js';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { mdFormat } from '../../utils/mdtools';
 import watermark from '../../utils/watermark';
-import FocusToolbar from './components/FocusToolbar.vue';
+import PrintToolbar from './components/PrintToolbar.vue';
 
 export default {
     components: {
-        FocusToolbar
+        PrintToolbar
     },
     data() {
         return {
@@ -54,13 +53,11 @@ export default {
                 if (res.code == 0) {
                     this.doc = res.meta.doc;
                     // 预览前对文本进行处理，然后再渲染预览
-                    this.doc.contentMd = mdFormat(this.doc.content);
-                    this.doc.content = this.doc.contentMd
+                    this.doc.content = mdFormat(this.doc.content)
                         + '\n'
                         + '\n'
                         + '<p>&nbsp;</p><p>&nbsp;</p>'
                         + '<p>&nbsp;</p><p>&nbsp;</p>'
-                        + '<div class="print-endline" style="border-top: 3px dotted #888;padding-top: 20px;text-align: center;color: #888;">文档末尾</div>'
                         + '<div style="height: 1000px"></div>'
                         + '<div style="page-break-after:always"></div>';
                     document.title = this.doc.title;
@@ -74,27 +71,7 @@ export default {
                 type: 'success',
                 duration: 1 * 1000
             });
-        },
-        // 导出 MD 功能
-        exportMd() {
-            console.log('导出 MD');
-            // 1. 将markdown内容转为Blob对象（指定MIME类型为markdown）
-            const blob = new Blob([this.doc.contentMd], { type: 'text/markdown' });
-            // 2. 创建临时URL
-            const url = URL.createObjectURL(blob);
-            // 3. 动态创建a标签
-            const a = document.createElement('a');
-            a.href = url;
-            // 设置下载的文件名（可自定义，需以.md结尾）
-            a.download = `${this.doc.title}.md`;
-            // 4. 模拟点击触发下载
-            document.body.appendChild(a); // 兼容部分浏览器
-            a.click();
-
-            // 5. 清理资源
-            document.body.removeChild(a); // 移除a标签
-            URL.revokeObjectURL(url); // 释放Blob URL
-        },
+        }
     }
 };
 </script>
@@ -158,10 +135,6 @@ export default {
         -webkit-print-color-adjust: exact;
         /* 强制打印背景色（部分浏览器需要） */
         print-color-adjust: exact;
-    }
-
-    .print-endline {
-        display: none !important;
     }
 }
 </style>
