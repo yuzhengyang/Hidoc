@@ -1,9 +1,9 @@
 package com.yuzhyn.hidoc.app.store;
 
 import com.yuzhyn.azylee.core.systems.bases.SystemTypeTool;
+import com.yuzhyn.azylee.core.systems.linuxs.shell.LinuxFirewallTool;
 import com.yuzhyn.hidoc.app.application.model.sys.StreamGobbler;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
-import com.yuzhyn.hidoc.app.utils.LinuxFirewallTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
