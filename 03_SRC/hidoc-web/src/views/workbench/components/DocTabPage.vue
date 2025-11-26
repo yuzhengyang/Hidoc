@@ -76,7 +76,7 @@
                     <el-col :span="2"><span style="padding-left: 5px">拥有者</span></el-col>
                     <el-col :span="2"><span style="padding-left: 5px">最近更新</span></el-col>
                     <el-col :span="2"><span style="padding-left: 5px">锁(编辑中)</span></el-col>
-                    <el-col :span="4"><span style="padding-left: 5px">排序</span></el-col>
+                    <!-- <el-col :span="4"><span style="padding-left: 5px">排序</span></el-col> -->
                     <el-col :span="4"><span style="padding-left: 5px">操作</span></el-col>
                 </el-row>
                 <el-row style="width: 100%">
@@ -122,12 +122,12 @@
                                     </div>
                                 </div>
                             </el-col>
-                            <el-col :span="4">
+                            <!-- <el-col :span="4">
                                 <el-button @click="setOrder(data, 0)" type="text" size="small">顶</el-button>
                                 <el-button @click="setOrder(data, 1)" type="text" size="small">上</el-button>
                                 <el-button @click="setOrder(data, 2)" type="text" size="small">下</el-button>
                                 <el-button @click="setOrder(data, 3)" type="text" size="small">底</el-button>
-                            </el-col>
+                            </el-col> -->
                             <el-col :span="4">
                                 <el-button @click="createChildDoc(data.id)" type="text" size="small">创建子文档</el-button>
                                 <el-button @click="docEdit(data)" type="text" size="small">编辑</el-button>
