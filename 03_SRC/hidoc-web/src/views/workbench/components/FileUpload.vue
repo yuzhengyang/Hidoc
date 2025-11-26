@@ -1,5 +1,7 @@
 <template>
-    <el-upload class="upload-demo" :action="fileUploadUrl" :headers="headers" :data="data" :on-success="handlerSuccess" :on-preview="handlePreview" :on-remove="handleRemove" :before-remove="beforeRemove" multiple :limit="10" :on-exceed="handleExceed" :file-list="fileList">
+    <el-upload class="upload-demo" :action="fileUploadUrl" :headers="headers" :data="data" :on-success="handlerSuccess"
+        :on-preview="handlePreview" :on-remove="handleRemove" :before-remove="beforeRemove" multiple :limit="10"
+        :on-exceed="handleExceed" :file-list="fileList">
         <el-button size="small" type="primary">点击上传</el-button>
         <template #tip>
             <div class="el-upload__tip">只能上传 jpg/png 文件，且不超过 500kb</div>
@@ -28,27 +30,24 @@ export default {
         };
     },
     mounted() {
-        console.log('mount begin');
-        this.fileUploadUrl = config().baseServer + 'f/u';
-        this.headers['Access-Token'] = getToken();
-        this.data.bucketName = this.bucket.name;
-
-        console.log(this.bucket);
-        console.log(this.bucket.id);
-
-        //  debugger;
-        let token = this.$store.state.user.token;
-        console.log('token-1-1-1: ' + token);
-
-        let name = this.$store.state.user.name;
-        console.log('name: ' + name);
-        console.log('mount end');
+        this.loadData();
     },
     components: {},
     methods: {
+        loadData() {
+            console.log(`methods.loadData 加载当前选中的桶信息`);
+            this.fileUploadUrl = config().baseServer + 'f/u';
+            this.headers['Access-Token'] = getToken();
+            this.data.bucketName = this.bucket.name;
+            let name = this.$store.state.user.name;
+            let token = this.$store.state.user.token;
+            console.log(`methods.loadData 加载完成，当前选中的桶为：${this.bucket.name}，用户为：${name}，token为：${token}`);
+        },
         openPanel() {
             console.log('openPanel');
+            this.loadData();
             this.fileList = [];
+
         },
         handleRemove(file, fileList) {
             console.log(file, fileList);
@@ -66,7 +65,7 @@ export default {
             return this.$confirm(`确定移除 ${file.name}？`);
         },
         handlerSuccess(response, file, fileList) {
-            this.callback({ name: '123123' });
+            this.callback({ name: 'name', desc: "操作完成" });
         }
     }
 };
@@ -78,6 +77,7 @@ export default {
     /* color: #333; */
     text-align: left;
 }
+
 .el-card {
     margin: 10px;
 }

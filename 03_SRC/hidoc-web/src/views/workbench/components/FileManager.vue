@@ -17,10 +17,12 @@
                 <el-col :span="3" style="margin-top: 10px">
                     <el-menu class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
                         <el-menu-item-group title="系统预置">
-                            <el-menu-item v-for="item in filterBucketList('sys')" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
+                            <el-menu-item v-for="item in filterBucketList('sys')" :key="item.id.toString()"
+                                :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
                         </el-menu-item-group>
                         <el-menu-item-group title="用户自定义">
-                            <el-menu-item v-for="item in filterBucketList('user')" :key="item.id.toString()" :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
+                            <el-menu-item v-for="item in filterBucketList('user')" :key="item.id.toString()"
+                                :index="item.id" @click="selectBucket(item)">{{ item.name }}</el-menu-item>
                         </el-menu-item-group>
                     </el-menu>
                 </el-col>
@@ -32,22 +34,30 @@
                                     <p>{{ item.fileName }}</p>
                                 </div>
                                 <div v-if="this.fileType(item.uname) == 'image'">
-                                    <el-image :src="formatImageUrl(item.uname)" style="width: 100%; height: 100px" fit="cover" :preview-src-list="[formatImageUrl(item.uname)]" lazy />
+                                    <el-image :src="formatImageUrl(item.uname)" style="width: 100%; height: 100px"
+                                        fit="cover" :preview-src-list="[formatImageUrl(item.uname)]" lazy />
                                 </div>
                                 <div v-else-if="this.fileType(item.uname) == 'video'">
-                                    <el-image style="width: 100%; height: 100px; background-color: rgba(0, 166, 255, 0.786); text-align: center">
+                                    <el-image
+                                        style="width: 100%; height: 100px; background-color: rgba(0, 166, 255, 0.786); text-align: center">
                                         <template #error>
                                             <div class="image-slot">
-                                                <el-icon style="font-size: 50px; margin-top: 20px; color: antiquewhite"><VideoPlay /></el-icon>
+                                                <el-icon style="font-size: 50px; margin-top: 20px; color: antiquewhite">
+                                                    <VideoPlay />
+                                                </el-icon>
                                             </div>
                                         </template>
                                     </el-image>
                                 </div>
                                 <div v-else>
-                                    <el-image style="width: 100%; height: 100px; background-color: rgba(81, 81, 81, 0.786); text-align: center">
+                                    <el-image
+                                        style="width: 100%; height: 100px; background-color: rgba(81, 81, 81, 0.786); text-align: center">
                                         <template #error>
                                             <div class="image-slot">
-                                                <el-icon style="font-size: 50px; margin-top: 20px; color: rgb(255, 255, 255)"><Document /></el-icon>
+                                                <el-icon
+                                                    style="font-size: 50px; margin-top: 20px; color: rgb(255, 255, 255)">
+                                                    <Document />
+                                                </el-icon>
                                             </div>
                                         </template>
                                     </el-image>
@@ -61,11 +71,14 @@
                                     <div style="padding-top: 2px">
                                         <el-button @click="fileHistory(item)" type="text" size="mini">历史</el-button>
                                         <el-button @click="fileDownload(item)" type="text" size="mini">下载</el-button>
-                                        <el-button @click="fileShare(item)" type="text" size="mini" v-if="this.currentBucket.name.indexOf('.') < 0">share</el-button>
-                                        <el-popover placement="top-start" :width="200" trigger="click" v-if="this.currentBucket.name.indexOf('.') < 0 || this.currentBucket.name.indexOf('.share') >= 0">
+                                        <el-button @click="fileShare(item)" type="text" size="mini"
+                                            v-if="this.currentBucket.name.indexOf('.') < 0">share</el-button>
+                                        <el-popover placement="top-start" :width="200" trigger="click"
+                                            v-if="this.currentBucket.name.indexOf('.') < 0 || this.currentBucket.name.indexOf('.share') >= 0">
                                             <p>删除操作不可撤回，确定删除吗？</p>
                                             <div style="text-align: right; margin: 0">
-                                                <el-button type="danger" size="mini" @click="fileDelete(item)">确定删除</el-button>
+                                                <el-button type="danger" size="mini"
+                                                    @click="fileDelete(item)">确定删除</el-button>
                                             </div>
                                             <template #reference>
                                                 <el-button type="text" size="mini">删除</el-button>
@@ -219,8 +232,14 @@ export default {
         },
         // 打开上传文件窗口
         openUploadDialog() {
-            this.dialogUploadVisible = true;
-            this.$refs['fileUpload'].openPanel();
+            this.dialogUploadVisible = true; // 先显示组件
+            // 等 DOM 渲染完成后，再调用组件方法
+            this.$nextTick(() => {
+                // 加一层判断，避免极端情况下组件仍未渲染的报错
+                if (this.$refs['fileUpload']) {
+                    this.$refs['fileUpload'].openPanel();
+                }
+            });
         },
         saveBucket() {
             if (this.dialogFormMode == 'create') {
@@ -279,7 +298,7 @@ export default {
                 }
             });
         },
-        fileHistory() {},
+        fileHistory() { },
         fileDownload(data) {
             window.location.href = config().baseServer + 'f/d/' + data.urlPrefix + '/' + data.bucketName + '/' + data.fileName;
         },
