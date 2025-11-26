@@ -313,7 +313,7 @@ public class DocController {
     @Transactional
     @PostMapping("save")
     public ResponseData save(@RequestBody Map<String, Object> params) {
-        if (MapTool.ok(params, "title", "content", "tag", "collectedId", "mode")) {
+        if (MapTool.ok(params, "title", "tag", "collectedId", "mode")) {
             String title = MapTool.get(params, "title", "").toString();
             String content = MapTool.get(params, "content", "").toString();
             String tag = MapTool.get(params, "tag", "").toString();
