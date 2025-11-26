@@ -139,7 +139,7 @@ public class FileBucketController {
                 if (!fileBucket.getUserId().equals(CurrentUserManager.getUser().getId())) {
                     return ResponseData.error("删除失败，不能删除其他用户数据");
                 }
-                if (!fileBucket.getName().contains(".")) {
+                if (fileBucket.getName().contains(".")) {
                     return ResponseData.error("删除失败，不能删除系统预置数据");
                 }
 
