@@ -12,7 +12,6 @@ import com.yuzhyn.hidoc.app.application.entity.softsup.SoftSupLimit;
 import com.yuzhyn.hidoc.app.application.entity.softsup.SoftSupVersion;
 import com.yuzhyn.hidoc.app.application.mapper.softsup.SoftSupBaseMapper;
 import com.yuzhyn.hidoc.app.application.mapper.softsup.SoftSupClientMapper;
-import com.yuzhyn.hidoc.app.application.mapper.softsup.SoftSupLimitMapper;
 import com.yuzhyn.hidoc.app.application.mapper.softsup.SoftSupVersionMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +37,6 @@ public class SoftSupApiController {
     @Autowired
     SoftSupClientMapper softSupClientMapper;
     @Autowired
-    SoftSupLimitMapper softSupLimitMapper;
-    @Autowired
     SoftSupVersionMapper softSupVersionMapper;
 
     @PostMapping("reg")
@@ -57,34 +54,6 @@ public class SoftSupApiController {
         SoftSupBase softSupBase = softSupBaseMapper.selectOne(new LambdaQueryWrapper<SoftSupBase>().eq(SoftSupBase::getToken, token));
         if (softSupBase == null) return ResponseData.error("软件基本信息未定义");
 
-        // 查询软件限制信息，校验限制信息
-        boolean isLimitAccess = true;
-        String forbidLimitId = "";
-        String forbidMessage = "";
-        List<SoftSupLimit> limits = softSupLimitMapper.selectList(new LambdaQueryWrapper<SoftSupLimit>().eq(SoftSupLimit::getBaseId, softSupBase.getId()));
-        if (ListTool.ok(limits)) {
-            for (SoftSupLimit item : limits) {
-                switch (item.getLimitType()) {
-                    case "FORBID_ID" -> {
-                        if (item.getLimitContent().contains("[" + id + "]")) {
-                            isLimitAccess = false;
-                            forbidLimitId = item.getId();
-                            forbidMessage = "限制ID";
-                        }
-                    }
-                    default -> {
-                        step.add("LIMIT: default");
-                    }
-                }
-                if (!isLimitAccess) break;
-            }
-        }
-        Map<String, Object> limit = new HashMap<>();
-        limit.put("access", isLimitAccess);
-        limit.put("id", forbidLimitId);
-        limit.put("message", forbidMessage);
-        responseData.putDataMap("limit", limit);
-
         // 查询客户端登记信息，没有则新增，有则更新
         SoftSupClient client = softSupClientMapper.selectById(id);
         if (client == null) {
@@ -98,8 +67,6 @@ public class SoftSupApiController {
             client.setIpLocation(MapTool.getString(params, "ipLocation", ""));
             client.setMapLocation(MapTool.getString(params, "mapLocation", ""));
             client.setVersion(MapTool.getString(params, "version", ""));
-            client.setIsLimitAccess(isLimitAccess);
-            client.setForbidLimitId(forbidLimitId);
             client.setFreeTime(MapTool.getLong(params, "freeTime", 0));
             client.setWorkTime(MapTool.getLong(params, "workTime", 0));
             client.setFreeTimePer(MapTool.getLong(params, "freeTimePer", 0));
@@ -115,8 +82,6 @@ public class SoftSupApiController {
             client.setIpLocation(MapTool.getString(params, "ipLocation", ""));
             client.setMapLocation(MapTool.getString(params, "mapLocation", ""));
             client.setVersion(MapTool.getString(params, "version", ""));
-            client.setIsLimitAccess(isLimitAccess);
-            client.setForbidLimitId(forbidLimitId);
             client.setFreeTime(MapTool.getLong(params, "freeTime", 0));
             client.setWorkTime(MapTool.getLong(params, "workTime", 0));
             client.setFreeTimePer(MapTool.getLong(params, "freeTimePer", 0));
@@ -124,6 +89,19 @@ public class SoftSupApiController {
             client.setUpdateTime(now);
             softSupClientMapper.updateById(client);
         }
+
+        // 查询软件限制信息，校验限制信息（没用了，以后删除，以后删除）
+        Map<String, Object> limit = new HashMap<>();
+        limit.put("access", true);
+        limit.put("id",  "");
+        limit.put("message",  "");
+        responseData.putDataMap("limit", limit);
+
+        // 锁定信息，包括锁定版本号、锁定使用
+        Map<String, Object> lock = new HashMap<>();
+        lock.put("version", client.getLockVersion());
+        lock.put("use",  client.getLockUse());
+        responseData.putDataMap("lock", lock);
 
         // 查询软件版本信息
         LambdaQueryWrapper<SoftSupVersion> versionWrapper = new LambdaQueryWrapper<>();

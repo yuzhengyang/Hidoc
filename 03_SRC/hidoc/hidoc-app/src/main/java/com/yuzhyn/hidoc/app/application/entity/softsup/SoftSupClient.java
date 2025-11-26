@@ -33,5 +33,6 @@ public class SoftSupClient {
     private LocalDateTime updateTime;
 
     private String lockVersion;
+    private Boolean lockUse;
     private String remark;
 }

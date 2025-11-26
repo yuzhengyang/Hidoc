@@ -18,6 +18,14 @@ CREATE TABLE IF NOT EXISTS public.soft_sup_client (
 	create_time timestamp NULL,
 	update_time timestamp NULL,
 	"lock_version" varchar(255) NULL,
+	"lock_use" bool DEFAULT false,
 	remark varchar(512) NULL,
 	CONSTRAINT pk_soft_sup_client PRIMARY KEY (id)
 );
+
+
+-- Ôö¼Ó×Ö¶Î
+SELECT * FROM sysdb_add_column('soft_sup_client', 'lock_use', 'bool DEFAULT false');
+
+
+
