@@ -24,7 +24,8 @@ English documentation please refer to: [README.EN.md](README.EN.md)
 ### 分支信息
 | 创建日期 | 分支                            | 状态                        | 使用技术说明 |
 |------------|----------------------------------|------------|------------|
-| - | main | 进行中 | JDK21 + SPRING 3.4.3 + PostgreSQL13^ |
+|  | main | 进行中 |  |
+| 2025-11-28 | 3.0.0 | 完成 | JDK21 + SPRING 3.4.3 + PostgreSQL13^ |
 | 2023-11-13 | 2.0.0 | 完成 | JDK17 + SPRING 3.0.2 + PostgreSQL13^ |
 | 2023-09-25 | 1.0.0 | 完成 | JDK-8 + SPRING 2.7.2 + PostgreSQL13^ |
 
