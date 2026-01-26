@@ -1,6 +1,8 @@
 package com.yuzhyn.hidoc.app.application.entity.serverman;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -22,4 +24,7 @@ public class ServerManExeLog {
     private String resultTb;
     private String resultTc;
 
+
+    @TableField(exist = false)
+    private SysUserLite runUser;
 }

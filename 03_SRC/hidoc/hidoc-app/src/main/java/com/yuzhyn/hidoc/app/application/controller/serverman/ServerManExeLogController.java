@@ -13,9 +13,11 @@ import com.yuzhyn.hidoc.app.aarg.R;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManCmd;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManExeLog;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManOutput;
+import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManCmdMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManExeLogMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManOutputMapper;
+import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,9 @@ import static java.util.stream.Collectors.toList;
 @RestController
 @RequestMapping("serverManExeLog")
 public class ServerManExeLogController {
+
+    @Autowired
+    SysUserLiteMapper sysUserLiteMapper;
 
     @Autowired
     ServerManCmdMapper serverManCmdMapper;
@@ -61,7 +66,24 @@ public class ServerManExeLogController {
                             .in(ServerManExeLog::getCmdId, cmdIds)
                             .orderByDesc(ServerManExeLog::getBeginTime));
             List<ServerManExeLog> list = serverManExeLogIPage.getRecords();
-            return ResponseData.okData(list);
+            if (ListTool.ok(list)) {
+                // 查询运行SSH脚本的用户信息
+                List<String> runUserIdList = list.stream().map(ServerManExeLog::getRunUserId).collect(toList());
+                List<SysUserLite> sysUserLiteList = sysUserLiteMapper.selectByIds(runUserIdList);
+                if (ListTool.ok(sysUserLiteList)) {
+                    for (ServerManExeLog serverManExeLog : list) {
+                        for (SysUserLite sysUserLite : sysUserLiteList) {
+                            if (sysUserLite.getId().equals(serverManExeLog.getRunUserId())) {
+                                serverManExeLog.setRunUser(sysUserLite);
+                                break;
+                            }
+                        }
+                    }
+                }
+                return ResponseData.okData(list);
+            } else {
+                return ResponseData.ok();
+            }
         } else {
             return ResponseData.ok();
         }
