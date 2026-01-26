@@ -47,6 +47,7 @@ public class JavaDocMeta {
     private String commentExample;
     private String commentLog;
     private String commentKeywords;
+    private String commentTags;
     private String commentMenu;
 
     private String sourceCode;

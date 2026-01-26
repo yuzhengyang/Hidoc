@@ -70,6 +70,9 @@ public class JavaDocComment {
                 } else if (txtline.startsWith("#目录：") || txtline.startsWith("#目录:") || txtline.startsWith("#目录 ")) {
                     curblock = "menu";
                     txtline = txtline.substring(4);
+                } else if (txtline.startsWith("#标签：") || txtline.startsWith("#标签:") || txtline.startsWith("#标签 ")) {
+                    curblock = "tag";
+                    txtline = txtline.substring(4);
                 } else if (txtline.startsWith("<pre>{@code 示例说明")) {
                     curblock = "example>";
                 } else if (txtline.startsWith("<pre>{@code 修改记录")) {
@@ -175,6 +178,10 @@ public class JavaDocComment {
 
     public String getMenu() {
         return ObjectTool.optional(commentResult.get("menu"), "");
+    }
+
+    public String getTag() {
+        return ObjectTool.optional(commentResult.get("tag"), "");
     }
 
     public String getExample() {
