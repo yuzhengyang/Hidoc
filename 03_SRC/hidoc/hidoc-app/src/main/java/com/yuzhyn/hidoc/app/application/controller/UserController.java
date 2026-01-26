@@ -223,13 +223,16 @@ public class UserController {
         String totpcode = MapTool.get(params, "totpcode", "").toString();
 
         if (!StringTool.ok(username)) return ResponseData.error("登录失败，账号不正确");
-        if (!StringTool.ok(password) && !StringTool.ok(totpcode)) return ResponseData.error("登录失败，密码或验证码没有输入");
+        if (!StringTool.ok(password) && !StringTool.ok(totpcode))
+            return ResponseData.error("登录失败，密码或验证码没有输入");
 
         // 先根据邮箱查询用户信息，如果没有再根据用户名查询
         SysUser user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, username));
-        if (user == null) user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getName, username));
+        if (user == null)
+            user = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getName, username));
         if (user == null) return ResponseData.error("邮箱不存在");
-        if (user.getIsSleep() != null && user.getIsSleep()) return ResponseData.error("账号长时间未使用，请重置密码后进行登录");
+        if (user.getIsSleep() != null && user.getIsSleep())
+            return ResponseData.error("账号长时间未使用，请重置密码后进行登录");
 
         if (StringTool.ok(totpcode) && totpcode.length() == 6) {
 
@@ -387,10 +390,10 @@ public class UserController {
             LocalDateTime endTime = localDate.plusDays((i - 1) * -1).atStartOfDay();
 
             Map map = new HashMap<>();
-            long _collectedCount = docCollectedMapper.selectCount(new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocCollected::getCreateTime, beginTime).lt(DocCollected::getCreateTime, endTime));
-            long _docCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocLite::getCreateTime, beginTime).lt(DocLite::getCreateTime, endTime));
-            long _docUpdateCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocLite::getUpdateTime, beginTime).lt(DocLite::getUpdateTime, endTime));
-            long _cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, CurrentUserManager.getUser().getId()).ge(FileCursor::getCreateTime, beginTime).lt(FileCursor::getCreateTime, endTime));
+            long _collectedCount = docCollectedMapper.selectCount(new LambdaQueryWrapper<DocCollected>().eq(DocCollected::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocCollected::getCreateTime, beginTime).lt(DocCollected::getCreateTime, endTime).eq(DocCollected::getIsDelete, false));
+            long _docCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocLite::getCreateTime, beginTime).lt(DocLite::getCreateTime, endTime).eq(DocLite::getIsDelete, false));
+            long _docUpdateCount = docLiteMapper.selectCount(new LambdaQueryWrapper<DocLite>().eq(DocLite::getCreateUserId, CurrentUserManager.getUser().getId()).ge(DocLite::getUpdateTime, beginTime).lt(DocLite::getUpdateTime, endTime).eq(DocLite::getIsDelete, false));
+            long _cursorCount = fileCursorMapper.selectCount(new LambdaQueryWrapper<FileCursor>().eq(FileCursor::getUserId, CurrentUserManager.getUser().getId()).ge(FileCursor::getCreateTime, beginTime).lt(FileCursor::getCreateTime, endTime).eq(FileCursor::getIsDelete, false));
             long _readCount = docAccessLogMapper.selectCount(new LambdaQueryWrapper<DocAccessLog>().eq(DocAccessLog::getOwnerUserId, CurrentUserManager.getUser().getId()).ne(DocAccessLog::getUserId, CurrentUserManager.getUser().getId()).ge(DocAccessLog::getCreateTime, beginTime).lt(DocAccessLog::getCreateTime, endTime));
             map.put("date", DateTimeFormat.toStr(beginTime, DateTimeFormatPattern.NORMAL_DATE));
             map.put("collectedCount", _collectedCount);
