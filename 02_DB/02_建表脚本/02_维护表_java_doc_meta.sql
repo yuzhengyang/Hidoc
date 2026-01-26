@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS public.java_doc_meta (
 	comment_example text NULL,
 	comment_log text NULL,
 	comment_keywords text NULL,
+	comment_tags text NULL,
 	comment_menu text NULL,
 	
 	source_code text NULL,
@@ -45,6 +46,7 @@ CREATE TABLE IF NOT EXISTS public.java_doc_meta (
 -- 增加字段
 SELECT * FROM sysdb_add_column('java_doc_meta', 'is_deprecated', 'bool NULL');
 SELECT * FROM sysdb_add_column('java_doc_meta', 'annotations', 'text NULL');
+SELECT * FROM sysdb_add_column('java_doc_meta', 'comment_tags', 'text NULL');
 
 
 -- 修改字段长度

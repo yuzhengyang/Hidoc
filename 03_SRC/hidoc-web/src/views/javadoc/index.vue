@@ -6,6 +6,7 @@
                     <el-button type="primary" size="default" plain @click="pageMode = 'search'">搜索</el-button>
                     <el-button type="primary" size="default" plain @click="pageMode = 'file'">目录</el-button>
                     <el-button type="primary" size="default" plain @click="pageMode = 'view'">浏览</el-button>
+                    <el-button type="primary" size="default" plain @click="pageMode = 'tag'">TAG</el-button>
                 </el-button-group>
             </el-affix>
         </el-header>
