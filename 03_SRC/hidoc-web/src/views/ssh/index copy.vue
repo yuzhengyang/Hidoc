@@ -11,16 +11,13 @@
                     </div>
                 </el-col>
             </el-row>
-            <!-- 服务器及操作列表：开始 -->
-            <div class="waterfall-container no-select">
-                <div class="waterfall-item" v-for="item in shareList" :key="item">
+            <el-row class="no-select">
+                <el-col :xs="24" :sm="12" :md="12" :lg="8" :xl="4" v-for="item in shareList" :key="item">
                     <el-card>
                         <template #header>
-                            <div class="card-header">
-                                <el-image style="height: 18px;width: 28px;"
-                                    :src="require(item.portOpen ? '../../assets/switch/computer_open.svg' : '../../assets/switch/computer_close.svg')"
-                                    fit="scale-down" />
-                                <span>{{ item.name }}</span>
+                            <div class="card-header" >
+                                <el-image style="height: 18px;width: 28px;" :src="require(item.portOpen?'../../assets/switch/computer_open.svg':'../../assets/switch/computer_close.svg')" fit="scale-down" />
+                                <span >{{ item.name }}</span>
                                 <span style="color: #aaa; font-size: 14px">（{{ item.address }}）</span>
                             </div>
                         </template>
@@ -28,6 +25,11 @@
                             <el-container style="margin: 2px">
                                 <el-main style="font-size: 14px">{{ cmd.name }}</el-main>
                                 <el-aside style="padding: 3px" width="80px" v-if="this.isLogin">
+                                    <!-- <el-button type="success" circle @click="runCmd(item, cmd)">
+                                        <el-icon>
+                                            <VideoPlay />
+                                        </el-icon>
+                                    </el-button> -->
                                     <el-progress class="cust-progress" type="circle" :percentage="cmd._waitProgress"
                                         :status="cmd._waitProgress == 100 ? 'success' : 'warning'" stroke-width="5"
                                         width="30" @click="runCmd(item, cmd, $event)"
@@ -46,6 +48,11 @@
                                             </span>
                                         </template>
                                     </el-progress>
+                                    <!-- <el-button type="primary" circle>
+                                        <el-icon>
+                                            <Operation />
+                                        </el-icon>
+                                    </el-button> -->
                                 </el-aside>
                             </el-container>
                         </div>
@@ -59,9 +66,8 @@
                             </div>
                         </template>
                     </el-card>
-                </div>
-            </div>
-            <!-- 服务器及操作列表：结束 -->
+                </el-col>
+            </el-row>
 
             <el-drawer v-model="drawerPanel.visible" direction="btt" :show-close="false" :before-close="handleClose"
                 size="85%" destroy-on-close="true">
@@ -217,12 +223,12 @@ export default {
                 if (res.code == 0) {
                     this.progressRefreshFunction(res.data);
                     this.shareList = res.data;
-                    this.progressRefresh.refreshTimer = setInterval(() => this.progressRefreshFunction(this.shareList), 1000);
+                    this.progressRefresh.refreshTimer = setInterval(()=>this.progressRefreshFunction(this.shareList), 1000);
                 }
             });
         },
         runCmd(machine, cmd, event) {
-            ElMessage({ message: `正在执行：${machine.name} ${cmd.name} 指令`, type: 'success', duration: 3 * 1000 });
+            ElMessage({message: `正在执行：${machine.name} ${cmd.name} 指令`, type: 'success', duration: 3 * 1000 });
 
             console.log('runCmd: ' + cmd.id);
             if (event.shiftKey) {
@@ -363,36 +369,6 @@ export default {
     margin: 8px;
     padding: 0px;
     --el-card-padding: 10px;
-}
-
-/* 瀑布流容器样式 */
-.waterfall-container {
-    column-count: 4;
-    column-gap: 10px;
-}
-
-@media (max-width: 1600px) {
-    .waterfall-container {
-        column-count: 3;
-    }
-}
-
-@media (max-width: 1200px) {
-    .waterfall-container {
-        column-count: 2;
-    }
-}
-
-@media (max-width: 768px) {
-    .waterfall-container {
-        column-count: 1;
-    }
-}
-
-/* 瀑布流项目样式 */
-.waterfall-item {
-    break-inside: avoid;
-    margin-bottom: 10px;
 }
 
 ::-webkit-scrollbar {
