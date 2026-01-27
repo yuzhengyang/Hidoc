@@ -359,10 +359,17 @@ export default {
     text-align: left;
 }
 
-.el-card {
+.waterfall-item .el-card {
     margin: 8px;
     padding: 0px;
     --el-card-padding: 10px;
+    border: 1px solid #bebebe;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s;
+}
+
+.waterfall-item .el-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* 瀑布流容器样式 */
