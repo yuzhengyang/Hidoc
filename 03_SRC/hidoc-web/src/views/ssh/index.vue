@@ -2,7 +2,6 @@
     <el-container style="height: 100%">
         <!-- 内容区域 -->
         <el-main style="height: 100%">
-            
             <!-- 登录使用功能的提示 -->
             <el-row class="no-select">
                 <el-col :span="24">
@@ -14,7 +13,7 @@
                 </el-col>
             </el-row>
             <!-- 搜索过滤 -->
-            <el-row class="no-select">
+            <el-row class="no-select" style="margin-bottom: 10px">
                 <el-col :span="24" style="text-align: right">
                     <el-input
                         v-model="searchKeyword"
@@ -153,11 +152,17 @@ export default {
             if (!this.searchKeyword) {
                 return this.shareList;
             }
-            const keyword = this.searchKeyword.toLowerCase();
+            const keywords = this.searchKeyword.trim().split(/\s+/).filter(k => k.length > 0);
+            if (keywords.length === 0) {
+                return this.shareList;
+            }
             return this.shareList.filter(item => {
-                const matchServerName = item.name.toLowerCase().includes(keyword);
-                const matchCmdName = item.cmdList.some(cmd => cmd.name.toLowerCase().includes(keyword));
-                return matchServerName || matchCmdName;
+                return keywords.every(keyword => {
+                    const lowerKeyword = keyword.toLowerCase();
+                    const matchServerName = item.name.toLowerCase().includes(lowerKeyword);
+                    const matchCmdName = item.cmdList.some(cmd => cmd.name.toLowerCase().includes(lowerKeyword));
+                    return matchServerName || matchCmdName;
+                });
             });
         }
     },
