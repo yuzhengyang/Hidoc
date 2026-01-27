@@ -184,6 +184,12 @@ export default {
             this.getCurrentUserInfo();
         }
         this.getShareList();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const keyParam = urlParams.get('key');
+        if (keyParam) {
+            this.searchKeyword = keyParam;
+        }
     },
     unmounted() {
         console.log('unmounted 钩子函数被调用');
