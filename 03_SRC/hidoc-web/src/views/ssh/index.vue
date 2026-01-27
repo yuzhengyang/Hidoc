@@ -2,6 +2,8 @@
     <el-container style="height: 100%">
         <!-- 内容区域 -->
         <el-main style="height: 100%">
+            
+            <!-- 登录使用功能的提示 -->
             <el-row class="no-select">
                 <el-col :span="24">
                     <div style="width: 100%">
@@ -11,9 +13,21 @@
                     </div>
                 </el-col>
             </el-row>
+            <!-- 搜索过滤 -->
+            <el-row class="no-select">
+                <el-col :span="24" style="text-align: right">
+                    <el-input
+                        v-model="searchKeyword"
+                        placeholder="搜索服务器或命令"
+                        clearable
+                        style="width: 300px"
+                        :prefix-icon="Search"
+                    />
+                </el-col>
+            </el-row>
             <!-- 服务器及操作列表：开始 -->
             <div class="waterfall-container no-select">
-                <div class="waterfall-item" v-for="item in shareList" :key="item">
+                <div class="waterfall-item" v-for="item in filteredShareList" :key="item">
                     <el-card>
                         <template #header>
                             <div class="card-header">
@@ -110,6 +124,7 @@ export default {
         return {
             user: {},
             isLogin: false,
+            searchKeyword: '',
             shareList: [],
             drawerPanel: {
                 visible: false
@@ -133,6 +148,19 @@ export default {
         };
     },
     components: {},
+    computed: {
+        filteredShareList() {
+            if (!this.searchKeyword) {
+                return this.shareList;
+            }
+            const keyword = this.searchKeyword.toLowerCase();
+            return this.shareList.filter(item => {
+                const matchServerName = item.name.toLowerCase().includes(keyword);
+                const matchCmdName = item.cmdList.some(cmd => cmd.name.toLowerCase().includes(keyword));
+                return matchServerName || matchCmdName;
+            });
+        }
+    },
     created() {
         console.log('created 钩子函数被调用');
     },
