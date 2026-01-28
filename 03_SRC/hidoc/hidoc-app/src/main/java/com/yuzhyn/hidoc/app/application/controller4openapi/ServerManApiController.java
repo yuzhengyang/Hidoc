@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.controller4openapi;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
@@ -9,8 +10,10 @@ import com.yuzhyn.hidoc.app.application.entity.javadoc.JavaDocProject;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManCmd;
 import com.yuzhyn.hidoc.app.application.entity.serverman.ServerManMachine;
 import com.yuzhyn.hidoc.app.application.entity.team.TeamLite;
+import com.yuzhyn.hidoc.app.application.entity.team.TeamMember;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManCmdMapper;
 import com.yuzhyn.hidoc.app.application.mapper.serverman.ServerManMachineMapper;
+import com.yuzhyn.hidoc.app.application.mapper.team.TeamMemberMapper;
 import com.yuzhyn.hidoc.app.application.service.team.TeamService;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
@@ -26,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.stream.Collectors.toList;
+
 @Slf4j
 @RestController
 @RequestMapping("openapi/serverMan")
@@ -40,14 +45,33 @@ public class ServerManApiController {
     @Autowired
     TeamService teamService;
 
+    @Autowired
+    TeamMemberMapper teamMemberMapper;
+
     @PostMapping("shareList")
     public ResponseData shareList(@RequestBody Map<String, Object> params) {
 
-        String machineId = MapTool.getString(params, "machineId", "");
+        // 如果用户未登录，则直接空，不再展示团队的服务器连接信息
+        if (!CurrentUserManager.isLogin()) return ResponseData.ok();
+
+        // 以下为通过登录用户，正式的获取相关的服务器连接信息和指令列表
+        // 获取当前用户的团队关系
+        List<String> teamIds = new ArrayList<>();
+        if (CurrentUserManager.isLogin()) {
+            List<TeamMember> memberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, CurrentUserManager.getUserId()));
+            if (ListTool.ok(memberList))
+                teamIds.addAll(memberList.stream().map(TeamMember::getTeamId).distinct().collect(toList()));
+        }
 
         List<ServerManMachine> machineList = new ArrayList<>();
         List<ServerManMachine> machineDbList = serverManMachineMapper.selectList(new LambdaQueryWrapper<ServerManMachine>()
                 .eq(ServerManMachine::getIsDelete, false)
+                .and(p -> {
+                    p.or().eq(ServerManMachine::getOwnerUserId, CurrentUserManager.getUserId());
+                    for (String teamId : teamIds) {
+                        p.or().apply("jsonb_exists(team_id_list, {0})", teamId);
+                    }
+                })
                 .orderByAsc(ServerManMachine::getName));
 
         List<ServerManCmd> cmdDbList = serverManCmdMapper.selectList(new LambdaQueryWrapper<ServerManCmd>()
@@ -57,25 +81,19 @@ public class ServerManApiController {
         List<TeamLite> allTeams = teamService.getAllTeams();
 
         for (ServerManMachine machineDb : machineDbList) {
-            boolean isAdd = false;
-            // 展示存在团队执行信息的内容
-            isAdd = StringTool.ok(machineDb.getTeamsExecute());
-            // 展示属于登录用户的内容
-            if (!isAdd) {
-                isAdd = CurrentUserManager.isLogin() && CurrentUserManager.getUserId().equals(machineDb.getOwnerUserId());
-            }
 
             List<ServerManCmd> cmds = cmdDbList.stream().filter(x -> x.getMachineId().equals(machineDb.getId())).toList();
-            if (isAdd && ListTool.ok(cmds)) {
-                if (StringTool.ok(machineDb.getTeamsExecute())) {
-                    machineDb.setTeamExecuteList(teamService.filterTeamsByIds(allTeams, machineDb.getTeamsExecute()));
-                }
-
-                machineDb.setUsername("*");
-                machineDb.setPassword("*");
+            if (ListTool.ok(cmds)) {
                 machineDb.setCmdList(cmds);
-                machineList.add(machineDb);
             }
+
+            if (ObjectUtil.isNotEmpty(machineDb.getTeamIdList())) {
+                machineDb.setTeamList(teamService.filterTeamsByIds(allTeams, machineDb.getTeamIdList().toJavaList(String.class)));
+            }
+
+            machineDb.setUsername("*");
+            machineDb.setPassword("*");
+            machineList.add(machineDb);
         }
 
         return ResponseData.okData(machineList);

@@ -1,6 +1,8 @@
 package com.yuzhyn.hidoc.app.application.service.team;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.ListTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
@@ -50,12 +52,14 @@ public class TeamService {
         switch (type) {
             case "userJoinPassword":
                 String password = team.getJoinRule().getString("userJoinPassword");
-                if (!(StringTool.ok(password, value) && password.equals(value))) return ResponseData.error("加入密码错误");
+                if (!(StringTool.ok(password, value) && password.equals(value)))
+                    return ResponseData.error("加入密码错误");
                 action += "（通过密码）";
                 break;
             case "autoJoinEmailSuffix":
                 String emailSuffix = team.getJoinRule().getString("autoJoinEmailSuffix");
-                if (!(StringTool.ok(emailSuffix, email) && email.endsWith("@" + emailSuffix))) return ResponseData.error("不符合加入邮箱规则");
+                if (!(StringTool.ok(emailSuffix, email) && email.endsWith("@" + emailSuffix)))
+                    return ResponseData.error("不符合加入邮箱规则");
                 action += "（通过邮箱规则）";
                 break;
         }
@@ -77,12 +81,15 @@ public class TeamService {
         return ResponseData.error("加入失败，请检查信息");
     }
 
-    public boolean isMember(String teamIds, String userId) {
-        if(ObjectUtil.isEmpty(teamIds)) return false;
+    public boolean isMember(JSONArray teamIdList, String userId) {
+        if (ObjectUtil.isEmpty(teamIdList)) return false;
         List<TeamMember> teamMemberList = teamMemberMapper.selectList(new LambdaQueryWrapper<TeamMember>().eq(TeamMember::getUserId, userId));
         if (ListTool.ok(teamMemberList)) {
             for (TeamMember teamMember : teamMemberList) {
-                if (teamIds.contains(teamMember.getTeamId())) return true;
+                for (String teamId : teamIdList.toJavaList(String.class)) {
+                    String teamIdString = Convert.toStr(teamId, "");
+                    if (teamIdString.contains(teamMember.getTeamId())) return true;
+                }
             }
         }
         return false;
@@ -92,13 +99,15 @@ public class TeamService {
         return teamLiteMapper.selectList(null);
     }
 
-    public List<TeamLite> filterTeamsByIds(List<TeamLite> teams, String ids) {
+    public List<TeamLite> filterTeamsByIds(List<TeamLite> teams, List<String> ids) {
         List<TeamLite> result = new ArrayList<>();
-        String[] teamsCodeArray = StringTool.split(ids, ",", true, true, true);
-        if (ListTool.ok(teamsCodeArray) && ListTool.ok(teams)) {
-            for (String teamCode : teamsCodeArray) {
+        if (ListTool.ok(ids) && ListTool.ok(teams)) {
+            for (String id : ids) {
                 for (TeamLite team : teams) {
-                    if (teamCode.equals(team.getId())) result.add(new TeamLite(team.getId(), team.getName()));
+                    if (id.equals(team.getId())) {
+                        result.add(new TeamLite(team.getId(), team.getName()));
+                        break;
+                    }
                 }
             }
         }

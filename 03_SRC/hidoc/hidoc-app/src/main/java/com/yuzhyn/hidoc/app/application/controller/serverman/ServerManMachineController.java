@@ -1,5 +1,6 @@
 package com.yuzhyn.hidoc.app.application.controller.serverman;
 
+import com.alibaba.fastjson.JSONArray;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yuzhyn.azylee.core.datas.collections.MapTool;
 import com.yuzhyn.azylee.core.datas.strings.StringTool;
@@ -38,6 +39,7 @@ public class ServerManMachineController {
             int port = MapTool.getInt(params, "port", 0);
             String username = MapTool.get(params, "username", "").toString();
             String password = MapTool.get(params, "password", "").toString();
+            Object teamIdListObject = MapTool.get(params, "teamIdList", null);
 
             if (StringTool.ok(name)) {
                 ServerManMachine serverManMachine = new ServerManMachine();
@@ -55,6 +57,8 @@ public class ServerManMachineController {
                 serverManMachine.setUsername(username);
                 serverManMachine.setPassword(password);
                 serverManMachine.setIsDelete(false);
+                if (teamIdListObject != null && teamIdListObject instanceof JSONArray)
+                    serverManMachine.setTeamIdList((JSONArray) teamIdListObject);
 
                 int flag = serverManMachineMapper.insert(serverManMachine);
                 if (flag > 0) {
@@ -77,6 +81,7 @@ public class ServerManMachineController {
             int port = MapTool.getInt(params, "port", 0);
             String username = MapTool.get(params, "username", "").toString();
             String password = MapTool.get(params, "password", "").toString();
+            Object teamIdListObject = MapTool.get(params, "teamIdList", null);
 
             if (StringTool.ok(id, name)) {
                 ServerManMachine serverManMachine = serverManMachineMapper.selectById(id);
@@ -94,6 +99,8 @@ public class ServerManMachineController {
                     serverManMachine.setPort(port);
                     serverManMachine.setUsername(username);
                     serverManMachine.setPassword(password);
+                    if (teamIdListObject != null && teamIdListObject instanceof JSONArray)
+                        serverManMachine.setTeamIdList((JSONArray) teamIdListObject);
 
                     int flag = serverManMachineMapper.updateById(serverManMachine);
                     if (flag > 0) {

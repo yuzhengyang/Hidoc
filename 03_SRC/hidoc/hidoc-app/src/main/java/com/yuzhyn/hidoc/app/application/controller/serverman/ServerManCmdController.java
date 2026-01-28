@@ -226,7 +226,7 @@ public class ServerManCmdController {
                             // 如果是本人创建的，则不判断权限
                         } else {
                             // 否则判断团队权限（命令共享）
-                            if (!teamService.isMember(machine.getTeamsExecute(), CurrentUserManager.getUserId())) {
+                            if (!teamService.isMember(machine.getTeamIdList(), CurrentUserManager.getUserId())) {
                                 return ResponseData.error("您不在所属的团队中，没有操作权限，详情请咨询管理员。");
                             }
                         }
