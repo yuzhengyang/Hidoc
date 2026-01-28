@@ -39,9 +39,9 @@
                     <el-icon><Box /></el-icon>
                     <template #title>数据收集器 *</template>
                 </el-menu-item>
-                <el-menu-item index="8020" v-if="user.roles.includes('sa')" @click="changeMenu(8020)">
+                <el-menu-item index="8020" @click="changeMenu(8020)">
                     <el-icon><Notification /></el-icon>
-                    <template #title>服务管理 *</template>
+                    <template #title>服务管理</template>
                 </el-menu-item>
                 <el-menu-item index="9000" @click="changeMenu(9000)">
                     <el-icon><User /></el-icon>
