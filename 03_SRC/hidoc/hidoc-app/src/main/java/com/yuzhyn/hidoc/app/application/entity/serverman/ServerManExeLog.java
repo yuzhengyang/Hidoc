@@ -2,6 +2,8 @@ package com.yuzhyn.hidoc.app.application.entity.serverman;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.yuzhyn.hidoc.app.application.entity.sys.SysUserLite;
 import lombok.Data;
 

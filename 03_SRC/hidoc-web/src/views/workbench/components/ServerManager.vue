@@ -10,21 +10,36 @@
             <el-row style="padding: 30px">
                 <el-col :span="24">
                     <el-collapse accordion @change="showCmdList">
-                        <el-collapse-item v-for="item in currentMachineList" :key="item.id.toString()" :index="item.id" :title="item.name" :name="item.id">
+                        <el-collapse-item v-for="item in currentMachineList" :key="item.id.toString()" :index="item.id"
+                            :title="item.name" :name="item.id">
                             <template #title>
                                 <div>
                                     <span style="font-weight: bold; font-size: 18px; color: #000">{{ item.name }}</span>
-                                    <span style="font-weight: bold; font-size: 18px; color: #888">（{{ item.address }}）</span>
+                                    <span style="font-weight: bold; font-size: 18px; color: #888">（{{ item.address
+                                        }}）</span>
                                 </div>
                             </template>
                             <div style="padding-left: 30px; margin-left: 15px; border-left: 3px solid #ccc">
                                 <div>
                                     {{ item.description }}
-                                    <el-button type="text" round size="small" @click="openEditMachine(item.id)">[编辑服务器信息]</el-button>
+                                    <el-button type="text" round size="small"
+                                        @click="openEditMachine(item.id)">[编辑服务器信息]</el-button>
+                                    <el-popover placement="top-start" :width="200" trigger="click">
+                                        <p>删除操作不可撤回，确定删除吗？</p>
+                                        <div style="text-align: right; margin: 0">
+                                            <el-button type="danger" size="mini"
+                                                @click="deleteMachine(item.id)">确定</el-button>
+                                        </div>
+                                        <template #reference>
+                                            <el-button type="text" round size="small"
+                                                style="color: #f56c6c">[删除服务器信息]</el-button>
+                                        </template>
+                                    </el-popover>
                                 </div>
                                 <div>&nbsp;</div>
                                 <div>
-                                    <el-button type="success" round size="small" @click="openCreateCmd(item.id)">创建指令</el-button>
+                                    <el-button type="success" round size="small"
+                                        @click="openCreateCmd(item.id)">创建指令</el-button>
                                 </div>
                                 <div>
                                     <el-table :data="this.currentCmdList" style="width: 100%">
@@ -37,17 +52,20 @@
                                     <el-table-column prop="contentTc" label="contentTc"></el-table-column> -->
                                         <el-table-column fixed="right" label="操作" width="100">
                                             <template #default="scope">
-                                                <el-button type="success" round size="small" @click="runCmd(scope.row)">执行</el-button>
+                                                <el-button type="success" round size="small"
+                                                    @click="runCmd(scope.row)">执行</el-button>
                                             </template>
                                         </el-table-column>
                                         <el-table-column fixed="right" label="管理" width="200">
                                             <template #default="scope">
-                                                <el-button type="warning" round size="small" @click="openEditCmd(scope.row)">编辑</el-button>
+                                                <el-button type="warning" round size="small"
+                                                    @click="openEditCmd(scope.row)">编辑</el-button>
                                                 <!-- <el-button type="warning" round size="small" @click="openCreateCmd(scope.row)">编辑</el-button> -->
                                                 <el-popover placement="top-start" :width="200" trigger="click">
                                                     <p>删除操作不可撤回，确定删除吗？</p>
                                                     <div style="text-align: right; margin: 0">
-                                                        <el-button type="danger" size="mini" @click="deleteCmd(scope.row)">确定</el-button>
+                                                        <el-button type="danger" size="mini"
+                                                            @click="deleteCmd(scope.row)">确定</el-button>
                                                     </div>
                                                     <template #reference>
                                                         <el-button type="danger" round size="small">删除</el-button>
@@ -69,13 +87,16 @@
                 <el-col :span="24">
                     <el-row>
                         <el-col :span="3">
-                            <el-input v-model="searchDataParams.planName" placeholder="执行服务器" class="input-with-select" @keydown="searchDataEnter" clearable />
+                            <el-input v-model="searchDataParams.planName" placeholder="执行服务器" class="input-with-select"
+                                @keydown="searchDataEnter" clearable />
                         </el-col>
                         <el-col :span="3">
-                            <el-input v-model="searchDataParams.dataSource" placeholder="执行命令" class="input-with-select" @keydown="searchDataEnter" clearable />
+                            <el-input v-model="searchDataParams.dataSource" placeholder="执行命令" class="input-with-select"
+                                @keydown="searchDataEnter" clearable />
                         </el-col>
                         <el-col :span="3">
-                            <el-input v-model="searchDataParams.ip" placeholder="执行人" class="input-with-select" @keydown="searchDataEnter" clearable />
+                            <el-input v-model="searchDataParams.ip" placeholder="执行人" class="input-with-select"
+                                @keydown="searchDataEnter" clearable />
                         </el-col>
                         <el-col :span="2">
                             <el-button type="success" @click="searchData()" style="height: 40px">
@@ -89,13 +110,15 @@
                 <el-col :span="24">
                     <el-table :data="exeLogList" style="width: 100%">
                         <!-- <el-table-column prop="id" label="会话ID"></el-table-column> -->
-                        <el-table-column prop="beginTime" label="开始时间"></el-table-column>
+                        <el-table-column prop="beginTime" label="开始时间" width="100"></el-table-column>
                         <!-- <el-table-column prop="endTime" label="结束时间"></el-table-column> -->
                         <el-table-column prop="contentTa" label="脚本a"></el-table-column>
-                        <el-table-column prop="resultTa" label="脚本a结果"></el-table-column>
-                        <el-table-column fixed="right" label="操作">
+                        <el-table-column prop="resultTa" label="脚本a结果" width="120"></el-table-column>
+                        <el-table-column prop="runUser.realName" label="执行人" width="100"></el-table-column>
+                        <el-table-column fixed="right" label="操作" width="100">
                             <template #default="scope">
-                                <el-button type="text" round size="small" @click="fileDetail(scope.row.id)">详情</el-button>
+                                <el-button type="text" round size="small"
+                                    @click="fileDetail(scope.row.id)">详情</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -111,11 +134,13 @@
                 <el-input v-model="this.machineForm.prop.name" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="描述" :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="this.machineForm.prop.description"></el-input>
+                <el-input type="textarea" :rows="2" placeholder="请输入内容"
+                    v-model="this.machineForm.prop.description"></el-input>
             </el-form-item>
             <el-form-item label="类型" :label-width="formLabelWidth">
                 <el-select v-model="this.machineForm.prop.type" placeholder="请选择">
-                    <el-option v-for="item in machineTypeSelect" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    <el-option v-for="item in machineTypeSelect" :key="item.value" :label="item.label"
+                        :value="item.value"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="地址" :label-width="formLabelWidth">
@@ -129,6 +154,13 @@
             </el-form-item>
             <el-form-item label="密码" :label-width="formLabelWidth">
                 <el-input v-model="this.machineForm.prop.password" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="团队" :label-width="formLabelWidth">
+                <el-select v-model="this.machineForm.prop.teamIdList" multiple placeholder="可选择已加入的团队"
+                    style="width: 300px">
+                    <el-option v-for="item in this.team.myJoin" :key="item.id" :label="item.name" :value="item.id" />
+                </el-select>
+                <span class="tips">私有 或 团队可见</span>
             </el-form-item>
         </el-form>
         <template #footer>
@@ -146,21 +178,26 @@
                 <el-input v-model="this.cmdForm.prop.name" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="描述" :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="this.cmdForm.prop.description"></el-input>
+                <el-input type="textarea" :rows="2" placeholder="请输入内容"
+                    v-model="this.cmdForm.prop.description"></el-input>
             </el-form-item>
             <el-form-item label="类型" :label-width="formLabelWidth">
                 <el-select v-model="this.cmdForm.prop.type" placeholder="请选择">
-                    <el-option v-for="item in cmdTypeSelect" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                    <el-option v-for="item in cmdTypeSelect" :key="item.value" :label="item.label"
+                        :value="item.value"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="指令a" :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="this.cmdForm.prop.contentTa"></el-input>
+                <el-input type="textarea" :rows="2" placeholder="请输入内容"
+                    v-model="this.cmdForm.prop.contentTa"></el-input>
             </el-form-item>
             <el-form-item label="指令b" :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="this.cmdForm.prop.contentTb"></el-input>
+                <el-input type="textarea" :rows="2" placeholder="请输入内容"
+                    v-model="this.cmdForm.prop.contentTb"></el-input>
             </el-form-item>
             <el-form-item label="指令c" :label-width="formLabelWidth">
-                <el-input type="textarea" :rows="2" placeholder="请输入内容" v-model="this.cmdForm.prop.contentTc"></el-input>
+                <el-input type="textarea" :rows="2" placeholder="请输入内容"
+                    v-model="this.cmdForm.prop.contentTc"></el-input>
             </el-form-item>
             <el-form-item label="执行间隔" :label-width="formLabelWidth">
                 <el-input-number v-model="this.cmdForm.prop.interval" :min="0" :max="3600" />
@@ -178,13 +215,15 @@
     <el-dialog v-model="this.exeLogDialog.dialog" title="日志文件详情" width="90%" center fullscreen>
         <el-container>
             <el-main>
-                <v-md-editor v-model="this.exeLogDialog.current.fileDetail" mode="preview" ref="editor" @copy-code-success="handleCopyCodeSuccess" />
+                <v-md-editor v-model="this.exeLogDialog.current.fileDetail" mode="preview" ref="editor"
+                    @copy-code-success="handleCopyCodeSuccess" />
             </el-main>
         </el-container>
         <template #footer>
             <span class="dialog-footer">
                 <el-affix position="bottom" :offset="20">
-                    <el-button type="primary" @click="this.exeLogDialog.dialog = false" style="width: 300px">关闭</el-button>
+                    <el-button type="primary" @click="this.exeLogDialog.dialog = false"
+                        style="width: 300px">关闭</el-button>
                 </el-affix>
             </span>
         </template>
@@ -208,7 +247,8 @@ export default {
                     address: '',
                     port: 0,
                     username: '',
-                    password: ''
+                    password: '',
+                    teamIdList: []
                 }
             },
             cmdForm: {
@@ -256,7 +296,10 @@ export default {
                     value: '通用',
                     label: 'normal'
                 }
-            ]
+            ],
+            team: {
+                myJoin: []
+            }
         };
     },
     components: { Search },
@@ -291,6 +334,8 @@ export default {
             this.loadCmd();
         },
         openCreateMachine() {
+            this.loadMyJoinTeam();
+
             // 清空表单数据
             this.machineForm.prop.name = '';
             this.machineForm.prop.description = '';
@@ -299,12 +344,14 @@ export default {
             this.machineForm.prop.port = '';
             this.machineForm.prop.username = '';
             this.machineForm.prop.password = '';
+            this.machineForm.prop.teamIdList = [];
 
             this.machineForm.mode = 'create';
             this.machineForm.dialog = true;
         },
         openEditMachine(machineId) {
             console.log('编辑主机信息');
+            this.loadMyJoinTeam();
 
             return request({
                 url: '/serverManMachine/get',
@@ -342,7 +389,8 @@ export default {
                         address: this.machineForm.prop.address,
                         port: this.machineForm.prop.port,
                         username: this.machineForm.prop.username,
-                        password: this.machineForm.prop.password
+                        password: this.machineForm.prop.password,
+                        teamIdList: this.machineForm.prop.teamIdList
                     }
                 }).then(res => {
                     if (res.code == 0) {
@@ -363,7 +411,8 @@ export default {
                         address: this.machineForm.prop.address,
                         port: this.machineForm.prop.port,
                         username: this.machineForm.prop.username,
-                        password: this.machineForm.prop.password
+                        password: this.machineForm.prop.password,
+                        teamIdList: this.machineForm.prop.teamIdList
                     }
                 }).then(res => {
                     if (res.code == 0) {
@@ -373,14 +422,13 @@ export default {
                 });
             }
         },
-        deleteMachine(row) {
+        deleteMachine(machineId) {
             return request({
                 url: '/serverManMachine/delete',
                 method: 'post',
-                data: { token: this.$store.state.user.token, id: row.id }
+                data: { token: this.$store.state.user.token, id: machineId }
             }).then(res => {
                 if (res.code == 0) {
-                    console.log(res);
                     this.loadMachine();
                 }
             });
@@ -520,7 +568,19 @@ export default {
                 type: 'success',
                 duration: 1 * 1000
             });
-        }
+        },
+        loadMyJoinTeam() {
+            return request({
+                url: '/team/getMyJoinTeams',
+                method: 'post',
+                data: { token: this.$store.state.user.token }
+            }).then(res => {
+                if (res.code == 0) {
+                    // debugger;
+                    this.team.myJoin = res.data;
+                }
+            });
+        },
     }
 };
 </script>
@@ -531,6 +591,7 @@ export default {
     /* color: #333; */
     text-align: left;
 }
+
 .el-card {
     margin: 10px;
 }

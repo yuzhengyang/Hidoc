@@ -21,6 +21,7 @@ import com.yuzhyn.hidoc.app.application.mapper.sys.SysUserLiteMapper;
 import com.yuzhyn.hidoc.app.common.model.ResponseData;
 import com.yuzhyn.hidoc.app.manager.CurrentUserManager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,7 +75,9 @@ public class ServerManExeLogController {
                     for (ServerManExeLog serverManExeLog : list) {
                         for (SysUserLite sysUserLite : sysUserLiteList) {
                             if (sysUserLite.getId().equals(serverManExeLog.getRunUserId())) {
-                                serverManExeLog.setRunUser(sysUserLite);
+                                SysUserLite thisUser = new SysUserLite();
+                                BeanUtils.copyProperties(sysUserLite, thisUser);
+                                serverManExeLog.setRunUser(thisUser);
                                 break;
                             }
                         }
